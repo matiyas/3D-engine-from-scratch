@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using System.Windows;
@@ -29,10 +28,10 @@ namespace Projekt_LGiM
                                                         0,  0,  1, tz,
                                                         0,  0,  0,  1});
 
-            for (int i = 0; i < punkty.Count; ++i)
+            foreach(var punkt in punkty)
             {
-                var p = new DenseVector(new double[]{ punkty[i][0], punkty[i][1], punkty[i][2], 1 }) * T;
-                punktyMod.Add(new DenseVector(new double[] { p[0], p[1], p[2] }));
+                var p = new DenseVector(new double[]{ punkt[0], punkt[1], punkt[2], 1 }) * T;
+                punktyMod.Add(new DenseVector(p.Take(3).ToArray()));
             }
 
             return punktyMod;
@@ -127,29 +126,14 @@ namespace Projekt_LGiM
 
             for (int i = 0; i < punkty.Count; ++i)
             {
-                Vector<double> p;
-
-                if (punkty[i][2] < minOdleglosc)
-                {
-                    p = new DenseVector(new double[] { punkty[i][0], punkty[i][1], minOdleglosc, 1 });
-                }
-                else if (punkty[i][2] > maxOdleglosc)
-                {
-                    p = new DenseVector(new double[] { punkty[i][0], punkty[i][1], maxOdleglosc, 1 });
-                }
-                else
-                {
-                    p = new DenseVector(new double[] { punkty[i][0], punkty[i][1], punkty[i][2], 1 });
-                }
-
-				Vector<double> pp = p * Proj;
-
+                var p = new DenseVector(new double[] { punkty[i][0], punkty[i][1], punkty[i][2], 1 }) * Proj;
+                
                 for (int j = 0; j < 4; ++j)
                 {
-                    pp[j] /= pp[3];
+                    p[j] /= p[3];
                 }
 
-				punktyMod.Add(new Point((int)(pp[0] + srodekX), (int)(pp[1] + srodekY)));
+				punktyMod.Add(new Point((int)(p[0] + srodekX), (int)(p[1] + srodekY)));
             }
 
             return punktyMod;

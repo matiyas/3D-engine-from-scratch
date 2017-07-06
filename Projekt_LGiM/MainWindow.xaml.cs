@@ -1,18 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Projekt_LGiM
@@ -24,7 +14,7 @@ namespace Projekt_LGiM
         private double dpi;
         private Size canvasSize;
         private List<DenseVector> bryla, brylaMod;
-        private List<Point> punkty, punktyMod;
+        private List<Point> punktyMod;
         private Point srodek;
 
         public MainWindow()
@@ -51,17 +41,17 @@ namespace Projekt_LGiM
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
 
-                bryla = new List<DenseVector>();
-
-                bryla.Add(new DenseVector(new double[]{ -100, -100,   0 }));
-                bryla.Add(new DenseVector(new double[]{  100, -100,   0 }));
-                bryla.Add(new DenseVector(new double[]{  100,  100,   0 }));
-                bryla.Add(new DenseVector(new double[]{ -100,  100,   0 }));
-                bryla.Add(new DenseVector(new double[]{ -100, -100, 200 }));
-                bryla.Add(new DenseVector(new double[]{  100, -100, 200 }));
-                bryla.Add(new DenseVector(new double[]{  100,  100, 200 }));
-                bryla.Add(new DenseVector(new double[]{ -100,  100, 200 }));
-
+                bryla = new List<DenseVector>
+                {
+                    new DenseVector(new double[] { -100, -100,   0 }),
+                    new DenseVector(new double[] {  100, -100,   0 }),
+                    new DenseVector(new double[] {  100,  100,   0 }),
+                    new DenseVector(new double[] { -100,  100,   0 }),
+                    new DenseVector(new double[] { -100, -100, 200 }),
+                    new DenseVector(new double[] {  100, -100, 200 }),
+                    new DenseVector(new double[] {  100,  100, 200 }),
+                    new DenseVector(new double[] { -100,  100, 200 })
+                };
                 RysujNaEkranie(bryla);
             };
         }
@@ -69,33 +59,22 @@ namespace Projekt_LGiM
         public void RysujNaEkranie(List<DenseVector> bryla)
         {
             rysownik.CzyscEkran();
-            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, 20, 1000, srodek.X, srodek.Y);
+            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, 10, 1000, srodek.X, srodek.Y);
 
             for (int i = 0; i < 4; ++i)
             {
-                rysownik.RysujLinie((int)punktyMod[i].X,
-                                    (int)punktyMod[i].Y,
-                                    (int)punktyMod[(i + 1) % 4].X,
-                                    (int)punktyMod[(i + 1) % 4].Y);
-
-                rysownik.RysujLinie((int)punktyMod[i + 4].X,
-                                    (int)punktyMod[i + 4].Y,
-                                    (int)punktyMod[((i + 1) % 4) + 4].X,
-                                    (int)punktyMod[((i + 1) % 4) + 4].Y);
-
-                rysownik.RysujLinie((int)punktyMod[i].X,
-                                    (int)punktyMod[i].Y,
-                                    (int)punktyMod[i + 4].X,
-                                    (int)punktyMod[i + 4].Y);
+                rysownik.RysujLinie(punktyMod[i], punktyMod[(i + 1) % 4]);
+                rysownik.RysujLinie(punktyMod[i + 4], punktyMod[((i + 1) % 4) + 4]);
+                rysownik.RysujLinie(punktyMod[i], punktyMod[i + 4]);
             }
 
             Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, PixelFormats.Bgra32, null,
                 tmpPixs, 4 * (int)canvasSize.Width);
         }
 
-        private void SliderTranslacjaX_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            brylaMod = Przeksztalcenie3d.Translacja(bryla, (sender as Slider).Value, 0, 0);
+            brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             RysujNaEkranie(brylaMod);
         }
     }

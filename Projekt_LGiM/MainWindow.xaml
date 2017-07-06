@@ -32,11 +32,12 @@
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
                     <Slider x:Name="SliderTranslacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="5,5,0,9" 
-                            Minimum="-100" Maximum="100" ValueChanged="SliderTranslacjaX_ValueChanged"/>
+                            Minimum="-100" Maximum="100" ValueChanged="SliderTranslacja_ValueChanged"/>
                     <Slider x:Name="SliderTranslacjaY" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="5,8,0,7" Maximum="100" Minimum="-100"/>
+                            Margin="5,8,0,7" Maximum="100" Minimum="-100" ValueChanged="SliderTranslacja_ValueChanged"/>
                     <Slider x:Name="SliderTranslacjaZ" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
-                            VerticalAlignment="Center" Margin="5,8,0,7" Maximum="100" Minimum="-100"/>
+                            VerticalAlignment="Center" Margin="5,8,0,7" Maximum="100" Minimum="-100" 
+                            ValueChanged="SliderTranslacja_ValueChanged"/>
                     <Label x:Name="EtykietaTranslacjaX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                     <Label x:Name="EtykietaTranslacjaY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
                            VerticalAlignment="Center"/>
@@ -92,7 +93,8 @@
                 </Grid>
             </GroupBox>
         </Grid>
-        <Label x:Name="DebugLabel" Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="10,548,0,0" VerticalAlignment="Top" Width="210"/>
+        <Label x:Name="DebugLabel" Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="10,548,0,0" VerticalAlignment="Top" 
+               Width="210"/>
 
     </Grid>
 </Window>

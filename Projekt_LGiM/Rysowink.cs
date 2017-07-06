@@ -60,12 +60,12 @@ namespace Projekt_LGiM
             }
         }
 
-        public void RysujLinie(int x0, int y0, int x1, int y1)
+        public void RysujLinie(Point p0, Point p1)
         {
-            int startX = Math.Min(x0, x1);
-            int endX = Math.Max(x0, x1);
-            int startY = Math.Min(y0, y1);
-            int endY = Math.Max(y0, y1);
+            int startX = (int)Math.Min(p0.X, p1.X);
+            int endX   = (int)Math.Max(p0.X, p1.X);
+            int startY = (int)Math.Min(p0.Y, p1.Y);
+            int endY   = (int)Math.Max(p0.Y, p1.Y);
             int dx = endX - startX;
             int dy = endY - startY;
 
@@ -73,26 +73,31 @@ namespace Projekt_LGiM
             {
                 for (int x = startX; x <= endX; ++x)
                 {
-                    double y = (dy / (double)dx) * (x - x0) + y0;
+                    double y = (dy / (double)dx) * (x - p0.X) + p0.Y;
 
-                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
+                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                         RysujPiksel(x, (int)Math.Floor(y));
                     else
-                        RysujPiksel(x, 2 * y0 - (int)Math.Floor(y));
+                        RysujPiksel(x, (int)(2 * p0.Y - Math.Floor(y)));
                 }
             }
             else
             {
                 for (int y = startY; y <= endY; ++y)
                 {
-                    double x = (dx / (double)dy) * (y - y0) + x0;
+                    double x = (dx / (double)dy) * (y - p0.Y) + p0.X;
 
-                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
+                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                         RysujPiksel((int)Math.Floor(x), y);
                     else
-                        RysujPiksel(2 * x0 - (int)Math.Floor(x), y);
+                        RysujPiksel((int)(2 * p0.X - Math.Floor(x)), y);
                 }
             }
+        }
+
+        public void RysujLinie(int x0, int y0, int x1, int y1)
+        {
+            RysujLinie(new Point(x0, y0), new Point(x1, y1));
         }
 
         public void RysujKolo(int x0, int y0, int x1, int y1)
