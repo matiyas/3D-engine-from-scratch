@@ -2,8 +2,8 @@
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using System.Drawing;
 using static System.Math;
+using System.Windows;
 
 namespace Projekt_LGiM
 {

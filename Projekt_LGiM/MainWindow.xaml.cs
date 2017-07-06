@@ -61,19 +61,15 @@ namespace Projekt_LGiM
                 bryla.Add(new DenseVector(new double[]{  100, -100, 200 }));
                 bryla.Add(new DenseVector(new double[]{  100,  100, 200 }));
                 bryla.Add(new DenseVector(new double[]{ -100,  100, 200 }));
+
+                RysujNaEkranie(bryla);
             };
         }
 
-        private void SliderTranslacjaX_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        public void RysujNaEkranie(List<DenseVector> bryla)
         {
-            DebugLabel.Content = "";
-
             rysownik.CzyscEkran();
-            bryla = Przeksztalcenie3d.Translacja(bryla, (sender as Slider).Value, 100, 0);
-            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 100, 20, 1000, srodek.X, srodek.Y);
-
-            foreach (var punkt in punktyMod)
-                DebugLabel.Content += punkt.ToString();
+            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, 20, 1000, srodek.X, srodek.Y);
 
             for (int i = 0; i < 4; ++i)
             {
@@ -95,7 +91,12 @@ namespace Projekt_LGiM
 
             Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, PixelFormats.Bgra32, null,
                 tmpPixs, 4 * (int)canvasSize.Width);
+        }
 
+        private void SliderTranslacjaX_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            brylaMod = Przeksztalcenie3d.Translacja(bryla, (sender as Slider).Value, 0, 0);
+            RysujNaEkranie(brylaMod);
         }
     }
 }
