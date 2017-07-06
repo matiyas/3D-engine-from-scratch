@@ -8,16 +8,17 @@ namespace Projekt_LGiM
 {
 	class Przeksztalcenie3d
     {
+        public Size RozmiarEkranu { get; set; }
+        public double Odleglosc { get; set; }
+
 		public static List<double> ZnajdzSrodek(List<DenseVector> punkty)
         {
-            var srodek = new List<double>();
-
-            for(int i = 0; i < 3; ++i)
+            return new List<double>(new double[]
             {
-                srodek.Add((punkty.Min(p => p[i]) - punkty.Max(p => p[i])) / 2);
-            }
-
-            return srodek;
+                (punkty.Max(x => x[0]) + punkty.Min(x => x[0])) / 2,
+                (punkty.Max(x => x[1]) + punkty.Min(x => x[1])) / 2,
+                (punkty.Max(x => x[2]) + punkty.Min(x => x[2])) / 2
+            });
         }
 
         public static List<DenseVector> Translacja(List<DenseVector> punkty, double tx, double ty, double tz)
@@ -27,7 +28,6 @@ namespace Projekt_LGiM
                                                         0,  1,  0, ty,
                                                         0,  0,  1, tz,
                                                         0,  0,  0,  1});
-
             foreach(var punkt in punkty)
             {
                 var p = new DenseVector(new double[]{ punkt[0], punkt[1], punkt[2], 1 }) * T;
@@ -44,37 +44,47 @@ namespace Projekt_LGiM
 			phiZ /= 100.0;
 
 			var punktyMod = new List<DenseVector>();
+            var srodek = ZnajdzSrodek(punkty);
 
-			var Rx = new DenseMatrix(4, 4, new double[]{ 		 1, 	     0, 	  	0, 		0, 
-														 		 0,  Cos(phiX), Sin(phiX), 		0, 
-														 		 0,  Sin(phiX), Cos(phiX), 		0, 
-														 		 0, 	 	 0,		    0, 		1});
+            var T0 = new DenseMatrix(4, 4, new double[]{         1,         0,          0, -srodek[0],
+                                                                 0,         1,          0, -srodek[1],
+                                                                 0,         0,          1, -srodek[2],
+                                                                 0,         0,          0,          1 });
+
+            var T1 = new DenseMatrix(4, 4, new double[]{         1,         0,          0,  srodek[0],
+                                                                 0,         1,          0,  srodek[1],
+                                                                 0,         0,          1,  srodek[2],
+                                                                 0,         0,          0,          1 });
+
+            var Rx = new DenseMatrix(4, 4, new double[]{ 		 1, 	     0, 	  	0, 		0, 
+														 		 0,  Cos(phiX), -Sin(phiX),     0, 
+														 		 0,  Sin(phiX),  Cos(phiX), 	0, 
+														 		 0, 	 	 0,		    0, 		1 });
 			
-			var Ry = new DenseMatrix(4, 4, new double[]{ Sin(phiY), 		 0, Cos(phiY), 		0, 
+			var Ry = new DenseMatrix(4, 4, new double[]{ Cos(phiY), 		 0, Sin(phiY), 		0, 
 														   		 0, 		 1, 		0, 		0, 
-														 Cos(phiY), 		 0, Sin(phiY), 		0,
-																 0, 		 0, 		0, 		1});
+														 -Sin(phiY), 		 0, Cos(phiY), 		0,
+																 0, 		 0, 		0, 		1 });
 			
 			var Rz = new DenseMatrix(4, 4, new double[]{ Cos(phiZ), -Sin(phiZ), 		0, 		0, 
 														 Sin(phiZ),  Cos(phiZ), 		0, 		0, 
 																 0, 		 0, 		1, 		0, 
-																 0, 		 0, 		0, 		1});
-            var srodek = ZnajdzSrodek(punkty);
-
-            punkty = Translacja(punkty, -srodek[0], -srodek[1], -srodek[2]);
+																 0, 		 0, 		0, 		1 });
 
 			for(int i = 0; i < punkty.Count(); ++i)
             {
 				var p = new DenseVector(new double[]{punkty[i][0], punkty[i][1], punkty[i][2], 1});
 
-				if(phiX.CompareTo(0) != 0)  p *= Rx;
-				if(phiY.CompareTo(0) != 0)  p *= Ry;
-				if(phiZ.CompareTo(0) != 0)  p *= Rz;
+                if (phiX.CompareTo(0) != 0) p *= T0 * Rx * T1;
+                if (phiY.CompareTo(0) != 0) p *= T0 * Ry * T1;
+                if (phiZ.CompareTo(0) != 0) p *= T0 * Rz * T1;
+
+                //p *= Rx;
 
                 punktyMod.Add(new DenseVector(new double[] { Floor(p[0] + 0.5), Floor(p[1] + 0.5), Floor(p[2] + 0.5) }));
             }
 
-            return Translacja(punktyMod, srodek[0], srodek[1], srodek[2]);
+            return punktyMod;
         }
 
 		public static List<DenseVector> Skalowanie(List<DenseVector> punkty, double sx, double sy, double sz)
@@ -115,25 +125,18 @@ namespace Projekt_LGiM
             return Translacja(punktyMod, srodek[0], srodek[1], srodek[2]);
         }
 
-        public static List<Point> RzutPerspektywiczny(List<DenseVector> punkty, int odleglosc, 
-            int minOdleglosc, int maxOdleglosc, double srodekX, double srodekY)
+        public static List<Point> RzutPerspektywiczny(List<DenseVector> punkty, double d, double srodekX, double srodekY)
         {
             var punktyMod = new List<Point>();
-            var Proj = new DenseMatrix(4, 4, new double[]{ 1, 0, 0, 0,
-                                                           0, 1, 0, 0, 
-                                                           0, 0, 0, 0,
-                                                           0, 0, 1 / (double)odleglosc, 1});
+            var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
+                                                           0,  1,  0,  0, 
+                                                           0,  0,  0,  0,
+                                                           0,  0, 1/d, 1 });
 
-            for (int i = 0; i < punkty.Count; ++i)
+            foreach(var punkt in punkty)
             {
-                var p = new DenseVector(new double[] { punkty[i][0], punkty[i][1], punkty[i][2], 1 }) * Proj;
-                
-                for (int j = 0; j < 4; ++j)
-                {
-                    p[j] /= p[3];
-                }
-
-				punktyMod.Add(new Point((int)(p[0] + srodekX), (int)(p[1] + srodekY)));
+                var p = new DenseVector(new double[] { punkt[0], punkt[1], punkt[2], 1 }) * Proj;
+				punktyMod.Add(new Point((int)(p[0] / p[3] + srodekX), (int)(p[1] / p[3] + srodekY)));
             }
 
             return punktyMod;

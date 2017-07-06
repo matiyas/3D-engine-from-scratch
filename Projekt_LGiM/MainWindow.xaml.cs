@@ -4,6 +4,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Windows.Controls;
+using System.Linq;
+using System.Collections;
 
 namespace Projekt_LGiM
 {
@@ -20,7 +23,7 @@ namespace Projekt_LGiM
         public MainWindow()
         {
             InitializeComponent();
-
+            
             SliderRotacjaX.Minimum = SliderRotacjaY.Minimum = SliderRotacjaZ.Minimum = -200 * Math.PI;
             SliderRotacjaX.Maximum = SliderRotacjaY.Maximum = SliderRotacjaZ.Maximum =  200 * Math.PI;
 
@@ -59,23 +62,53 @@ namespace Projekt_LGiM
         public void RysujNaEkranie(List<DenseVector> bryla)
         {
             rysownik.CzyscEkran();
-            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, 10, 1000, srodek.X, srodek.Y);
+            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
 
             for (int i = 0; i < 4; ++i)
             {
-                rysownik.RysujLinie(punktyMod[i], punktyMod[(i + 1) % 4]);
-                rysownik.RysujLinie(punktyMod[i + 4], punktyMod[((i + 1) % 4) + 4]);
-                rysownik.RysujLinie(punktyMod[i], punktyMod[i + 4]);
+                rysownik.RysujLinie(punktyMod[i], punktyMod[(i + 1) % 4]);              // Przód
+                rysownik.RysujLinie(punktyMod[i + 4], punktyMod[((i + 1) % 4) + 4]);    // Tył
+                rysownik.RysujLinie(punktyMod[i], punktyMod[i + 4]);                    // Bok
             }
 
-            Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, PixelFormats.Bgra32, null,
-                tmpPixs, 4 * (int)canvasSize.Width);
+            Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, 
+                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)canvasSize.Width);
         }
 
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             RysujNaEkranie(brylaMod);
+        }
+
+        private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
+            RysujNaEkranie(brylaMod);
+        }
+
+        private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            bryla = brylaMod;
+
+            foreach (object slider in GridTranslacja.Children)
+            {
+                if(slider is Slider)
+                    (slider as Slider).Value = 0;
+            }
+
+            foreach (object slider in GridRotacja.Children)
+            {
+                if (slider is Slider)
+                    (slider as Slider).Value = 0;
+            }
+
+            foreach (object slider in GridSkalowanie.Children)
+            {
+                if (slider is Slider)
+                    (slider as Slider).Value = 0;
+            }
+
         }
     }
 }

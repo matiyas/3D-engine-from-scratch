@@ -32,12 +32,14 @@
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
                     <Slider x:Name="SliderTranslacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="5,5,0,9" 
-                            Minimum="-100" Maximum="100" ValueChanged="SliderTranslacja_ValueChanged"/>
-                    <Slider x:Name="SliderTranslacjaY" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="5,8,0,7" Maximum="100" Minimum="-100" ValueChanged="SliderTranslacja_ValueChanged"/>
-                    <Slider x:Name="SliderTranslacjaZ" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
+                            Minimum="-100" Maximum="100" ValueChanged="SliderTranslacja_ValueChanged" 
+                            Thumb.DragCompleted="Slider_DragCompleted"/>
+                    <Slider x:Name="SliderTranslacjaY" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
                             VerticalAlignment="Center" Margin="5,8,0,7" Maximum="100" Minimum="-100" 
-                            ValueChanged="SliderTranslacja_ValueChanged"/>
+                            Thumb.DragCompleted="Slider_DragCompleted" ValueChanged="SliderTranslacja_ValueChanged" />
+                    <Slider x:Name="SliderTranslacjaZ" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
+                            Margin="5,8,0,7" Maximum="100" Minimum="-100" ValueChanged="SliderTranslacja_ValueChanged"
+                            Thumb.DragCompleted="Slider_DragCompleted"/>
                     <Label x:Name="EtykietaTranslacjaX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                     <Label x:Name="EtykietaTranslacjaY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
                            VerticalAlignment="Center"/>
@@ -56,11 +58,13 @@
                         <ColumnDefinition/>
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
-                    <Slider x:Name="SliderRotacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="5,5,0,9"/>
-                    <Slider x:Name="SliderRotacjaY" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="5,8,0,7"/>
-                    <Slider x:Name="SliderRotacjaZ" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center"
-                            VerticalAlignment="Center" Margin="5,8,0,7"/>
+                    <Slider x:Name="SliderRotacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="5,5,0,9"
+                            ValueChanged="SliderRotacja_ValueChanged" Thumb.DragCompleted="Slider_DragCompleted"/>
+                    <Slider x:Name="SliderRotacjaY" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center"
+                            VerticalAlignment="Center" Margin="5,8,0,7" ValueChanged="SliderRotacja_ValueChanged"
+                            Thumb.DragCompleted="Slider_DragCompleted"/>
+                    <Slider x:Name="SliderRotacjaZ" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
+                            Margin="5,8,0,7" ValueChanged="SliderRotacja_ValueChanged" Thumb.DragCompleted="Slider_DragCompleted"/>
                     <Label x:Name="EtykietaRotacjaX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                     <Label x:Name="EtykietaRotacjaY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
                            VerticalAlignment="Center"/>
@@ -80,11 +84,12 @@
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
                     <Slider x:Name="SliderSkalowanieX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="5,5,0,9" 
-                            Maximum="100" Minimum="-100"/>
+                            Maximum="100" Minimum="-100" Thumb.DragCompleted="Slider_DragCompleted"/>
                     <Slider x:Name="SliderSkalowanieY" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="5,8,0,7" Maximum="100" Minimum="-100"/>
+                            Margin="5,8,0,7" Maximum="100" Minimum="-100" Thumb.DragCompleted="Slider_DragCompleted"/>
                     <Slider x:Name="SliderSkalowanieZ" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
-                            VerticalAlignment="Center" Margin="5,8,0,7" Maximum="100" Minimum="-100"/>
+                            VerticalAlignment="Center" Margin="5,8,0,7" Maximum="100" Minimum="-100" 
+                            Thumb.DragCompleted="Slider_DragCompleted"/>
                     <Label x:Name="EtykietaSkalowanieX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                     <Label x:Name="EtykietaSkalowanieY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
                            VerticalAlignment="Center"/>
