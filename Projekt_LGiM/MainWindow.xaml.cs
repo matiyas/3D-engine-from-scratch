@@ -5,8 +5,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
+using System.IO;
+using System.Globalization;
 using System.Linq;
-using System.Collections;
 
 namespace Projekt_LGiM
 {
@@ -16,9 +17,9 @@ namespace Projekt_LGiM
         private Rysownik rysownik;
         private double dpi;
         private Size canvasSize;
-        private List<DenseVector> bryla, brylaMod;
-        private List<Point> punktyMod;
+        private List<DenseVector> bryla, brylaMod, brylaNorm, brylaNormMod;
         private Point srodek;
+        private List<int[]> polaczenia;
 
         public MainWindow()
         {
@@ -43,32 +44,27 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
-
-                bryla = new List<DenseVector>
-                {
-                    new DenseVector(new double[] { -100, -100,   0 }),
-                    new DenseVector(new double[] {  100, -100,   0 }),
-                    new DenseVector(new double[] {  100,  100,   0 }),
-                    new DenseVector(new double[] { -100,  100,   0 }),
-                    new DenseVector(new double[] { -100, -100, 200 }),
-                    new DenseVector(new double[] {  100, -100, 200 }),
-                    new DenseVector(new double[] {  100,  100, 200 }),
-                    new DenseVector(new double[] { -100,  100, 200 })
-                };
-                RysujNaEkranie(bryla);
+                
+                polaczenia = PolaczeniaObj(@"C:\Users\damian\Documents\cube.obj");
+                bryla      = WierzcholkiObj(@"C:\Users\damian\Documents\cube.obj");
+                brylaNorm  = WierzcholkiNormObj(@"C:\Users\damian\Documents\cube.obj");
+                
+                RysujNaEkranie(bryla, brylaNorm);
             };
         }
-
-        public void RysujNaEkranie(List<DenseVector> bryla)
+        
+        public void RysujNaEkranie(List<DenseVector> bryla, List<DenseVector> brylaNorm)
         {
             rysownik.CzyscEkran();
-            punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
-
-            for (int i = 0; i < 4; ++i)
+            var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
+            var punktyNormMod = Przeksztalcenie3d.RzutPerspektywiczny(brylaNorm, 500, srodek.X, srodek.Y);
+            
+            if (polaczenia != null)
             {
-                rysownik.RysujLinie(punktyMod[i], punktyMod[(i + 1) % 4]);              // Przód
-                rysownik.RysujLinie(punktyMod[i + 4], punktyMod[((i + 1) % 4) + 4]);    // Tył
-                rysownik.RysujLinie(punktyMod[i], punktyMod[i + 4]);                    // Bok
+                foreach (var polaczenie in polaczenia)
+                {
+                    rysownik.RysujLinie(punktyMod[polaczenie[0]], punktyNormMod[polaczenie[1]]);
+                } 
             }
 
             Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, 
@@ -78,24 +74,28 @@ namespace Projekt_LGiM
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
-            RysujNaEkranie(brylaMod);
+            brylaNormMod = Przeksztalcenie3d.Translacja(brylaNorm, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
+            RysujNaEkranie(brylaMod, brylaNormMod);
         }
         
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
-            RysujNaEkranie(brylaMod);
+            brylaNormMod = Przeksztalcenie3d.Rotacja(brylaNorm, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
+            RysujNaEkranie(brylaMod, brylaNormMod);
         }
 
         private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Skalowanie(bryla, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
-            RysujNaEkranie(brylaMod);
+            brylaNormMod = Przeksztalcenie3d.Skalowanie(brylaNorm, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
+            RysujNaEkranie(brylaMod, brylaNormMod);
         }
 
         private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
             bryla = brylaMod;
+            brylaNorm = brylaNormMod;
 
             foreach (object slider in GridTranslacja.Children)
             {
@@ -115,6 +115,76 @@ namespace Projekt_LGiM
                     (slider as Slider).Value = 0;
             }
 
+        }
+
+        public List<DenseVector> WierzcholkiObj(string path)
+        {
+            string line;
+
+            var vertices = new List<DenseVector>();
+
+            using (var streamReader = new StreamReader(path))
+            {
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    var tmp = line.Split(' ');
+                    if (tmp[0] == "v")
+                    {
+                        vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) => 
+                            { return 100 * double.Parse(x, CultureInfo.InvariantCulture); })));
+                    }
+                }
+                streamReader.DiscardBufferedData();
+                streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+            }
+
+            return vertices;
+        }
+
+        public List<DenseVector> WierzcholkiNormObj(string path)
+        {
+            string line;
+
+            var vertices = new List<DenseVector>();
+
+            using (var streamReader = new StreamReader(path))
+            {
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    var tmp = line.Split(' ');
+                    if (tmp[0] == "vn")
+                    {
+                        vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) =>
+                        { return 100 * double.Parse(x, CultureInfo.InvariantCulture); })));
+                    }
+                }
+                streamReader.DiscardBufferedData();
+                streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+            }
+
+            return vertices;
+        }
+
+        public List<int[]> PolaczeniaObj(string path)
+        {
+            string line;
+
+            var p = new List<int[]>();
+            using (var streamReader = new StreamReader(path))
+            {
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    var tmp = line.Split(' ');
+                    if (tmp[0] == "f")
+                    {
+                        foreach (var x in tmp.Skip(1))
+                        {
+                            p.Add(new int[] { int.Parse(x.Split('/')[0]) - 1, int.Parse(new string(x.Split('/')[2].ToArray())) - 1 });
+                        }
+                    }
+                }
+            }
+            return p;
         }
     }
 }
