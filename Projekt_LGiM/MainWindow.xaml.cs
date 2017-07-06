@@ -80,10 +80,16 @@ namespace Projekt_LGiM
             brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             RysujNaEkranie(brylaMod);
         }
-
+        
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
+            RysujNaEkranie(brylaMod);
+        }
+
+        private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            brylaMod = Przeksztalcenie3d.Skalowanie(bryla, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
             RysujNaEkranie(brylaMod);
         }
 

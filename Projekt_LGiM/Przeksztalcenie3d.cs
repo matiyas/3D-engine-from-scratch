@@ -8,9 +8,6 @@ namespace Projekt_LGiM
 {
 	class Przeksztalcenie3d
     {
-        public Size RozmiarEkranu { get; set; }
-        public double Odleglosc { get; set; }
-
 		public static List<double> ZnajdzSrodek(List<DenseVector> punkty)
         {
             return new List<double>(new double[]
@@ -79,9 +76,7 @@ namespace Projekt_LGiM
                 if (phiY.CompareTo(0) != 0) p *= T0 * Ry * T1;
                 if (phiZ.CompareTo(0) != 0) p *= T0 * Rz * T1;
 
-                //p *= Rx;
-
-                punktyMod.Add(new DenseVector(new double[] { Floor(p[0] + 0.5), Floor(p[1] + 0.5), Floor(p[2] + 0.5) }));
+                punktyMod.Add(new DenseVector(p.Take(3).ToArray()));
             }
 
             return punktyMod;
@@ -96,17 +91,14 @@ namespace Projekt_LGiM
             sy /= 100.0;
             sz /= 100.0;
 
-            if(tmpX >= 0)       sx++;
-            else if(sx < 1.0)   sx++;
-            else                sx = 1.0 / sx;
+            if(tmpX >= 0 || sx < 1.0)   sx++;
+            else                        sx = 1.0 / sx;
 
-            if(tmpY >= 0)       sy++;
-            else if(sy < 1.0)   sy++;
-            else                sy = 1.0 / sy;
+            if(tmpY >= 0 || sy < 1.0)   sy++;
+            else                        sy = 1.0 / sy;
 
-            if(tmpZ >= 0)       sz++;
-            else if(sz < 1.0)   sz++;
-            else                sz = 1.0 / sz;
+            if(tmpZ >= 0 || sz < 1.0)   sz++;
+            else                        sz = 1.0 / sz;
 
 			var S = new DenseMatrix(4, 4, new double[]{ sx,  0,  0, 0, 
 														 0, sy,  0, 0, 
@@ -116,10 +108,10 @@ namespace Projekt_LGiM
 
             punkty = Translacja(punkty, -srodek[0], -srodek[1], -srodek[2]);
 
-			for(int i = 0; i < punkty.Count(); ++i)
+			foreach(var punkt in punkty)
             {
-				var p = new DenseVector(new double[]{punkty[i][0], punkty[i][1], punkty[i][2], 1}) * S;
-                punktyMod.Add(new DenseVector(new double[] { p[0], p[1], p[2] }));
+				var p = new DenseVector(new double[]{ punkt[0], punkt[1], punkt[2], 1 }) * S;
+                punktyMod.Add(new DenseVector(p.Take(3).ToArray()));
             }
 
             return Translacja(punktyMod, srodek[0], srodek[1], srodek[2]);
