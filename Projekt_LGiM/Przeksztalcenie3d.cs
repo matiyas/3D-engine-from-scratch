@@ -43,30 +43,30 @@ namespace Projekt_LGiM
 			var punktyMod = new List<DenseVector>();
             var srodek = ZnajdzSrodek(punkty);
 
-            var T0 = new DenseMatrix(4, 4, new double[]{         1,         0,          0, -srodek[0],
-                                                                 0,         1,          0, -srodek[1],
-                                                                 0,         0,          1, -srodek[2],
-                                                                 0,         0,          0,          1 });
+            var T0 = new DenseMatrix(4, 4, new double[]{		1,			0,			0, -srodek[0],
+																0,			1,			0, -srodek[1],
+																0,			0,			1, -srodek[2],
+																0,			0,			0,			1 });
 
-            var T1 = new DenseMatrix(4, 4, new double[]{         1,         0,          0,  srodek[0],
-                                                                 0,         1,          0,  srodek[1],
-                                                                 0,         0,          1,  srodek[2],
-                                                                 0,         0,          0,          1 });
+            var T1 = new DenseMatrix(4, 4, new double[]{		1,			0,			0,	srodek[0],
+																0,			1,			0,	srodek[1],
+																0,			0,			1,	srodek[2],
+																0,			0,			0,			1 });
 
-            var Rx = new DenseMatrix(4, 4, new double[]{ 		 1, 	     0, 	  	0, 		0, 
-														 		 0,  Cos(phiX), -Sin(phiX),     0, 
-														 		 0,  Sin(phiX),  Cos(phiX), 	0, 
-														 		 0, 	 	 0,		    0, 		1 });
+            var Rx = new DenseMatrix(4, 4, new double[]{		1,			0,			0,			0, 
+								 								0,  Cos(phiX), -Sin(phiX),			0,
+																0,  Sin(phiX),	Cos(phiX), 			0,
+																0,			0,			0,			1 });
 			
-			var Ry = new DenseMatrix(4, 4, new double[]{ Cos(phiY), 		 0, Sin(phiY), 		0, 
-														   		 0, 		 1, 		0, 		0, 
-														 -Sin(phiY), 		 0, Cos(phiY), 		0,
-																 0, 		 0, 		0, 		1 });
+			var Ry = new DenseMatrix(4, 4, new double[]{Cos(phiY),			0,	Sin(phiY),			0,
+																0,			1,			0,			0, 
+													   -Sin(phiY),			0,	Cos(phiY),			0,
+																0,			0,			0,			1 });
 			
-			var Rz = new DenseMatrix(4, 4, new double[]{ Cos(phiZ), -Sin(phiZ), 		0, 		0, 
-														 Sin(phiZ),  Cos(phiZ), 		0, 		0, 
-																 0, 		 0, 		1, 		0, 
-																 0, 		 0, 		0, 		1 });
+			var Rz = new DenseMatrix(4, 4, new double[]{Cos(phiZ), -Sin(phiZ),			0,			0,
+														Sin(phiZ),	Cos(phiZ),			0,			0,
+																0,			0,			1,			0, 
+																0,			0,			0,			1 });
 
 			for(int i = 0; i < punkty.Count(); ++i)
             {
@@ -99,22 +99,31 @@ namespace Projekt_LGiM
 
             if(tmpZ >= 0 || sz < 1.0)   sz++;
             else                        sz = 1.0 / sz;
+			
+			var srodek = ZnajdzSrodek(punkty);
+			
+			var T0 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, -srodek[0],
+														 0,	1, 0, -srodek[1],
+														 0,	0, 1, -srodek[2],
+														 0,	0, 0,	  1 	});
 
-			var S = new DenseMatrix(4, 4, new double[]{ sx,  0,  0, 0, 
-														 0, sy,  0, 0, 
-														 0,  0, sz, 0, 
-														 0,  0,  0, 1});
-            var srodek = ZnajdzSrodek(punkty);
+            var T1 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, srodek[0],
+														 0,	1, 0, srodek[1],
+														 0,	0, 1, srodek[2],
+														 0,	0, 0,	 1 		});
 
-            punkty = Translacja(punkty, -srodek[0], -srodek[1], -srodek[2]);
+			var S = new DenseMatrix(4, 4, new double[]{ sx,  0,  0,  0, 
+														 0, sy,  0,  0, 
+														 0,  0, sz,  0, 
+														 0,  0,  0,  1});
 
 			foreach(var punkt in punkty)
             {
-				var p = new DenseVector(new double[]{ punkt[0], punkt[1], punkt[2], 1 }) * S;
+				var p = new DenseVector(new double[]{ punkt[0], punkt[1], punkt[2], 1 }) * T0 * S * T1;
                 punktyMod.Add(new DenseVector(p.Take(3).ToArray()));
             }
 
-            return Translacja(punktyMod, srodek[0], srodek[1], srodek[2]);
+            return punktyMod;
         }
 
         public static List<Point> RzutPerspektywiczny(List<DenseVector> punkty, double d, double srodekX, double srodekY)
