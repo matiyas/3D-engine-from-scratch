@@ -33,7 +33,7 @@ namespace Projekt_LGiM
                     if (tmp[0] == typ)
                     {
                         vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) =>
-                        { return 100 * double.Parse(x, CultureInfo.InvariantCulture); })));
+                        { return 7 * double.Parse(x, CultureInfo.InvariantCulture); })));
                     }
                 }
             }

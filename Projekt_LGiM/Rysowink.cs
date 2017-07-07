@@ -9,15 +9,26 @@ namespace Projekt_LGiM
         private byte[] pixs;
         private int wysokosc, szerokosc;
         public Color KolorPedzla;
+        public Color KolorTla;
 
         public Rysownik(ref byte[] pixs, int szerokosc, int wysokosc)
         {
             KolorPedzla.R = KolorPedzla.G = KolorPedzla.B = 0;
             KolorPedzla.A = 255;
 
+            KolorTla.R = KolorTla.G = KolorTla.B = KolorTla.A = 255;
+
             this.pixs = pixs;
             this.szerokosc = szerokosc;
             this.wysokosc = wysokosc;
+        }
+
+        public void UstawTlo(byte r, byte g, byte b, byte a)
+        {
+            KolorTla.R = r;
+            KolorTla.G = g;
+            KolorTla.B = b;
+            KolorTla.A = a;
         }
 
         public void UstawPedzel(byte r, byte g, byte b, byte a)
@@ -54,9 +65,12 @@ namespace Projekt_LGiM
 
         public void CzyscEkran()
         {
-            for (int i = 0; i < pixs.Length; ++i)
+            for (int i = 0; i < pixs.Length; i += 4)
             {
-                pixs[i] = 255;
+                pixs[i] = KolorTla.B;
+                pixs[i + 1] = KolorTla.G;
+                pixs[i + 2] = KolorTla.R;
+                pixs[i + 3] = KolorTla.A;
             }
         }
 

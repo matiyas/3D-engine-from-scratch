@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Projekt_LGiM
 {
@@ -17,6 +18,7 @@ namespace Projekt_LGiM
         private List<DenseVector> bryla, brylaMod, brylaNorm, brylaNormMod;
         private Point srodek;
         private List<List<int>> sciany;
+        private Point lpm0, ppm0;
 
         public MainWindow()
         {
@@ -41,14 +43,18 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
+                rysownik.UstawTlo(0, 0, 0, 255);
+                rysownik.UstawPedzel(0, 255, 0, 255);
+                rysownik.CzyscEkran();
 
-                var obj = new WaveformObj(@"C:\Users\damian\Documents\monkey.obj");
+                var obj = new WaveformObj(@"C:\Users\damian\Documents\cat.obj");
 
                 sciany = obj.Face();
                 bryla = obj.Vertex();
-                brylaNorm = obj.VertexNormal();
+                //brylaNorm = obj.VertexNormal();
 
-                RysujNaEkranie(bryla, brylaNorm);
+                bryla = Przeksztalcenie3d.Rotacja(bryla, 0, 100 * Math.PI, 100 * Math.PI);
+                RysujNaEkranie(bryla, brylaNormMod);
             };
         }
         
@@ -56,7 +62,7 @@ namespace Projekt_LGiM
         {
             rysownik.CzyscEkran();
             var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
-            var punktyNormMod = Przeksztalcenie3d.RzutPerspektywiczny(brylaNorm, 500, srodek.X, srodek.Y);
+            //var punktyNormMod = Przeksztalcenie3d.RzutPerspektywiczny(brylaNorm, 500, srodek.X, srodek.Y);
             
             if (sciany != null)
             {
@@ -72,49 +78,97 @@ namespace Projekt_LGiM
             Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, 
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)canvasSize.Width);
         }
+        
+        private void Ekran_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if(e.Delta > 0) { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -20); }
+            else            { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 20); }
+
+            RysujNaEkranie(bryla, brylaNormMod);
+        }
+
+        private void Ekran_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
+            if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
+        }
+
+        private void Ekran_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if(Keyboard.IsKeyDown(Key.LeftShift))
+                {
+                    brylaMod = Przeksztalcenie3d.Rotacja(bryla, 0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
+                }
+                else
+                {
+                    brylaMod = Przeksztalcenie3d.Rotacja(bryla, -(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
+                }
+
+                RysujNaEkranie(brylaMod, brylaNormMod);
+            }
+
+            if(e.RightButton == MouseButtonState.Pressed)
+            {
+                brylaMod = Przeksztalcenie3d.Translacja(bryla, -(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
+                RysujNaEkranie(brylaMod, brylaNormMod);
+            }
+        }
+
+        private void Ekran_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            bryla = brylaMod;
+        }
 
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            //brylaNormMod = Przeksztalcenie3d.Translacja(brylaNorm, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
-            brylaNormMod = Przeksztalcenie3d.Translacja(brylaNorm, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             RysujNaEkranie(brylaMod, brylaNormMod);
         }
         
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            //brylaNormMod = Przeksztalcenie3d.Rotacja(brylaNorm, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
             brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
-            brylaNormMod = Przeksztalcenie3d.Rotacja(brylaNorm, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
             RysujNaEkranie(brylaMod, brylaNormMod);
         }
 
         private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Skalowanie(bryla, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
-            brylaNormMod = Przeksztalcenie3d.Skalowanie(brylaNorm, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
+           // brylaNormMod = Przeksztalcenie3d.Skalowanie(brylaNorm, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
             RysujNaEkranie(brylaMod, brylaNormMod);
         }
 
         private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
             bryla = brylaMod;
-            brylaNorm = brylaNormMod;
+           // brylaNorm = brylaNormMod;
 
             foreach (object slider in GridTranslacja.Children)
             {
                 if(slider is Slider)
+                {
                     (slider as Slider).Value = 0;
+                }
             }
 
             foreach (object slider in GridRotacja.Children)
             {
                 if (slider is Slider)
+                {
                     (slider as Slider).Value = 0;
+                }
             }
 
             foreach (object slider in GridSkalowanie.Children)
             {
                 if (slider is Slider)
+                {
                     (slider as Slider).Value = 0;
+                }
             }
 
         }

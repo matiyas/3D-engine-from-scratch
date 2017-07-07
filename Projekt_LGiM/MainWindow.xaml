@@ -5,14 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Projekt_LGiM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="626" Width="904">
+        Title="MainWindow" Height="626" Width="904" WindowState="Maximized">
     <Grid x:Name="GridMain">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="230"/>
         </Grid.ColumnDefinitions>
         <Border x:Name="RamkaEkran" BorderBrush="#FFA8A8A8" BorderThickness="1" Margin="10,10,0,10">
-            <Image x:Name="Ekran" d:IsLocked="True" d:IsHidden="True"/>
+            <Image x:Name="Ekran" d:IsHidden="True" MouseWheel="Ekran_MouseWheel" MouseDown="Ekran_MouseDown" 
+                   MouseMove="Ekran_MouseMove" MouseUp="Ekran_MouseUp"/>
         </Border>
         <Grid x:Name="GridKonrtolki" Grid.Column="1" Margin="0,10,0,0" Height="520" VerticalAlignment="Top">
             <Grid.RowDefinitions>
