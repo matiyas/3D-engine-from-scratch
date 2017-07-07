@@ -5,9 +5,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
-using System.IO;
-using System.Globalization;
-using System.Linq;
 
 namespace Projekt_LGiM
 {
@@ -19,7 +16,7 @@ namespace Projekt_LGiM
         private Size canvasSize;
         private List<DenseVector> bryla, brylaMod, brylaNorm, brylaNormMod;
         private Point srodek;
-        private List<int[]> polaczenia;
+        private List<List<int>> sciany;
 
         public MainWindow()
         {
@@ -44,11 +41,13 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
-                
-                polaczenia = PolaczeniaObj(@"C:\Users\damian\Documents\cube.obj");
-                bryla      = WierzcholkiObj(@"C:\Users\damian\Documents\cube.obj");
-                brylaNorm  = WierzcholkiNormObj(@"C:\Users\damian\Documents\cube.obj");
-                
+
+                var obj = new WaveformObj(@"C:\Users\damian\Documents\monkey.obj");
+
+                sciany = obj.Face();
+                bryla = obj.Vertex();
+                brylaNorm = obj.VertexNormal();
+
                 RysujNaEkranie(bryla, brylaNorm);
             };
         }
@@ -59,12 +58,15 @@ namespace Projekt_LGiM
             var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
             var punktyNormMod = Przeksztalcenie3d.RzutPerspektywiczny(brylaNorm, 500, srodek.X, srodek.Y);
             
-            if (polaczenia != null)
+            if (sciany != null)
             {
-                foreach (var polaczenie in polaczenia)
+                foreach (var sciana in sciany)
                 {
-                    rysownik.RysujLinie(punktyMod[polaczenie[0]], punktyNormMod[polaczenie[1]]);
-                } 
+                    for(int i = 0; i < sciana.Count; ++i)
+                    {
+                        rysownik.RysujLinie(punktyMod[sciana[i]], punktyMod[sciana[(i + 1) % sciana.Count]]);
+                    }
+                }
             }
 
             Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, 
@@ -115,76 +117,6 @@ namespace Projekt_LGiM
                     (slider as Slider).Value = 0;
             }
 
-        }
-
-        public List<DenseVector> WierzcholkiObj(string path)
-        {
-            string line;
-
-            var vertices = new List<DenseVector>();
-
-            using (var streamReader = new StreamReader(path))
-            {
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var tmp = line.Split(' ');
-                    if (tmp[0] == "v")
-                    {
-                        vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) => 
-                            { return 100 * double.Parse(x, CultureInfo.InvariantCulture); })));
-                    }
-                }
-                streamReader.DiscardBufferedData();
-                streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-            }
-
-            return vertices;
-        }
-
-        public List<DenseVector> WierzcholkiNormObj(string path)
-        {
-            string line;
-
-            var vertices = new List<DenseVector>();
-
-            using (var streamReader = new StreamReader(path))
-            {
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var tmp = line.Split(' ');
-                    if (tmp[0] == "vn")
-                    {
-                        vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) =>
-                        { return 100 * double.Parse(x, CultureInfo.InvariantCulture); })));
-                    }
-                }
-                streamReader.DiscardBufferedData();
-                streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-            }
-
-            return vertices;
-        }
-
-        public List<int[]> PolaczeniaObj(string path)
-        {
-            string line;
-
-            var p = new List<int[]>();
-            using (var streamReader = new StreamReader(path))
-            {
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var tmp = line.Split(' ');
-                    if (tmp[0] == "f")
-                    {
-                        foreach (var x in tmp.Skip(1))
-                        {
-                            p.Add(new int[] { int.Parse(x.Split('/')[0]) - 1, int.Parse(new string(x.Split('/')[2].ToArray())) - 1 });
-                        }
-                    }
-                }
-            }
-            return p;
         }
     }
 }

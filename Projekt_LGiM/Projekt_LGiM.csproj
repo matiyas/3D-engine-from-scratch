@@ -62,6 +62,7 @@
     </ApplicationDefinition>
     <Compile Include="Przeksztalcenie3d.cs" />
     <Compile Include="Rysowink.cs" />
+    <Compile Include="WaveformObj.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
