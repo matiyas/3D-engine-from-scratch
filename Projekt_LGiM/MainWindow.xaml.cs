@@ -151,7 +151,7 @@ namespace Projekt_LGiM
             {
                 if(slider is Slider)
                 {
-                    (slider as Slider).Value = 0;
+                    ((Slider)slider).Value = 0;
                 }
             }
 
@@ -159,7 +159,7 @@ namespace Projekt_LGiM
             {
                 if (slider is Slider)
                 {
-                    (slider as Slider).Value = 0;
+                    ((Slider)slider).Value = 0;
                 }
             }
 
@@ -167,7 +167,7 @@ namespace Projekt_LGiM
             {
                 if (slider is Slider)
                 {
-                    (slider as Slider).Value = 0;
+                    ((Slider)slider).Value = 0;
                 }
             }
 
