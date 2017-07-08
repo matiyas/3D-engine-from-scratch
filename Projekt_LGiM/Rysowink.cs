@@ -212,19 +212,20 @@ namespace Projekt_LGiM
         {
             if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
             {
-                Color kolor = new Color();
-
                 int pozycja = 4 * (y * szerokosc + x);
-                kolor.B = pixs[pozycja];
-                kolor.G = pixs[pozycja + 1];
-                kolor.R = pixs[pozycja + 2];
-                kolor.A = pixs[pozycja + 3];
-
-                return kolor;
+                
+                return new Color()
+                {
+                    B = pixs[pozycja],
+                    G = pixs[pozycja + 1],
+                    R = pixs[pozycja + 2],
+                    A = pixs[pozycja + 3]
+                };
             }
             else
             {
                 throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
+
             }
         }
     }

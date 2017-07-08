@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Linq;
 
 namespace Projekt_LGiM
 {
@@ -20,6 +21,7 @@ namespace Projekt_LGiM
         private List<List<int[]>> sciany;
         private List<Point> punktyTekstura;
         private Point lpm0, ppm0;
+        private Teksturowanie teksturowanie;
 
         public MainWindow()
         {
@@ -44,6 +46,7 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
+                teksturowanie = new Teksturowanie(@"C:\Users\damian\Documents\cat-texture.jpg", rysownik);
                 rysownik.UstawTlo(0, 0, 0, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
                 rysownik.CzyscEkran();
@@ -75,9 +78,23 @@ namespace Projekt_LGiM
 
                     for (int i = 2; i < sciana.Count; ++i)
                     {
-                        rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i - 1][0]]);
-                        rysownik.RysujLinie(punktyMod[sciana[i - 1][0]], punktyMod[sciana[i][0]]);
-                        rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i][0]]);
+                        var a = new List<Point>()
+                        {
+                            punktyMod[sciana[i - 2][0]],
+                            punktyMod[sciana[i - 1][0]],
+                            punktyMod[sciana[i][0]]
+                        };
+
+                        var b = new List<Point>()
+                        {
+                            punktyTekstura[sciana[i - 2][0]],
+                            punktyTekstura[sciana[i - 1][0]],
+                            punktyTekstura[sciana[i][0]]
+                        };
+                        teksturowanie.Teksturuj(a, b);
+                        //rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i - 1][0]]);
+                        //rysownik.RysujLinie(punktyMod[sciana[i - 1][0]], punktyMod[sciana[i][0]]);
+                        //rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i][0]]);
                     }
                 }
             }

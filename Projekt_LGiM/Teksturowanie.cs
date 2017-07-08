@@ -13,24 +13,23 @@ namespace Projekt_LGiM
     {
         private string sciezka;
         private Rysownik rysownik;
-        private byte[] teksturaPixs;
-        private Size teksturaSize;
+        private Drawing.Bitmap teksturaBmp;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
             this.sciezka = sciezka;
             this.rysownik = rysownik;
 
-            var obraz = Drawing.Image.FromFile(sciezka);
-            using (var memoryStream = new MemoryStream())
-            {
-                obraz.Save(memoryStream, ImageFormat.Jpeg);
-                teksturaPixs = memoryStream.ToArray();
-            }
+            teksturaBmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
         }
 
         public void Teksturuj(List<Point> sciana, List<Point> tekstura)
         {
+            for(int i = 0; i < tekstura.Count; ++i)
+            {
+                tekstura[i] = new Point(tekstura[i].X * teksturaBmp.Width, tekstura[i].Y * teksturaBmp.Height);
+            }
+
             int startY = (int)Math.Min(Math.Min(sciana[0].Y, sciana[1].Y), sciana[2].Y);
             int endY   = (int)Math.Max(Math.Max(sciana[0].Y, sciana[1].Y), sciana[2].Y);
 
@@ -72,7 +71,8 @@ namespace Projekt_LGiM
                 }
 
                 // Dla obliczonych par punktów przechodź w poziomie
-                foreach(int x in Enumerable.Range(punktyWypelnienie[0], punktyWypelnienie[1]))
+                if(punktyWypelnienie.Count > 1)
+                for(int x = punktyWypelnienie[0]; x < punktyWypelnienie[1]; ++x)
                 {
                     double mianownik = (sciana[1].X - sciana[0].X) * (sciana[2].Y - sciana[0].Y) 
                                      - ((sciana[1].Y - sciana[0].Y) * (sciana[2].X - sciana[0].X));
@@ -94,27 +94,23 @@ namespace Projekt_LGiM
                         double a = tx - Math.Floor(tx);
                         double b = ty - Math.Floor(ty);
 
-                        var kolorP1 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty), 
-                            teksturaPixs, (int)teksturaSize.Width, (int)teksturaSize.Height);
-
-                        var kolorP2 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty + 1), 
-                            teksturaPixs, (int)teksturaSize.Width, (int)teksturaSize.Height);
-
-                        var kolorP3 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty), 
-                            teksturaPixs, (int)teksturaSize.Width, (int)teksturaSize.Height);
-
-                        var kolorP4 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1), 
-                            teksturaPixs, (int)teksturaSize.Width, (int)teksturaSize.Height);
-
-                        var kolor = new Color()
+                        if (Math.Floor(tx + 1) < teksturaBmp.Width && Math.Floor(ty + 1) < teksturaBmp.Height)
                         {
-                            // Oblicz kolor piksela
-                            R = (byte)((1 - b) * ((1 - a) * kolorP1.R + a * kolorP3.R) + b * ((1 - a) * kolorP2.R + a * kolorP4.R)),
-                            G = (byte)((1 - b) * ((1 - a) * kolorP1.G + a * kolorP3.G) + b * ((1 - a) * kolorP2.G + a * kolorP4.G)),
-                            B = (byte)((1 - b) * ((1 - a) * kolorP1.B + a * kolorP3.B) + b * ((1 - a) * kolorP2.B + a * kolorP4.B)),
-                            A = (byte)((1 - b) * ((1 - a) * kolorP1.A + a * kolorP3.A) + b * ((1 - a) * kolorP2.A + a * kolorP4.A))
-                        };
-                        rysownik.RysujPiksel(x, y, kolor.R, kolor.G, kolor.B, kolor.A);
+                            var kolorP1 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty));
+                            var kolorP2 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty + 1));
+                            var kolorP3 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty));
+                            var kolorP4 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1));
+
+                            var kolor = new Color()
+                            {
+                                // Oblicz kolor piksela
+                                R = (byte)((1 - b) * ((1 - a) * kolorP1.R + a * kolorP3.R) + b * ((1 - a) * kolorP2.R + a * kolorP4.R)),
+                                G = (byte)((1 - b) * ((1 - a) * kolorP1.G + a * kolorP3.G) + b * ((1 - a) * kolorP2.G + a * kolorP4.G)),
+                                B = (byte)((1 - b) * ((1 - a) * kolorP1.B + a * kolorP3.B) + b * ((1 - a) * kolorP2.B + a * kolorP4.B)),
+                                A = (byte)((1 - b) * ((1 - a) * kolorP1.A + a * kolorP3.A) + b * ((1 - a) * kolorP2.A + a * kolorP4.A))
+                            };
+                            rysownik.RysujPiksel(x, y, kolor.R, kolor.G, kolor.B, kolor.A); 
+                        }
                     }
                 }
             }
