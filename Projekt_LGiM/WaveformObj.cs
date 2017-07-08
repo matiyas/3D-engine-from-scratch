@@ -29,15 +29,19 @@ namespace Projekt_LGiM
             {
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    var tmp = line.Split(' ');
+                    var tmp = line.Split(null);
                     if (tmp[0] == typ)
                     {
-                        vertices.Add(new DenseVector(Array.ConvertAll(tmp.Skip(1).Take(3).ToArray(), (x) =>
-                        { return 7 * double.Parse(x, CultureInfo.InvariantCulture); })));
+                        var v = new List<double>();
+
+                        foreach(var val in tmp.Skip(1))
+                        {
+                            v.Add(double.Parse(val, CultureInfo.InvariantCulture));
+                        }
+                        vertices.Add(v.ToArray());
                     }
                 }
             }
-
             return vertices;
         }
 
@@ -46,11 +50,11 @@ namespace Projekt_LGiM
             string line;
             var indices = new List<List<int>>();
 
-            using (var streamReader = new StreamReader(sciezka))
+            using (var streamReader = new StreamReader(sciezka, true))
             {
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    var tmp = line.Split(' ');
+                    var tmp = line.Split(null);
 
                     if (tmp[0] == "f")
                     {
@@ -58,8 +62,7 @@ namespace Projekt_LGiM
 
                         foreach (var x in tmp.Skip(1))
                         {
-                            if (int.TryParse(x.Split('/')[0], out int i) == false) { i = 0; }
-                            l.Add(--i);
+                            l.Add(int.Parse(x.Split('/')[0]) - 1);
                         }
                         indices.Add(l);
                     }

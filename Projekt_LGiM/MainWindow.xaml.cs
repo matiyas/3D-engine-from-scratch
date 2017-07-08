@@ -47,7 +47,7 @@ namespace Projekt_LGiM
                 rysownik.UstawPedzel(0, 255, 0, 255);
                 rysownik.CzyscEkran();
 
-                var obj = new WaveformObj(@"C:\Users\damian\Documents\cat.obj");
+                var obj = new WaveformObj(@"C:\Users\damian\Documents\czolg.obj");
 
                 sciany = obj.Face();
                 bryla = obj.Vertex();
