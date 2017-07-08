@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.IO;
 using System.Globalization;
+using System.Windows;
 
 namespace Projekt_LGiM
 {
@@ -11,13 +11,78 @@ namespace Projekt_LGiM
     class WaveformObj
     {
         private string sciezka;
-        public List<DenseVector> Vertex() => Parse("v");
-        public List<DenseVector> VertexNormal() => Parse("vn");
-        public List<DenseVector> VertexTexture() => Parse("vt");
 
         public WaveformObj(string sciezka)
         {
             this.sciezka = sciezka;
+        }
+
+        //private List<List<int>> Indices(int type)
+        //{
+        //    string line;
+        //    var indices = new List<List<int>>();
+
+        //    using (var streamReader = new StreamReader(sciezka, true))
+        //    {
+        //        while ((line = streamReader.ReadLine()) != null)
+        //        {
+        //            var tmp = line.Split(null);
+
+        //            if (tmp[0] == "f")
+        //            {
+        //                var l = new List<int>();
+
+        //                foreach (var x in tmp.Skip(1))
+        //                {
+        //                    l.Add(int.Parse(x.Split('/')[type]) - 1);
+        //                }
+        //                indices.Add(l);
+        //            }
+        //        }
+        //    }
+        //    return indices;
+        //}
+
+        public List<List<int[]>> Indices()
+        {
+            string line;
+            var indices = new List<List<int[]>>();
+
+            using (var streamReader = new StreamReader(sciezka, true))
+            {
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    var tmp = line.Split(null);
+
+                    if (tmp[0] == "f")
+                    {
+                        var l = new List<int[]>();
+
+                        foreach (var x in tmp.Skip(1))
+                        {
+                            var v = int.Parse(x.Split('/')[0]) - 1;
+                            
+                            if(int.TryParse(x.Split('/')[1], out int vt) == false)
+                            {
+                                vt = -1;
+                            }
+
+                            if (x.Split('/').ToArray().Length == 3)
+                            {
+                                var vn = int.Parse(x.Split('/')[2]) - 1;
+                                l.Add(new int[] { v, vt, vn });
+                            }
+                            else
+                            {
+                                l.Add(new int[] { v, vt });
+                            }
+
+                        }
+                        indices.Add(l);
+                    }
+                }
+            }
+            return indices;
         }
 
         private List<DenseVector> Parse(string typ)
@@ -34,7 +99,7 @@ namespace Projekt_LGiM
                     {
                         var v = new List<double>();
 
-                        foreach(var val in tmp.Skip(1))
+                        foreach (var val in tmp.Skip(1))
                         {
                             v.Add(double.Parse(val, CultureInfo.InvariantCulture));
                         }
@@ -45,30 +110,28 @@ namespace Projekt_LGiM
             return vertices;
         }
 
-        public List<List<int>> Face()
+        public List<DenseVector> Vertex() => Parse("v");
+
+        public List<DenseVector> VertexNormal() => Parse("vn");
+
+        public List<Point> VertexTexture()
         {
             string line;
-            var indices = new List<List<int>>();
+            var points = new List<Point>();
 
-            using (var streamReader = new StreamReader(sciezka, true))
+            using (var streamReader = new StreamReader(sciezka))
             {
                 while ((line = streamReader.ReadLine()) != null)
                 {
                     var tmp = line.Split(null);
-
-                    if (tmp[0] == "f")
+                    if (tmp[0] == "vt")
                     {
-                        var l = new List<int>();
-
-                        foreach (var x in tmp.Skip(1))
-                        {
-                            l.Add(int.Parse(x.Split('/')[0]) - 1);
-                        }
-                        indices.Add(l);
+                        points.Add(new Point(double.Parse(tmp[1], CultureInfo.InvariantCulture), 
+                                             double.Parse(tmp[2], CultureInfo.InvariantCulture)));
                     }
                 }
             }
-            return indices;
+            return points;
         }
     }
 }
