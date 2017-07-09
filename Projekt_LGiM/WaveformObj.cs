@@ -9,7 +9,7 @@ namespace Projekt_LGiM
 {
     class WaveformObj
     {
-        public struct Face
+        public struct Sciana
         {
             public List<int> Vertex { get; set; }
             public List<int> VertexTexture { get; set; }
@@ -23,7 +23,7 @@ namespace Projekt_LGiM
             this.sciezka = sciezka;
         }
 
-        public List<Face> Faces()
+        public List<Sciana> Powierzchnie()
         {
             string line;
             var indices = new List<Face>();
@@ -73,53 +73,53 @@ namespace Projekt_LGiM
             return indices;
         }
 
-        private List<DenseVector> Parse(string typ)
+        private List<DenseVector> Parsuj(string typ)
         {
-            string line;
-            var vertices = new List<DenseVector>();
+            string linia;
+            var wierzcholki = new List<DenseVector>();
 
             using (var streamReader = new StreamReader(sciezka))
             {
-                while ((line = streamReader.ReadLine()) != null)
+                while ((linia = streamReader.ReadLine()) != null)
                 {
-                    var tmp = line.Split(null);
-                    if (tmp[0] == typ)
+                    var wartosci = linia.Split(null);
+                    if (wartosci[0] == typ)
                     {
-                        var v = new List<double>();
+                        var wierzcholek = new List<double>();
 
-                        foreach (var val in tmp.Skip(1))
+                        foreach (var wartosc in wartosci.Skip(1))
                         {
-                            v.Add(double.Parse(val, CultureInfo.InvariantCulture));
+                            wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture));
                         }
-                        vertices.Add(v.ToArray());
+                        wierzcholki.Add(wierzcholek.ToArray());
                     }
                 }
             }
-            return vertices;
+            return wierzcholki;
         }
 
-        public List<DenseVector> Vertex() => Parse("v");
+        public List<DenseVector> Vertex() => Parsuj("v");
 
-        public List<DenseVector> VertexNormal() => Parse("vn");
+        public List<DenseVector> VertexNormal() => Parsuj("vn");
 
         public List<Point> VertexTexture()
         {
-            string line;
-            var points = new List<Point>();
+            string linia;
+            var punkty = new List<Point>();
 
             using (var streamReader = new StreamReader(sciezka))
             {
-                while ((line = streamReader.ReadLine()) != null)
+                while ((linia = streamReader.ReadLine()) != null)
                 {
-                    var tmp = line.Split(null);
-                    if (tmp[0] == "vt")
+                    var wartosci = linia.Split(null);
+                    if (wartosci[0] == "vt")
                     {
-                        points.Add(new Point(double.Parse(tmp[1], CultureInfo.InvariantCulture), 
-                                             double.Parse(tmp[2], CultureInfo.InvariantCulture)));
+                        punkty.Add(new Point(double.Parse(wartosci[1], CultureInfo.InvariantCulture), 
+                            double.Parse(wartosci[2], CultureInfo.InvariantCulture)));
                     }
                 }
             }
-            return points;
+            return punkty;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using Drawing = System.Drawing;
 
 namespace Projekt_LGiM
 {
@@ -227,6 +228,28 @@ namespace Projekt_LGiM
                 throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
 
             }
+        }
+
+        public static byte[] ToByteArray(string sciezka)
+        {
+            var bmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
+            var pixs = new byte[bmp.Size.Width * bmp.Height * 4];
+
+            for (int x = 0; x < bmp.Width; ++x)
+            {
+                for (int y = 0; y < bmp.Height; ++y)
+                {
+                    int pos = 4 * (y * bmp.Width + x);
+                    var c = bmp.GetPixel(x, y);
+
+                    pixs[pos++] = c.B;
+                    pixs[pos++] = c.G;
+                    pixs[pos++] = c.R;
+                    pixs[pos] = c.A;
+                }
+            }
+
+            return pixs;
         }
     }
 }

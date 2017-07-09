@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using System.IO;
 using Drawing = System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
 
 namespace Projekt_LGiM
 {
@@ -13,38 +10,23 @@ namespace Projekt_LGiM
     {
         private string sciezka;
         private Rysownik rysownik;
-        private Drawing.Bitmap teksturaBmp;
-        private byte[] texturePixs;
+        private Drawing.Size rozmiarTekstury;
+        private byte[] teksturaPixs;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
             this.sciezka = sciezka;
             this.rysownik = rysownik;
 
-            teksturaBmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
-
-            texturePixs = new byte[teksturaBmp.Size.Width * teksturaBmp.Height * 4];
-
-            for(int x = 0; x < teksturaBmp.Width; ++x)
-            {
-                for(int y = 0; y < teksturaBmp.Height; ++y)
-                {
-                    int pos = 4 * (y * teksturaBmp.Width + x);
-                    var c = teksturaBmp.GetPixel(x, y);
-
-                    texturePixs[pos++] = c.B;
-                    texturePixs[pos++] = c.G;
-                    texturePixs[pos++] = c.R;
-                    texturePixs[pos] = c.A;
-                }
-            }
+            rozmiarTekstury = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka)).Size;
+            teksturaPixs = Rysownik.ToByteArray(sciezka);          
         }
 
         public void Teksturuj(List<Point> sciana, List<Point> tekstura)
         {
             for(int i = 0; i < tekstura.Count; ++i)
             {
-                tekstura[i] = new Point(tekstura[i].X * teksturaBmp.Width, tekstura[i].Y * teksturaBmp.Height);
+                tekstura[i] = new Point(tekstura[i].X * rozmiarTekstury.Width, tekstura[i].Y * rozmiarTekstury.Height);
             }
 
             int startY = (int)Math.Min(Math.Min(sciana[0].Y, sciana[1].Y), sciana[2].Y);
@@ -112,24 +94,19 @@ namespace Projekt_LGiM
                             double a = tx - Math.Floor(tx);
                             double b = ty - Math.Floor(ty);
 
-                            if (Math.Floor(tx + 1) < teksturaBmp.Width && Math.Floor(ty + 1) < teksturaBmp.Height)
+                            if (Math.Floor(tx + 1) < rozmiarTekstury.Width && Math.Floor(ty + 1) < rozmiarTekstury.Height)
                             {
-                                //var kolorP1 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty));
-                                //var kolorP2 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty + 1));
-                                //var kolorP3 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty));
-                                //var kolorP4 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1));
-
-                                var kolorP1 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty), texturePixs,
-                                    teksturaBmp.Width, teksturaBmp.Height);
+                                var kolorP1 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty), teksturaPixs,
+                                    rozmiarTekstury.Width, rozmiarTekstury.Height);
 
                                 var kolorP2 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty + 1),
-                                    texturePixs, teksturaBmp.Width, teksturaBmp.Height);
+                                    teksturaPixs, rozmiarTekstury.Width, rozmiarTekstury.Height);
 
-                                var kolorP3 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty), texturePixs,
-                                    teksturaBmp.Width, teksturaBmp.Height);
+                                var kolorP3 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty), teksturaPixs,
+                                    rozmiarTekstury.Width, rozmiarTekstury.Height);
 
-                                var kolorP4 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1), texturePixs,
-                                    teksturaBmp.Width, teksturaBmp.Height);
+                                var kolorP4 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1), teksturaPixs,
+                                    rozmiarTekstury.Width, rozmiarTekstury.Height);
 
                                 var kolor = new Color()
                                 {

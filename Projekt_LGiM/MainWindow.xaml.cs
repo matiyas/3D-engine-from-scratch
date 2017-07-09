@@ -15,10 +15,10 @@ namespace Projekt_LGiM
         private byte[] pixs, tmpPixs;
         private Rysownik rysownik;
         private double dpi;
-        private Size canvasSize;
+        private Size rozmiarPlotna;
         private List<DenseVector> bryla, brylaMod;
         private Point srodek;
-        private List<WaveformObj.Face> sciany;
+        private List<WaveformObj.Sciana> sciany;
         private List<Point> punktyTekstura;
         private Point lpm0, ppm0;
         private Teksturowanie teksturowanie;
@@ -36,24 +36,26 @@ namespace Projekt_LGiM
             // jej rozmiaru rozmiaru tablicy przechowującej piksele.
             Loaded += delegate
             {
-                canvasSize.Width = RamkaEkran.ActualWidth;
-                canvasSize.Height = RamkaEkran.ActualHeight;
+                rozmiarPlotna.Width = RamkaEkran.ActualWidth;
+                rozmiarPlotna.Height = RamkaEkran.ActualHeight;
 
-                srodek.X = canvasSize.Width / 2;
-                srodek.Y = canvasSize.Height / 2;
+                srodek.X = rozmiarPlotna.Width / 2;
+                srodek.Y = rozmiarPlotna.Height / 2;
 
-                pixs    = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
-                tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
+                pixs    = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
+                tmpPixs = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
 
-                rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
+                rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
                 teksturowanie = new Teksturowanie(@"C:\Users\damian\Documents\crate.jpg", rysownik);
+
+                // Przygotowanie ekranu i rysownika
                 rysownik.UstawTlo(0, 0, 0, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
                 rysownik.CzyscEkran();
 
+                // Wczytanie modelu
                 var obj = new WaveformObj(@"C:\Users\damian\Documents\ncubeobj.obj");
-
-                sciany = obj.Faces();
+                sciany = obj.Powierzchnie();
                 bryla = obj.Vertex();
                 punktyTekstura = obj.VertexTexture();
 
@@ -74,37 +76,49 @@ namespace Projekt_LGiM
             {
                 if (CheckTeksturuj.IsChecked == true)
                 {
-                    sciany.Sort((f1, f2) =>
+                    // Algorytm malarza
+                    sciany.Sort((sciana1, scaiana2) =>
                     {
-                        var max1 = Math.Max(Math.Max(bryla[f1.Vertex[0]][2], bryla[f1.Vertex[1]][2]), bryla[f1.Vertex[2]][2]);
-                        var max2 = Math.Max(Math.Max(bryla[f2.Vertex[0]][2], bryla[f2.Vertex[1]][2]), bryla[f2.Vertex[2]][2]);
+                        var sciana1MaxZ = Math.Max
+                        (
+                            Math.Max(bryla[sciana1.Vertex[0]][2], bryla[sciana1.Vertex[1]][2]),
+                            bryla[sciana1.Vertex[2]][2]
+                        );
 
-                        if (max1 < max2) { return 1; }
-                        if (max1 > max2) { return -1; }
+                        var sciana2MaxZ = Math.Max
+                        (
+                            Math.Max(bryla[scaiana2.Vertex[0]][2], bryla[scaiana2.Vertex[1]][2]),
+                            bryla[scaiana2.Vertex[2]][2]
+                        );
+
+                        if (sciana1MaxZ < sciana2MaxZ) { return  1; }
+                        if (sciana1MaxZ > sciana2MaxZ) { return -1; }
 
                         return 0;
                     });
 
+                    // Rysowanie tekstury na ekranie
                     foreach (var sciana in sciany)
                     {
-                        var a = new List<Point>()
+                        var obszar = new List<Point>()
                         {
                             punktyMod[sciana.Vertex[0]],
                             punktyMod[sciana.Vertex[1]],
                             punktyMod[sciana.Vertex[2]]
                         };
 
-                        var b = new List<Point>()
+                        var tekstura = new List<Point>()
                         {
                             punktyTekstura[sciana.VertexTexture[0]],
                             punktyTekstura[sciana.VertexTexture[1]],
                             punktyTekstura[sciana.VertexTexture[2]]
                         };
 
-                        teksturowanie.Teksturuj(a, b);
+                        teksturowanie.Teksturuj(obszar, tekstura);
                     }
                 }
 
+                // Rysowanie siatki na ekranie
                 if (CheckSiatka.IsChecked == true)
                 {
                     foreach (var sciana in sciany)
@@ -115,23 +129,35 @@ namespace Projekt_LGiM
                     }
                 }
 
-                Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi,
-                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)canvasSize.Width);
+                Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
+                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
             }
         }
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if(e.Delta > 0) { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -10); }
-            else            { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 10); }
+            if(e.Delta > 0)
+            {
+                bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -10);
+            }
+            else
+            {
+                bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 10);
+            }
 
             RysujNaEkranie(bryla);
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
-            if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                lpm0 = e.GetPosition(Ekran);
+            }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                ppm0 = e.GetPosition(Ekran);
+            }
         }
 
         private void Ekran_MouseMove(object sender,  MouseEventArgs e)
