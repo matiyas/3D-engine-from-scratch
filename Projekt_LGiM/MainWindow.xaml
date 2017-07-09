@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Projekt_LGiM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="626" Width="904" WindowState="Maximized">
+        Title="MainWindow" Height="626" Width="904">
     <Grid x:Name="GridMain">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -15,10 +15,11 @@
             <Image x:Name="Ekran" d:IsHidden="True" MouseWheel="Ekran_MouseWheel" MouseDown="Ekran_MouseDown" 
                    MouseMove="Ekran_MouseMove" MouseUp="Ekran_MouseUp"/>
         </Border>
-        <Grid x:Name="GridKonrtolki" Grid.Column="1" Margin="0,10,0,0" Height="520" VerticalAlignment="Top">
+        <Grid x:Name="GridKonrtolki" Grid.Column="1" Margin="0,10,0,0" Height="576" VerticalAlignment="Top">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <GroupBox x:Name="GroupBoxTranslacja" Header="Translacja" Margin="10,0,10,10">
@@ -73,7 +74,7 @@
                            VerticalAlignment="Center"/>
                 </Grid>
             </GroupBox>
-            <GroupBox x:Name="GroupBoxSkalowanie" Header="Skalowanie" Margin="10,10,10,20" Grid.Row="2">
+            <GroupBox x:Name="GroupBoxSkalowanie" Header="Skalowanie" Margin="10,10,10,6" Grid.Row="2">
                 <Grid x:Name="GridSkalowanie" Margin="0,10,0,-2">
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -100,9 +101,11 @@
                            VerticalAlignment="Center"/>
                 </Grid>
             </GroupBox>
+            <CheckBox x:Name="CheckTeksturuj" Content="Teksturowanie" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="3" 
+                         VerticalAlignment="Top" Width="210" Click="CheckTeksturuj_Click"/>
+            <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,31,0,0" Grid.Row="3" 
+                         VerticalAlignment="Top" Width="210" Click="CheckSiatka_Click" IsChecked="True"/>
         </Grid>
-        <Label x:Name="DebugLabel" Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="10,548,0,0" VerticalAlignment="Top" 
-               Width="210"/>
 
     </Grid>
 </Window>

@@ -46,14 +46,14 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * canvasSize.Width * canvasSize.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)canvasSize.Width, (int)canvasSize.Height);
-                teksturowanie = new Teksturowanie(@"C:\Users\damian\Documents\cat-texture.jpg", rysownik);
+                teksturowanie = new Teksturowanie(@"C:\Users\damian\Documents\crate.jpg", rysownik);
                 rysownik.UstawTlo(0, 0, 0, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
                 rysownik.CzyscEkran();
 
-                var obj = new WaveformObj(@"C:\Users\damian\Documents\cat.obj");
+                var obj = new WaveformObj(@"C:\Users\damian\Documents\ncubeobj.obj");
 
-                sciany = obj.Indices();
+                sciany = obj.Faces();
                 bryla = obj.Vertex();
                 punktyTekstura = obj.VertexTexture();
 
@@ -66,47 +66,55 @@ namespace Projekt_LGiM
         {
             rysownik.CzyscEkran();
             var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
-            
+
             if (sciany != null)
             {
-                foreach (var sciana in sciany)
+                if (CheckTeksturuj.IsChecked == true)
                 {
-                    //for(int i = 0; i < sciana.Count; ++i)
-                    //{
-                    //    rysownik.RysujLinie(punktyMod[sciana[i]], punktyMod[sciana[(i + 1) % sciana.Count]]);
-                    //}
-
-                    for (int i = 2; i < sciana.Count; ++i)
+                    foreach (var sciana in sciany)
                     {
-                        var a = new List<Point>()
+                        for (int i = 0; i < sciana.Count; i += 2)
                         {
-                            punktyMod[sciana[i - 2][0]],
-                            punktyMod[sciana[i - 1][0]],
-                            punktyMod[sciana[i][0]]
-                        };
+                            var a = new List<Point>()
+                            {
+                                punktyMod[sciana[i][0]],
+                                punktyMod[sciana[(i + 1) % sciana.Count][0]],
+                                punktyMod[sciana[(i + 2) % sciana.Count][0]]
+                            };
 
-                        var b = new List<Point>()
-                        {
-                            punktyTekstura[sciana[i - 2][0]],
-                            punktyTekstura[sciana[i - 1][0]],
-                            punktyTekstura[sciana[i][0]]
-                        };
-                        teksturowanie.Teksturuj(a, b);
-                        //rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i - 1][0]]);
-                        //rysownik.RysujLinie(punktyMod[sciana[i - 1][0]], punktyMod[sciana[i][0]]);
-                        //rysownik.RysujLinie(punktyMod[sciana[i - 2][0]], punktyMod[sciana[i][0]]);
+                            var b = new List<Point>()
+                            {
+                                punktyTekstura[sciana[i][1]],
+                                punktyTekstura[sciana[(i + 1) % sciana.Count][1]],
+                                punktyTekstura[sciana[(i + 2) % sciana.Count][1]]
+                            };
+                            teksturowanie.Teksturuj(a, b);
+                        }
                     }
                 }
-            }
 
-            Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi, 
+                if (CheckSiatka.IsChecked == true)
+                {
+                    foreach (var sciana in sciany)
+                    {
+                        for (int i = 0; i < sciana.Count; i += 2)
+                        {
+                            rysownik.RysujLinie(punktyMod[sciana[i][0]], punktyMod[sciana[(i + 1) % sciana.Count][0]]);
+                            rysownik.RysujLinie(punktyMod[sciana[(i + 1) % sciana.Count][0]], punktyMod[sciana[(i + 2) % sciana.Count][0]]);
+                            rysownik.RysujLinie(punktyMod[sciana[(i + 2) % sciana.Count][0]], punktyMod[sciana[i][0]]);
+                        }
+                    }
+                }
+
+                Ekran.Source = BitmapSource.Create((int)canvasSize.Width, (int)canvasSize.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)canvasSize.Width);
+            }
         }
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if(e.Delta > 0) { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -20); }
-            else            { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 20); }
+            if(e.Delta > 0) { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -10); }
+            else            { bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 10); }
 
             RysujNaEkranie(bryla);
         }
@@ -150,7 +158,11 @@ namespace Projekt_LGiM
             brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
             RysujNaEkranie(brylaMod);
         }
-        
+
+        private void CheckSiatka_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(bryla);
+
+        private void CheckTeksturuj_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(bryla);
+
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);

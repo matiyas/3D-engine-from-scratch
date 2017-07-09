@@ -7,7 +7,6 @@ using System.Windows;
 
 namespace Projekt_LGiM
 {
-
     class WaveformObj
     {
         private string sciezka;
@@ -17,33 +16,7 @@ namespace Projekt_LGiM
             this.sciezka = sciezka;
         }
 
-        //private List<List<int>> Indices(int type)
-        //{
-        //    string line;
-        //    var indices = new List<List<int>>();
-
-        //    using (var streamReader = new StreamReader(sciezka, true))
-        //    {
-        //        while ((line = streamReader.ReadLine()) != null)
-        //        {
-        //            var tmp = line.Split(null);
-
-        //            if (tmp[0] == "f")
-        //            {
-        //                var l = new List<int>();
-
-        //                foreach (var x in tmp.Skip(1))
-        //                {
-        //                    l.Add(int.Parse(x.Split('/')[type]) - 1);
-        //                }
-        //                indices.Add(l);
-        //            }
-        //        }
-        //    }
-        //    return indices;
-        //}
-
-        public List<List<int[]>> Indices()
+        public List<List<int[]>> Faces()
         {
             string line;
             var indices = new List<List<int[]>>();
@@ -65,6 +38,10 @@ namespace Projekt_LGiM
                             if(int.TryParse(x.Split('/')[1], out int vt) == false)
                             {
                                 vt = -1;
+                            }
+                            else
+                            {
+                                --vt;
                             }
 
                             if (x.Split('/').ToArray().Length == 3)

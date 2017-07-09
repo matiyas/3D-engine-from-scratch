@@ -14,6 +14,7 @@ namespace Projekt_LGiM
         private string sciezka;
         private Rysownik rysownik;
         private Drawing.Bitmap teksturaBmp;
+        private byte[] texturePixs;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
@@ -21,6 +22,22 @@ namespace Projekt_LGiM
             this.rysownik = rysownik;
 
             teksturaBmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
+
+            texturePixs = new byte[teksturaBmp.Size.Width * teksturaBmp.Height * 4];
+
+            for(int x = 0; x < teksturaBmp.Width; ++x)
+            {
+                for(int y = 0; y < teksturaBmp.Height; ++y)
+                {
+                    int pos = 4 * (y * teksturaBmp.Width + x);
+                    var c = teksturaBmp.GetPixel(x, y);
+
+                    texturePixs[pos++] = c.B;
+                    texturePixs[pos++] = c.G;
+                    texturePixs[pos++] = c.R;
+                    texturePixs[pos] = c.A;
+                }
+            }
         }
 
         public void Teksturuj(List<Point> sciana, List<Point> tekstura)
@@ -36,7 +53,7 @@ namespace Projekt_LGiM
             var punktyWypelnienie = new List<int>();
 
             // Przechodź po obszarze figury od góry
-            for (int y = startY + 1; y < endY - 1; ++y)
+            for (int y = startY; y < endY; ++y)
             {
                 punktyWypelnienie.Clear();
 
@@ -72,7 +89,7 @@ namespace Projekt_LGiM
 
                 // Dla obliczonych par punktów przechodź w poziomie
                 if(punktyWypelnienie.Count > 1)
-                for(int x = punktyWypelnienie[0]; x < punktyWypelnienie[1]; ++x)
+                for(int x = punktyWypelnienie[0]; x <= punktyWypelnienie[1]; ++x)
                 {
                     double mianownik = (sciana[1].X - sciana[0].X) * (sciana[2].Y - sciana[0].Y) 
                                      - ((sciana[1].Y - sciana[0].Y) * (sciana[2].X - sciana[0].X));
@@ -96,10 +113,22 @@ namespace Projekt_LGiM
 
                         if (Math.Floor(tx + 1) < teksturaBmp.Width && Math.Floor(ty + 1) < teksturaBmp.Height)
                         {
-                            var kolorP1 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty));
-                            var kolorP2 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty + 1));
-                            var kolorP3 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty));
-                            var kolorP4 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1));
+                                //var kolorP1 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty));
+                                //var kolorP2 = teksturaBmp.GetPixel((int)Math.Floor(tx), (int)Math.Floor(ty + 1));
+                                //var kolorP3 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty));
+                                //var kolorP4 = teksturaBmp.GetPixel((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1));
+
+                                var kolorP1 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty), texturePixs, 
+                                    teksturaBmp.Width, teksturaBmp.Height);
+
+                                var kolorP2 = Rysownik.SprawdzKolor((int)Math.Floor(tx), (int)Math.Floor(ty + 1), 
+                                    texturePixs, teksturaBmp.Width, teksturaBmp.Height);
+
+                                var kolorP3 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty), texturePixs, 
+                                    teksturaBmp.Width, teksturaBmp.Height);
+
+                                var kolorP4 = Rysownik.SprawdzKolor((int)Math.Floor(tx + 1), (int)Math.Floor(ty + 1), texturePixs, 
+                                    teksturaBmp.Width, teksturaBmp.Height);
 
                             var kolor = new Color()
                             {
