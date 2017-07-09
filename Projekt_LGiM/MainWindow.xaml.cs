@@ -18,7 +18,7 @@ namespace Projekt_LGiM
         private Size canvasSize;
         private List<DenseVector> bryla, brylaMod;
         private Point srodek;
-        private List<List<int[]>> sciany;
+        private List<WaveformObj.Face> sciany;
         private List<Point> punktyTekstura;
         private Point lpm0, ppm0;
         private Teksturowanie teksturowanie;
@@ -73,23 +73,21 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in sciany)
                     {
-                        for (int i = 0; i < sciana.Count; i += 2)
+                        var a = new List<Point>()
                         {
-                            var a = new List<Point>()
-                            {
-                                punktyMod[sciana[i][0]],
-                                punktyMod[sciana[(i + 1) % sciana.Count][0]],
-                                punktyMod[sciana[(i + 2) % sciana.Count][0]]
-                            };
+                            punktyMod[sciana.Vertex[0]],
+                            punktyMod[sciana.Vertex[1]],
+                            punktyMod[sciana.Vertex[2]]
+                        };
 
-                            var b = new List<Point>()
-                            {
-                                punktyTekstura[sciana[i][1]],
-                                punktyTekstura[sciana[(i + 1) % sciana.Count][1]],
-                                punktyTekstura[sciana[(i + 2) % sciana.Count][1]]
-                            };
-                            teksturowanie.Teksturuj(a, b);
-                        }
+                        var b = new List<Point>()
+                        {
+                            punktyTekstura[sciana.VertexTexture[0]],
+                            punktyTekstura[sciana.VertexTexture[1]],
+                            punktyTekstura[sciana.VertexTexture[2]]
+                        };
+
+                        teksturowanie.Teksturuj(a, b);
                     }
                 }
 
@@ -97,12 +95,9 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in sciany)
                     {
-                        for (int i = 0; i < sciana.Count; i += 2)
-                        {
-                            rysownik.RysujLinie(punktyMod[sciana[i][0]], punktyMod[sciana[(i + 1) % sciana.Count][0]]);
-                            rysownik.RysujLinie(punktyMod[sciana[(i + 1) % sciana.Count][0]], punktyMod[sciana[(i + 2) % sciana.Count][0]]);
-                            rysownik.RysujLinie(punktyMod[sciana[(i + 2) % sciana.Count][0]], punktyMod[sciana[i][0]]);
-                        }
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[1]]);
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[1]], punktyMod[sciana.Vertex[2]]);
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[2]]);
                     }
                 }
 

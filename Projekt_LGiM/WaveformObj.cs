@@ -9,6 +9,13 @@ namespace Projekt_LGiM
 {
     class WaveformObj
     {
+        public struct Face
+        {
+            public List<int> Vertex { get; set; }
+            public List<int> VertexTexture { get; set; }
+            public List<int> VertexNormal { get; set; }
+        }
+
         private string sciezka;
 
         public WaveformObj(string sciezka)
@@ -16,46 +23,50 @@ namespace Projekt_LGiM
             this.sciezka = sciezka;
         }
 
-        public List<List<int[]>> Faces()
+        public List<Face> Faces()
         {
             string line;
-            var indices = new List<List<int[]>>();
+            var indices = new List<Face>();
 
             using (var streamReader = new StreamReader(sciezka, true))
             {
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    var tmp = line.Split(null);
+                    var splittedLine = line.Split(null);
 
-                    if (tmp[0] == "f")
+                    if (splittedLine[0] == "f")
                     {
-                        var l = new List<int[]>();
+                        splittedLine = splittedLine.Skip(1).ToArray();
 
-                        foreach (var x in tmp.Skip(1))
+                        for(int i = 0; i < splittedLine.Length; i += 2)
                         {
-                            var v = int.Parse(x.Split('/')[0]) - 1;
-                            
-                            if(int.TryParse(x.Split('/')[1], out int vt) == false)
+                            var F = new Face()
                             {
-                                vt = -1;
-                            }
-                            else
-                            {
-                                --vt;
-                            }
+                                Vertex = new List<int>(),
+                                VertexTexture = new List<int>(),
+                                VertexNormal = new List<int>()
+                            };
 
-                            if (x.Split('/').ToArray().Length == 3)
+                            for (int j = 0; j < 3; ++j)
                             {
-                                var vn = int.Parse(x.Split('/')[2]) - 1;
-                                l.Add(new int[] { v, vt, vn });
-                            }
-                            else
-                            {
-                                l.Add(new int[] { v, vt });
-                            }
+                                F.Vertex.Add(int.Parse(splittedLine[(i + j) % splittedLine.Length].Split('/')[0]) - 1);
 
+                                if (int.TryParse(splittedLine[(i + j) % splittedLine.Length].Split('/')[1], out int vt) == false)
+                                {
+                                    F.VertexTexture.Add(-1);
+                                }
+                                else
+                                {
+                                    F.VertexTexture.Add(vt - 1);
+                                }
+
+                                if (splittedLine[(i + j) % splittedLine.Length].Split('/').ToArray().Length == 3)
+                                {
+                                    F.VertexNormal.Add(int.Parse(splittedLine[(i + j) % splittedLine.Length].Split('/')[2]) - 1);
+                                }
+                            }
+                            indices.Add(F);
                         }
-                        indices.Add(l);
                     }
                 }
             }
