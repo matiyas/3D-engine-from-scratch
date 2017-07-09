@@ -65,12 +65,26 @@ namespace Projekt_LGiM
         public void RysujNaEkranie(List<DenseVector> bryla)
         {
             rysownik.CzyscEkran();
-            var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
 
+            // Painter algorithm
+            bryla.OrderBy(wektor => wektor[2]);
+            var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
+            
             if (sciany != null)
             {
                 if (CheckTeksturuj.IsChecked == true)
                 {
+                    sciany.Sort((f1, f2) =>
+                    {
+                        var max1 = Math.Max(Math.Max(bryla[f1.Vertex[0]][2], bryla[f1.Vertex[1]][2]), bryla[f1.Vertex[2]][2]);
+                        var max2 = Math.Max(Math.Max(bryla[f2.Vertex[0]][2], bryla[f2.Vertex[1]][2]), bryla[f2.Vertex[2]][2]);
+
+                        if (max1 < max2) { return 1; }
+                        if (max1 > max2) { return -1; }
+
+                        return 0;
+                    });
+
                     foreach (var sciana in sciany)
                     {
                         var a = new List<Point>()

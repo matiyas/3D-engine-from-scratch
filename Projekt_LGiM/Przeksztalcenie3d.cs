@@ -130,14 +130,14 @@ namespace Projekt_LGiM
         {
             var punktyMod = new List<Point>();
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
-                                                           0,  1,  0,  0, 
+                                                           0,  1,  0,  0,
                                                            0,  0,  0,  0,
                                                            0,  0, 1/d, 1 });
 
-            foreach(var punkt in punkty)
+            foreach (var punkt in punkty)
             {
                 var p = new DenseVector(new double[] { punkt[0], punkt[1], punkt[2], 1 }) * Proj;
-				punktyMod.Add(new Point((int)(p[0] / p[3] + srodekX), (int)(p[1] / p[3] + srodekY)));
+                punktyMod.Add(new Point((int)(p[0] / p[3] + srodekX), (int)(p[1] / p[3] + srodekY)));
             }
 
             return punktyMod;
