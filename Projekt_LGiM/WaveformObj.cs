@@ -26,7 +26,7 @@ namespace Projekt_LGiM
         public List<Sciana> Powierzchnie()
         {
             string line;
-            var indices = new List<Face>();
+            var indices = new List<Sciana>();
 
             using (var streamReader = new StreamReader(sciezka, true))
             {
@@ -40,7 +40,7 @@ namespace Projekt_LGiM
 
                         for(int i = 0; i < splittedLine.Length; i += 2)
                         {
-                            var F = new Face()
+                            var F = new Sciana()
                             {
                                 Vertex = new List<int>(),
                                 VertexTexture = new List<int>(),

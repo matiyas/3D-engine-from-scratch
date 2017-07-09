@@ -46,15 +46,15 @@ namespace Projekt_LGiM
                 tmpPixs = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
 
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
-                teksturowanie = new Teksturowanie(@"C:\Users\damian\Documents\crate.jpg", rysownik);
+                teksturowanie = new Teksturowanie(@"tekstury\cube.jpg", rysownik);
 
                 // Przygotowanie ekranu i rysownika
-                rysownik.UstawTlo(0, 0, 0, 255);
+                rysownik.UstawTlo(127, 127, 127, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
                 rysownik.CzyscEkran();
 
                 // Wczytanie modelu
-                var obj = new WaveformObj(@"C:\Users\damian\Documents\ncubeobj.obj");
+                var obj = new WaveformObj(@"modele\cube.obj");
                 sciany = obj.Powierzchnie();
                 bryla = obj.Vertex();
                 punktyTekstura = obj.VertexTexture();
@@ -74,6 +74,17 @@ namespace Projekt_LGiM
             
             if (sciany != null)
             {
+                // Rysowanie siatki na ekranie
+                if (CheckSiatka.IsChecked == true)
+                {
+                    foreach (var sciana in sciany)
+                    {
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[1]]);
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[1]], punktyMod[sciana.Vertex[2]]);
+                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[2]]);
+                    }
+                }
+
                 if (CheckTeksturuj.IsChecked == true)
                 {
                     // Algorytm malarza
@@ -91,10 +102,7 @@ namespace Projekt_LGiM
                             bryla[scaiana2.Vertex[2]][2]
                         );
 
-                        if (sciana1MaxZ < sciana2MaxZ) { return  1; }
-                        if (sciana1MaxZ > sciana2MaxZ) { return -1; }
-
-                        return 0;
+                        return sciana2MaxZ.CompareTo(sciana1MaxZ);
                     });
 
                     // Rysowanie tekstury na ekranie
@@ -115,17 +123,6 @@ namespace Projekt_LGiM
                         };
 
                         teksturowanie.Teksturuj(obszar, tekstura);
-                    }
-                }
-
-                // Rysowanie siatki na ekranie
-                if (CheckSiatka.IsChecked == true)
-                {
-                    foreach (var sciana in sciany)
-                    {
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[1]]);
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[1]], punktyMod[sciana.Vertex[2]]);
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[2]]);
                     }
                 }
 
