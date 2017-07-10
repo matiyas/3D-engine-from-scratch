@@ -56,7 +56,7 @@ namespace Projekt_LGiM
 
                 // Wczytanie modelu
                 var obj = new WaveformObj(@"modele\cube.obj");
-                sciany = obj.Powierzchnie();
+                sciany = obj.PowierzchnieTrojkaty();
                 bryla = obj.Vertex();
                 punktyTekstura = obj.VertexTexture();
 
@@ -96,26 +96,27 @@ namespace Projekt_LGiM
                         return sciana2.Vertex.Max(wierzcholek => bryla[wierzcholek][2]).CompareTo
                               (sciana1.Vertex.Max(wierzcholek => bryla[wierzcholek][2]));
                     });
-
+                    
                     // Rysowanie tekstury na ekranie
                     foreach (var sciana in sciany)
                     {
-                        var obszar = new List<Point>();
-                        foreach (var wierzcholek in sciana.Vertex)
-                        {
-                            obszar.Add(punktyMod[wierzcholek]);
-                        }
+                        teksturowanie.Teksturuj(
+                            new List<Point>()
+                            {
+                                punktyMod[sciana.Vertex[0]],
+                                punktyMod[sciana.Vertex[1]],
+                                punktyMod[sciana.Vertex[2]]
+                            },
 
-                        var tekstura = new List<Point>();
-                        foreach (var wierzcholek in sciana.VertexTexture)
-                        {
-                            tekstura.Add(punktyTekstura[wierzcholek]);
-                        }
-
-                        teksturowanie.Teksturuj(obszar, tekstura);
+                            new List<Point>()
+                            {
+                                punktyTekstura[sciana.VertexTexture[0]],
+                                punktyTekstura[sciana.VertexTexture[1]],
+                                punktyTekstura[sciana.VertexTexture[2]]
+                            });
                     }
                 }
-                
+
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
