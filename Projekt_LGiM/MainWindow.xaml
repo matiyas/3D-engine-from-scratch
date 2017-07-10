@@ -105,6 +105,7 @@
                          VerticalAlignment="Top" Width="210" Click="CheckTeksturuj_Click"/>
             <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,31,0,0" Grid.Row="3" 
                          VerticalAlignment="Top" Width="210" Click="CheckSiatka_Click" IsChecked="True"/>
+            <Label x:Name="LabelFps" HorizontalAlignment="Left" Margin="10,52,0,0" Grid.Row="3" VerticalAlignment="Top" Width="210" Content="0 fps" HorizontalContentAlignment="Right"/>
         </Grid>
 
     </Grid>

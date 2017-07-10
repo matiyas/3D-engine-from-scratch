@@ -7,6 +7,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Projekt_LGiM
 {
@@ -66,10 +67,11 @@ namespace Projekt_LGiM
         
         public void RysujNaEkranie(List<DenseVector> bryla)
         {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             rysownik.CzyscEkran();
 
-            // Painter algorithm
-            bryla.OrderBy(wektor => wektor[2]);
             var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
             
             if (sciany != null)
@@ -88,47 +90,37 @@ namespace Projekt_LGiM
 
                 if (CheckTeksturuj.IsChecked == true)
                 {
-                    // Algorytm malarza
-                    sciany.Sort((sciana1, scaiana2) =>
+                    // Sortuj sciany względem współczynnika Z
+                    sciany.Sort((sciana1, sciana2) =>
                     {
-                        var sciana1MaxZ = Math.Max
-                        (
-                            Math.Max(bryla[sciana1.Vertex[0]][2], bryla[sciana1.Vertex[1]][2]),
-                            bryla[sciana1.Vertex[2]][2]
-                        );
-
-                        var sciana2MaxZ = Math.Max
-                        (
-                            Math.Max(bryla[scaiana2.Vertex[0]][2], bryla[scaiana2.Vertex[1]][2]),
-                            bryla[scaiana2.Vertex[2]][2]
-                        );
-
-                        return sciana2MaxZ.CompareTo(sciana1MaxZ);
+                        return sciana2.Vertex.Max(wierzcholek => bryla[wierzcholek][2]).CompareTo
+                              (sciana1.Vertex.Max(wierzcholek => bryla[wierzcholek][2]));
                     });
 
                     // Rysowanie tekstury na ekranie
                     foreach (var sciana in sciany)
                     {
-                        var obszar = new List<Point>()
+                        var obszar = new List<Point>();
+                        foreach (var wierzcholek in sciana.Vertex)
                         {
-                            punktyMod[sciana.Vertex[0]],
-                            punktyMod[sciana.Vertex[1]],
-                            punktyMod[sciana.Vertex[2]]
-                        };
+                            obszar.Add(punktyMod[wierzcholek]);
+                        }
 
-                        var tekstura = new List<Point>()
+                        var tekstura = new List<Point>();
+                        foreach (var wierzcholek in sciana.VertexTexture)
                         {
-                            punktyTekstura[sciana.VertexTexture[0]],
-                            punktyTekstura[sciana.VertexTexture[1]],
-                            punktyTekstura[sciana.VertexTexture[2]]
-                        };
+                            tekstura.Add(punktyTekstura[wierzcholek]);
+                        }
 
                         teksturowanie.Teksturuj(obszar, tekstura);
                     }
                 }
-
+                
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
+
+                stopWatch.Stop();
+                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
             }
         }
         
