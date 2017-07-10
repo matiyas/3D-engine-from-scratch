@@ -79,9 +79,10 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in sciany)
                     {
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[1]]);
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[1]], punktyMod[sciana.Vertex[2]]);
-                        rysownik.RysujLinie(punktyMod[sciana.Vertex[0]], punktyMod[sciana.Vertex[2]]);
+                        for (int i = 0; i < sciana.Vertex.Count; ++i)
+                        {
+                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                        }
                     }
                 }
 
