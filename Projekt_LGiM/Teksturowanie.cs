@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Windows;
 using Drawing = System.Drawing;
+using System.Linq;
 
 namespace Projekt_LGiM
 {
@@ -27,65 +26,70 @@ namespace Projekt_LGiM
             {
                 tekstura[j, 0] *= rozmiarTekstury.Width;
                 tekstura[j, 1] *= rozmiarTekstury.Height;
-                //tekstura[j] = new Point(tekstura[j, 0] * rozmiarTekstury.Width, tekstura[j].Y * rozmiarTekstury.Height);
             }
 
             int startY = (int)Math.Min(Math.Min(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
-            int endY = (int)Math.Max(Math.Max(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
+            int endY =   (int)Math.Max(Math.Max(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
 
-            var punktyWypelnienie = new List<int>();
+            int[] punktyWypelnienie;
 
             // Przechodź po obszarze figury od góry
             for (int y = startY; y < endY; ++y)
             {
-                punktyWypelnienie.Clear();
+                punktyWypelnienie = new int[6];
 
                 // Przechodź po krawędziach figury
                 for (int j = 0; j < obszar.GetLength(0); ++j)
                 {
                     int k = (j + 1) % obszar.GetLength(0);
-                    int maxX = (int)Math.Max(obszar[j, 0], obszar[k, 0]);
-                    int minX = (int)Math.Min(obszar[j, 0], obszar[k, 0]);
-                    int maxY = (int)Math.Max(obszar[j, 1], obszar[k, 1]);
-                    int minY = (int)Math.Min(obszar[j, 1], obszar[k, 1]);
+                    var maxX = Math.Max(obszar[j, 0], obszar[k, 0]);
+                    var minX = Math.Min(obszar[j, 0], obszar[k, 0]);
+                    var maxY = Math.Max(obszar[j, 1], obszar[k, 1]);
+                    var minY = Math.Min(obszar[j, 1], obszar[k, 1]);
 
+                    double mianownik = (obszar[j, 1] - obszar[k, 1]);
+                    double licznik = (y - obszar[j, 1]);
                     int x = 0;
-                    if((obszar[j, 1] - obszar[k, 1]) * (y - obszar[j, 1]) != 0)
-                        x = (int)((obszar[j, 0] - obszar[k, 0]) / (obszar[j, 1] - obszar[k, 1]) * (y - obszar[j, 1]) + obszar[j, 0]);
+
+                    if(licznik * mianownik != 0)
+                    {
+                        x = (int)((obszar[j, 0] - obszar[k, 0]) / mianownik * licznik + obszar[j, 0]);
+                    }
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        punktyWypelnienie.Add(x);
+                        punktyWypelnienie[j] = x;
                     }
                 }
 
                 // Posortuj punkty w poziomie
-                punktyWypelnienie.Sort();
+                Array.Sort(punktyWypelnienie);
 
                 // Usuń powtarzające się punkty
-                for (int j = 0; j < punktyWypelnienie.Count - 1; ++j)
+                for (int j = 0; j < punktyWypelnienie.Length - 1; ++j)
                 {
                     if (punktyWypelnienie[j] == punktyWypelnienie[j + 1])
                     {
-                        punktyWypelnienie.RemoveAt(j);
+                        punktyWypelnienie = punktyWypelnienie.Where(e => e != punktyWypelnienie[j]).ToArray();
                     }
                 }
 
                 // Dla obliczonych par punktów przechodź w poziomie
-                if (punktyWypelnienie.Count > 1)
+                if (punktyWypelnienie.Length > 1)
                 {
                     for (int x = punktyWypelnienie[0]; x <= punktyWypelnienie[1]; ++x)
                     {
-                        double mianownik = (obszar[1, 0] - obszar[0, 0]) * (obszar[2, 1] - obszar[0, 1])
-                                            - ((obszar[1, 1] - obszar[0, 1]) * (obszar[2, 0] - obszar[0, 0]));
+                        double d10x = obszar[1, 0] - obszar[0, 0];
+                        double d20y = obszar[2, 1] - obszar[0, 1];
+                        double d10y = obszar[1, 1] - obszar[0, 1];
+                        double d20x = obszar[2, 0] - obszar[0, 0];
+                        double d0x = x - obszar[0, 0];
+                        double d0y = y - obszar[0, 1];
 
-                        double v = ((x - obszar[0, 0]) * (obszar[2, 1] - obszar[0, 1])
-                                    - ((y - obszar[0, 1]) * (obszar[2, 0] - obszar[0, 0]))) / mianownik;
-
-                        double w = ((obszar[1, 0] - obszar[0, 0]) * (y - obszar[0, 1])
-                                    - ((obszar[1, 1] - obszar[0, 1]) * (x - obszar[0, 0]))) / mianownik;
-
+                        double mianownik = d10x * d20y - (d10y * d20x);
+                        double v = (d0x * d20y - d0y * d20x) / mianownik;
+                        double w = (d10x * d0y - d10y * d0x) / mianownik;
                         double u = 1 - v - w;
 
                         // Jeśli punkt znajduje się w trójkącie to oblicz współrzędne trójkąta z tekstury

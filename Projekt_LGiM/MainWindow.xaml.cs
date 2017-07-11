@@ -77,18 +77,6 @@ namespace Projekt_LGiM
             
             if (sciany != null)
             {
-                // Rysowanie siatki na ekranie
-                if (CheckSiatka.IsChecked == true)
-                {
-                    foreach (var sciana in sciany)
-                    {
-                        for (int i = 0; i < sciana.Vertex.Count; ++i)
-                        {
-                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
-                        }
-                    }
-                }
-
                 if (CheckTeksturuj.IsChecked == true)
                 {
                     // Sortuj sciany względem współczynnika Z
@@ -115,6 +103,18 @@ namespace Projekt_LGiM
                                 { punktyTekstura[sciana.VertexTexture[1]].X, punktyTekstura[sciana.VertexTexture[1]].Y},
                                 { punktyTekstura[sciana.VertexTexture[2]].X, punktyTekstura[sciana.VertexTexture[2]].Y}
                             });
+                    }
+                }
+
+                // Rysowanie siatki na ekranie
+                if (CheckSiatka.IsChecked == true)
+                {
+                    foreach (var sciana in sciany)
+                    {
+                        for (int i = 0; i < sciana.Vertex.Count; ++i)
+                        {
+                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                        }
                     }
                 }
 
