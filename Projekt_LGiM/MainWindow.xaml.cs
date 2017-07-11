@@ -19,7 +19,7 @@ namespace Projekt_LGiM
         private Size rozmiarPlotna;
         private List<DenseVector> bryla, brylaMod;
         private Point srodek;
-        private List<WaveformObj.Sciana> sciany;
+        private List<WaveformObj.Sciana> sciany, scianyTrojkatne;
         private List<Point> punktyTekstura;
         private Point lpm0, ppm0;
         private Teksturowanie teksturowanie;
@@ -56,7 +56,8 @@ namespace Projekt_LGiM
 
                 // Wczytanie modelu
                 var obj = new WaveformObj(@"modele\cube.obj");
-                sciany = obj.PowierzchnieTrojkaty();
+                scianyTrojkatne = obj.PowierzchnieTrojkaty();
+                sciany = obj.Powierzchnie();
                 bryla = obj.Vertex();
                 punktyTekstura = obj.VertexTexture();
 
@@ -91,14 +92,14 @@ namespace Projekt_LGiM
                 if (CheckTeksturuj.IsChecked == true)
                 {
                     // Sortuj sciany względem współczynnika Z
-                    sciany.Sort((sciana1, sciana2) =>
+                    scianyTrojkatne.Sort((sciana1, sciana2) =>
                     {
                         return sciana2.Vertex.Max(wierzcholek => bryla[wierzcholek][2]).CompareTo
                               (sciana1.Vertex.Max(wierzcholek => bryla[wierzcholek][2]));
                     });
-                    
+
                     // Rysowanie tekstury na ekranie
-                    foreach (var sciana in sciany)
+                    foreach (var sciana in scianyTrojkatne)
                     {
                         teksturowanie.Teksturuj(
                             new List<Point>()

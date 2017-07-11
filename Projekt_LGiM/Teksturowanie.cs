@@ -25,8 +25,7 @@ namespace Projekt_LGiM
         {
             for (int j = 0; j < tekstura.Count; ++j)
             {
-                tekstura[j] = new Point(tekstura[j].X * rozmiarTekstury.Width, 
-                                                tekstura[j].Y * rozmiarTekstury.Height);
+                tekstura[j] = new Point(tekstura[j].X * rozmiarTekstury.Width, tekstura[j].Y * rozmiarTekstury.Height);
             }
 
             int startY = (int)Math.Min(Math.Min(obszar[0].Y, obszar[1].Y), obszar[2].Y);
@@ -48,9 +47,7 @@ namespace Projekt_LGiM
                     int maxY = (int)Math.Max(obszar[j].Y, obszar[k].Y);
                     int minY = (int)Math.Min(obszar[j].Y, obszar[k].Y);
 
-                    int x = (int)Math.Floor((obszar[j].X - obszar[k].X) 
-                                            / (obszar[j].Y - obszar[k].Y) 
-                                            * (y - obszar[j].Y) + obszar[j].X);
+                    int x = (int)((obszar[j].X - obszar[k].X) / (obszar[j].Y - obszar[k].Y) * (y - obszar[j].Y) + obszar[j].X);
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
