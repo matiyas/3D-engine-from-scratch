@@ -102,18 +102,18 @@ namespace Projekt_LGiM
                     foreach (var sciana in scianyTrojkatne)
                     {
                         teksturowanie.Teksturuj(
-                            new List<Point>()
+                            new double[,]
                             {
-                                punktyMod[sciana.Vertex[0]],
-                                punktyMod[sciana.Vertex[1]],
-                                punktyMod[sciana.Vertex[2]]
+                                { punktyMod[sciana.Vertex[0]].X, punktyMod[sciana.Vertex[0]].Y},
+                                { punktyMod[sciana.Vertex[1]].X, punktyMod[sciana.Vertex[1]].Y},
+                                { punktyMod[sciana.Vertex[2]].X, punktyMod[sciana.Vertex[2]].Y}
                             },
 
-                            new List<Point>()
+                            new double[,]
                             {
-                                punktyTekstura[sciana.VertexTexture[0]],
-                                punktyTekstura[sciana.VertexTexture[1]],
-                                punktyTekstura[sciana.VertexTexture[2]]
+                                { punktyTekstura[sciana.VertexTexture[0]].X, punktyTekstura[sciana.VertexTexture[0]].Y},
+                                { punktyTekstura[sciana.VertexTexture[1]].X, punktyTekstura[sciana.VertexTexture[1]].Y},
+                                { punktyTekstura[sciana.VertexTexture[2]].X, punktyTekstura[sciana.VertexTexture[2]].Y}
                             });
                     }
                 }
@@ -122,7 +122,7 @@ namespace Projekt_LGiM
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
                 stopWatch.Stop();
-                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
+                LabelFps.Content = (stopWatch.ElapsedMilliseconds).ToString() + " ms";
             }
         }
         

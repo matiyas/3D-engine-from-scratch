@@ -21,15 +21,17 @@ namespace Projekt_LGiM
             teksturaPixs = Rysownik.ToByteArray(sciezka);          
         }
 
-        public void Teksturuj(List<Point> obszar, List<Point> tekstura)
+        public void Teksturuj(double[,] obszar, double[,] tekstura)
         {
-            for (int j = 0; j < tekstura.Count; ++j)
+            for (int j = 0; j < tekstura.GetLength(0); ++j)
             {
-                tekstura[j] = new Point(tekstura[j].X * rozmiarTekstury.Width, tekstura[j].Y * rozmiarTekstury.Height);
+                tekstura[j, 0] *= rozmiarTekstury.Width;
+                tekstura[j, 1] *= rozmiarTekstury.Height;
+                //tekstura[j] = new Point(tekstura[j, 0] * rozmiarTekstury.Width, tekstura[j].Y * rozmiarTekstury.Height);
             }
 
-            int startY = (int)Math.Min(Math.Min(obszar[0].Y, obszar[1].Y), obszar[2].Y);
-            int endY = (int)Math.Max(Math.Max(obszar[0].Y, obszar[1].Y), obszar[2].Y);
+            int startY = (int)Math.Min(Math.Min(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
+            int endY = (int)Math.Max(Math.Max(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
 
             var punktyWypelnienie = new List<int>();
 
@@ -39,15 +41,17 @@ namespace Projekt_LGiM
                 punktyWypelnienie.Clear();
 
                 // Przechodź po krawędziach figury
-                for (int j = 0; j < obszar.Count; ++j)
+                for (int j = 0; j < obszar.GetLength(0); ++j)
                 {
-                    int k = (j + 1) % obszar.Count;
-                    int maxX = (int)Math.Max(obszar[j].X, obszar[k].X);
-                    int minX = (int)Math.Min(obszar[j].X, obszar[k].X);
-                    int maxY = (int)Math.Max(obszar[j].Y, obszar[k].Y);
-                    int minY = (int)Math.Min(obszar[j].Y, obszar[k].Y);
+                    int k = (j + 1) % obszar.GetLength(0);
+                    int maxX = (int)Math.Max(obszar[j, 0], obszar[k, 0]);
+                    int minX = (int)Math.Min(obszar[j, 0], obszar[k, 0]);
+                    int maxY = (int)Math.Max(obszar[j, 1], obszar[k, 1]);
+                    int minY = (int)Math.Min(obszar[j, 1], obszar[k, 1]);
 
-                    int x = (int)((obszar[j].X - obszar[k].X) / (obszar[j].Y - obszar[k].Y) * (y - obszar[j].Y) + obszar[j].X);
+                    int x = 0;
+                    if((obszar[j, 1] - obszar[k, 1]) * (y - obszar[j, 1]) != 0)
+                        x = (int)((obszar[j, 0] - obszar[k, 0]) / (obszar[j, 1] - obszar[k, 1]) * (y - obszar[j, 1]) + obszar[j, 0]);
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
@@ -73,14 +77,14 @@ namespace Projekt_LGiM
                 {
                     for (int x = punktyWypelnienie[0]; x <= punktyWypelnienie[1]; ++x)
                     {
-                        double mianownik = (obszar[1].X - obszar[0].X) * (obszar[2].Y - obszar[0].Y)
-                                            - ((obszar[1].Y - obszar[0].Y) * (obszar[2].X - obszar[0].X));
+                        double mianownik = (obszar[1, 0] - obszar[0, 0]) * (obszar[2, 1] - obszar[0, 1])
+                                            - ((obszar[1, 1] - obszar[0, 1]) * (obszar[2, 0] - obszar[0, 0]));
 
-                        double v = ((x - obszar[0].X) * (obszar[2].Y - obszar[0].Y)
-                                    - ((y - obszar[0].Y) * (obszar[2].X - obszar[0].X))) / mianownik;
+                        double v = ((x - obszar[0, 0]) * (obszar[2, 1] - obszar[0, 1])
+                                    - ((y - obszar[0, 1]) * (obszar[2, 0] - obszar[0, 0]))) / mianownik;
 
-                        double w = ((obszar[1].X - obszar[0].X) * (y - obszar[0].Y)
-                                    - ((obszar[1].Y - obszar[0].Y) * (x - obszar[0].X))) / mianownik;
+                        double w = ((obszar[1, 0] - obszar[0, 0]) * (y - obszar[0, 1])
+                                    - ((obszar[1, 1] - obszar[0, 1]) * (x - obszar[0, 0]))) / mianownik;
 
                         double u = 1 - v - w;
 
@@ -88,8 +92,8 @@ namespace Projekt_LGiM
                         if (u >= 0 && u <= 1 && v >= 0 && v <= 1 && w >= 0 && w <= 1)
                         {
                                 
-                            double tx = u * tekstura[0].X + v * tekstura[1].X + w * tekstura[2].X;
-                            double ty = u * tekstura[0].Y + v * tekstura[1].Y + w * tekstura[2].Y;
+                            double tx = u * tekstura[0, 0] + v * tekstura[1, 0] + w * tekstura[2, 0];
+                            double ty = u * tekstura[0, 1] + v * tekstura[1, 1] + w * tekstura[2, 1];
 
                             double a = tx - Math.Floor(tx);
                             double b = ty - Math.Floor(ty);
