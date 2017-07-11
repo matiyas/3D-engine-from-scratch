@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Windows;
 using Drawing = System.Drawing;
+using System.Linq;
 
 namespace Projekt_LGiM
 {
@@ -21,75 +20,84 @@ namespace Projekt_LGiM
             teksturaPixs = Rysownik.ToByteArray(sciezka);          
         }
 
-        public void Teksturuj(List<Point> obszar, List<Point> tekstura)
+        public void Teksturuj(double[,] obszar, double[,] tekstura)
         {
-            for (int j = 0; j < tekstura.Count; ++j)
+            for (int j = 0; j < tekstura.GetLength(0); ++j)
             {
-                tekstura[j] = new Point(tekstura[j].X * rozmiarTekstury.Width, tekstura[j].Y * rozmiarTekstury.Height);
+                tekstura[j, 0] *= rozmiarTekstury.Width;
+                tekstura[j, 1] *= rozmiarTekstury.Height;
             }
 
-            int startY = (int)Math.Min(Math.Min(obszar[0].Y, obszar[1].Y), obszar[2].Y);
-            int endY = (int)Math.Max(Math.Max(obszar[0].Y, obszar[1].Y), obszar[2].Y);
+            int startY = (int)Math.Min(Math.Min(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
+            int endY =   (int)Math.Max(Math.Max(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
 
-            var punktyWypelnienie = new List<int>();
+            int[] punktyWypelnienie;
 
             // Przechodź po obszarze figury od góry
             for (int y = startY; y < endY; ++y)
             {
-                punktyWypelnienie.Clear();
+                punktyWypelnienie = new int[6];
 
                 // Przechodź po krawędziach figury
-                for (int j = 0; j < obszar.Count; ++j)
+                for (int j = 0; j < obszar.GetLength(0); ++j)
                 {
-                    int k = (j + 1) % obszar.Count;
-                    int maxX = (int)Math.Max(obszar[j].X, obszar[k].X);
-                    int minX = (int)Math.Min(obszar[j].X, obszar[k].X);
-                    int maxY = (int)Math.Max(obszar[j].Y, obszar[k].Y);
-                    int minY = (int)Math.Min(obszar[j].Y, obszar[k].Y);
+                    int k = (j + 1) % obszar.GetLength(0);
+                    var maxX = Math.Max(obszar[j, 0], obszar[k, 0]);
+                    var minX = Math.Min(obszar[j, 0], obszar[k, 0]);
+                    var maxY = Math.Max(obszar[j, 1], obszar[k, 1]);
+                    var minY = Math.Min(obszar[j, 1], obszar[k, 1]);
 
-                    int x = (int)((obszar[j].X - obszar[k].X) / (obszar[j].Y - obszar[k].Y) * (y - obszar[j].Y) + obszar[j].X);
+                    double mianownik = (obszar[j, 1] - obszar[k, 1]);
+                    double licznik = (y - obszar[j, 1]);
+                    int x = 0;
+
+                    if(licznik * mianownik != 0)
+                    {
+                        x = (int)((obszar[j, 0] - obszar[k, 0]) / mianownik * licznik + obszar[j, 0]);
+                    }
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        punktyWypelnienie.Add(x);
+                        punktyWypelnienie[j] = x;
                     }
                 }
 
                 // Posortuj punkty w poziomie
-                punktyWypelnienie.Sort();
+                Array.Sort(punktyWypelnienie);
 
                 // Usuń powtarzające się punkty
-                for (int j = 0; j < punktyWypelnienie.Count - 1; ++j)
+                for (int j = 0; j < punktyWypelnienie.Length - 1; ++j)
                 {
                     if (punktyWypelnienie[j] == punktyWypelnienie[j + 1])
                     {
-                        punktyWypelnienie.RemoveAt(j);
+                        punktyWypelnienie = punktyWypelnienie.Where(e => e != punktyWypelnienie[j]).ToArray();
                     }
                 }
 
                 // Dla obliczonych par punktów przechodź w poziomie
-                if (punktyWypelnienie.Count > 1)
+                if (punktyWypelnienie.Length > 1)
                 {
                     for (int x = punktyWypelnienie[0]; x <= punktyWypelnienie[1]; ++x)
                     {
-                        double mianownik = (obszar[1].X - obszar[0].X) * (obszar[2].Y - obszar[0].Y)
-                                            - ((obszar[1].Y - obszar[0].Y) * (obszar[2].X - obszar[0].X));
+                        double d10x = obszar[1, 0] - obszar[0, 0];
+                        double d20y = obszar[2, 1] - obszar[0, 1];
+                        double d10y = obszar[1, 1] - obszar[0, 1];
+                        double d20x = obszar[2, 0] - obszar[0, 0];
+                        double d0x = x - obszar[0, 0];
+                        double d0y = y - obszar[0, 1];
 
-                        double v = ((x - obszar[0].X) * (obszar[2].Y - obszar[0].Y)
-                                    - ((y - obszar[0].Y) * (obszar[2].X - obszar[0].X))) / mianownik;
-
-                        double w = ((obszar[1].X - obszar[0].X) * (y - obszar[0].Y)
-                                    - ((obszar[1].Y - obszar[0].Y) * (x - obszar[0].X))) / mianownik;
-
+                        double mianownik = d10x * d20y - (d10y * d20x);
+                        double v = (d0x * d20y - d0y * d20x) / mianownik;
+                        double w = (d10x * d0y - d10y * d0x) / mianownik;
                         double u = 1 - v - w;
 
                         // Jeśli punkt znajduje się w trójkącie to oblicz współrzędne trójkąta z tekstury
                         if (u >= 0 && u <= 1 && v >= 0 && v <= 1 && w >= 0 && w <= 1)
                         {
                                 
-                            double tx = u * tekstura[0].X + v * tekstura[1].X + w * tekstura[2].X;
-                            double ty = u * tekstura[0].Y + v * tekstura[1].Y + w * tekstura[2].Y;
+                            double tx = u * tekstura[0, 0] + v * tekstura[1, 0] + w * tekstura[2, 0];
+                            double ty = u * tekstura[0, 1] + v * tekstura[1, 1] + w * tekstura[2, 1];
 
                             double a = tx - Math.Floor(tx);
                             double b = ty - Math.Floor(ty);

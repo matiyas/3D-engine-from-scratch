@@ -77,18 +77,6 @@ namespace Projekt_LGiM
             
             if (sciany != null)
             {
-                // Rysowanie siatki na ekranie
-                if (CheckSiatka.IsChecked == true)
-                {
-                    foreach (var sciana in sciany)
-                    {
-                        for (int i = 0; i < sciana.Vertex.Count; ++i)
-                        {
-                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
-                        }
-                    }
-                }
-
                 if (CheckTeksturuj.IsChecked == true)
                 {
                     // Sortuj sciany względem współczynnika Z
@@ -102,19 +90,31 @@ namespace Projekt_LGiM
                     foreach (var sciana in scianyTrojkatne)
                     {
                         teksturowanie.Teksturuj(
-                            new List<Point>()
+                            new double[,]
                             {
-                                punktyMod[sciana.Vertex[0]],
-                                punktyMod[sciana.Vertex[1]],
-                                punktyMod[sciana.Vertex[2]]
+                                { punktyMod[sciana.Vertex[0]].X, punktyMod[sciana.Vertex[0]].Y},
+                                { punktyMod[sciana.Vertex[1]].X, punktyMod[sciana.Vertex[1]].Y},
+                                { punktyMod[sciana.Vertex[2]].X, punktyMod[sciana.Vertex[2]].Y}
                             },
 
-                            new List<Point>()
+                            new double[,]
                             {
-                                punktyTekstura[sciana.VertexTexture[0]],
-                                punktyTekstura[sciana.VertexTexture[1]],
-                                punktyTekstura[sciana.VertexTexture[2]]
+                                { punktyTekstura[sciana.VertexTexture[0]].X, punktyTekstura[sciana.VertexTexture[0]].Y},
+                                { punktyTekstura[sciana.VertexTexture[1]].X, punktyTekstura[sciana.VertexTexture[1]].Y},
+                                { punktyTekstura[sciana.VertexTexture[2]].X, punktyTekstura[sciana.VertexTexture[2]].Y}
                             });
+                    }
+                }
+
+                // Rysowanie siatki na ekranie
+                if (CheckSiatka.IsChecked == true)
+                {
+                    foreach (var sciana in sciany)
+                    {
+                        for (int i = 0; i < sciana.Vertex.Count; ++i)
+                        {
+                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                        }
                     }
                 }
 
