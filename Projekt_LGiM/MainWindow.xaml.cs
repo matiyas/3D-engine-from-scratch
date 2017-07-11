@@ -122,7 +122,7 @@ namespace Projekt_LGiM
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
                 stopWatch.Stop();
-                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
+                LabelFps.Content = (stopWatch.ElapsedMilliseconds).ToString() + " ms";
             }
         }
         
