@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Projekt_LGiM
 {
-    class WaveformObj
+    class WavefrontObj
     {
         public struct Sciana
         {
@@ -18,11 +18,10 @@ namespace Projekt_LGiM
 
         private string sciezka;
 
-        public WaveformObj(string sciezka)
+        public WavefrontObj(string sciezka)
         {
             this.sciezka = sciezka;
         }
-
 
         public List<Sciana> Powierzchnie()
         {

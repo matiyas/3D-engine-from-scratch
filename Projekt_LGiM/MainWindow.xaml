@@ -5,22 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Projekt_LGiM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="626" Width="904">
+        Title="MainWindow" Height="661.703" Width="904"
+        KeyDown="Window_KeyDown">
     <Grid x:Name="GridMain">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="230"/>
         </Grid.ColumnDefinitions>
-        <Border x:Name="RamkaEkran" BorderBrush="#FFA8A8A8" BorderThickness="1" Margin="10,10,0,10">
+        <Border x:Name="RamkaEkran" BorderBrush="#FFA8A8A8" BorderThickness="1" Margin="10,10,0,10" Grid.Row="1">
             <Image x:Name="Ekran" d:IsHidden="True" MouseWheel="Ekran_MouseWheel" MouseDown="Ekran_MouseDown" 
                    MouseMove="Ekran_MouseMove" MouseUp="Ekran_MouseUp"/>
         </Border>
-        <Grid x:Name="GridKonrtolki" Grid.Column="1" Margin="0,10,0,0" Height="576" VerticalAlignment="Top">
+        <Grid x:Name="GridKonrtolki" Grid.Column="1" Margin="0,10,0,0" Height="592" VerticalAlignment="Top" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="2*"/>
-                <RowDefinition/>
+                <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <GroupBox x:Name="GroupBoxTranslacja" Header="Translacja" Margin="10,0,10,10">
                 <Grid x:Name="GridTranslacja" Margin="0,10,0,-2">
@@ -101,13 +106,28 @@
                            VerticalAlignment="Center"/>
                 </Grid>
             </GroupBox>
-            <CheckBox x:Name="CheckTeksturuj" Content="Teksturowanie" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="3" 
-                         VerticalAlignment="Top" Width="210" Click="CheckTeksturuj_Click" IsChecked="True"/>
-            <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,31,0,0" Grid.Row="3" 
-                         VerticalAlignment="Top" Width="210" Click="CheckSiatka_Click" IsChecked="False"/>
-            <Label x:Name="LabelFps" HorizontalAlignment="Left" Margin="10,52,0,0" Grid.Row="3" VerticalAlignment="Top" Width="210" 
+            <CheckBox x:Name="CheckTeksturuj" Content="Teksturowanie" HorizontalAlignment="Left" Margin="10,75,0,0" Grid.Row="3" 
+                         VerticalAlignment="Top" Width="210" Click="CheckTeksturuj_Click" IsChecked="False"/>
+            <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,96,0,0" Grid.Row="3" 
+                         VerticalAlignment="Top" Width="210" Click="CheckSiatka_Click" IsChecked="True"/>
+            <Label x:Name="LabelFps" HorizontalAlignment="Left" Margin="10,112,0,0" Grid.Row="3" VerticalAlignment="Top" Width="210" 
                    Content="0 fps" HorizontalContentAlignment="Right"/>
+            <GroupBox x:Name="GroupBoxOdleglosc" Header="Odległość" HorizontalAlignment="Left" Height="60" Margin="10,10,0,0" 
+                      Grid.Row="3" VerticalAlignment="Top" Width="210">
+                <Grid HorizontalAlignment="Left" Height="50" Margin="0,0,-2,-12" VerticalAlignment="Top" Width="200">
+                    <Slider x:Name="SliderOdleglosc" Margin="10,10,10,0" VerticalAlignment="Center" Minimum="0" Maximum="1000" 
+                            ValueChanged="SliderOdleglosc_ValueChanged"/>
+                </Grid>
+            </GroupBox>
         </Grid>
+        <Menu x:Name="Menu" Grid.ColumnSpan="2">
+            <MenuItem Header="Plik">
+                <MenuItem Header="Otwórz">
+                    <MenuItem x:Name="MenuItemModel"  Header="Model (.obj)" Click="MenuItem_Click"/>
+                    <MenuItem x:Name="MenuItemTekstura" Header="Tekstura" Click="MenuItem_Click"/>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
 
     </Grid>
 </Window>

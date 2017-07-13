@@ -64,6 +64,18 @@ namespace Projekt_LGiM
             }
         }
 
+        public void RysujPiksel(int x, int y, Color c)
+        {
+            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
+            {
+                int pozycja = 4 * (y * szerokosc + x);
+                pixs[pozycja] = c.B;
+                pixs[pozycja + 1] = c.G;
+                pixs[pozycja + 2] = c.R;
+                pixs[pozycja + 3] = c.A;
+            }
+        }
+
         public void CzyscEkran()
         {
             for (int i = 0; i < pixs.Length; i += 4)
@@ -226,7 +238,6 @@ namespace Projekt_LGiM
             else
             {
                 throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
-
             }
         }
 
