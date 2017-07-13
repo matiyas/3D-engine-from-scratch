@@ -3,7 +3,6 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using System.Windows;
-using System;
 
 namespace Projekt_LGiM
 {

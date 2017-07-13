@@ -16,14 +16,49 @@ namespace Projekt_LGiM
             public List<int> VertexNormal { get; set; }
         }
 
+        public DenseVector Pozycja { get; set; }
+        public DenseVector Obrot { get; set; }
+        public DenseVector Skalowanie { get; set; }
+        public List<DenseVector> VertexCoords { get; private set; }
+        public List<DenseVector> VertexTextureCoords { get; }
+        public List<DenseVector> VertexNormalsCoords { get; }
+        public List<Sciana> Sciany { get; }
+        public List<Sciana> ScianyTrojkatne { get; }
+        public Teksturowanie Teksturowanie { get; set; }
+
         private string sciezka;
 
         public WavefrontObj(string sciezka)
         {
             this.sciezka = sciezka;
+
+            Pozycja = new DenseVector(3);
+            Obrot = new DenseVector(3);
+            Skalowanie = new DenseVector(new double[] { 1, 1, 1 });
+
+            VertexCoords = Parsuj("v");
+            VertexTextureCoords = VertexTexture();
+            VertexNormalsCoords = Parsuj("vn");
+            Sciany = Powierzchnie();
+            ScianyTrojkatne = PowierzchnieTrojkaty();
         }
 
-        public List<Sciana> Powierzchnie()
+        public void Przesun(double tx, double ty, double tz)
+        {
+            VertexCoords = Przeksztalcenie3d.Translacja(VertexCoords, tx, ty, tz);
+        }
+
+        public void Obroc(double phiX, double phiY, double phiZ)
+        {
+            VertexCoords = Przeksztalcenie3d.Rotacja(VertexCoords, phiX, phiY, phiZ);
+        }
+
+        public void Skaluj(double sx, double sy, double sz)
+        {
+            VertexCoords = Przeksztalcenie3d.Skalowanie(VertexCoords, sx, sy, sz);
+        }
+
+        private List<Sciana> Powierzchnie()
         {
             string line;
             var indices = new List<Sciana>();
@@ -145,14 +180,10 @@ namespace Projekt_LGiM
             return wierzcholki;
         }
 
-        public List<DenseVector> Vertex() => Parsuj("v");
-
-        public List<DenseVector> VertexNormal() => Parsuj("vn");
-
-        public List<Point> VertexTexture()
+        public List<DenseVector> VertexTexture()
         {
             string linia;
-            var punkty = new List<Point>();
+            var punkty = new List<DenseVector>();
 
             using (var streamReader = new StreamReader(sciezka))
             {
@@ -161,8 +192,8 @@ namespace Projekt_LGiM
                     var wartosci = linia.Split(null);
                     if (wartosci[0] == "vt")
                     {
-                        punkty.Add(new Point(double.Parse(wartosci[1], CultureInfo.InvariantCulture), 
-                            double.Parse(wartosci[2], CultureInfo.InvariantCulture)));
+                        punkty.Add(new DenseVector(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
+                            double.Parse(wartosci[2], CultureInfo.InvariantCulture) }));
                     }
                 }
             }

@@ -9,7 +9,6 @@ using System.Windows.Input;
 using System.Linq;
 using System.Diagnostics;
 using System.Threading;
-using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
 namespace Projekt_LGiM
@@ -20,18 +19,20 @@ namespace Projekt_LGiM
         private Rysownik rysownik;
         private double dpi;
         private Size rozmiarPlotna;
-        private List<DenseVector> bryla, brylaMod;
         private Point srodek;
-        private List<WavefrontObj.Sciana> sciany, scianyTrojkatne;
-        private List<Point> punktyTekstura;
         private Point lpm0, ppm0;
-        private Teksturowanie teksturowanie;
-        private WavefrontObj model;
-        //private Point ekranPos;
+        private List<WavefrontObj> modele;
+        private double lastTransX, lastTransY, lastTransZ;
+        private double lastRotateX, lastRotateY, lastRotateZ;
+        private double lastScaleX, lastScaleY, lastScaleZ;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            lastTransX = lastTransY = lastTransZ = 0;
+            lastRotateX = lastRotateY = lastRotateZ = 0;
+            lastScaleX = lastScaleY = lastScaleZ = 0;
 
             SliderRotacjaX.Minimum = SliderRotacjaY.Minimum = SliderRotacjaZ.Minimum = -200 * Math.PI;
             SliderRotacjaX.Maximum = SliderRotacjaY.Maximum = SliderRotacjaZ.Maximum =  200 * Math.PI;
@@ -42,8 +43,6 @@ namespace Projekt_LGiM
             // jej rozmiaru rozmiaru tablicy przechowującej piksele.
             Loaded += delegate
             {
-                //ekranPos = Ekran.PointToScreen(new Point(0, 0));
-
                 rozmiarPlotna.Width = RamkaEkran.ActualWidth;
                 rozmiarPlotna.Height = RamkaEkran.ActualHeight;
 
@@ -53,8 +52,8 @@ namespace Projekt_LGiM
                 pixs    = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
                 tmpPixs = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
 
+                modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
-                teksturowanie = new Teksturowanie(@"tekstury\world.jpg", rysownik);
 
                 // Przygotowanie ekranu i rysownika
                 rysownik.UstawTlo(0, 0, 0, 255);
@@ -64,114 +63,128 @@ namespace Projekt_LGiM
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-                //Mouse.OverrideCursor = Cursors.None;
+                //Thread t = new Thread(new ParameterizedThreadStart((e) =>
+                //{
+                //    while (true)
+                //    {
+                //        if (modele != null)
+                //        {
+                //            if(true)
+                //            {
+                //                foreach (var model in modele)
+                //                {
+                //                    model.Obrot += new DenseVector(new double[] { 0, 1, 0 });
+                //                }
+                //            }
+                //            Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
+                //        }
 
-                Thread t = new Thread(new ParameterizedThreadStart((e) =>
-                {
-                    while (true)
-                    {
-                        if(bryla != null)
-                        {
-                            bryla = Przeksztalcenie3d.Rotacja(bryla, 0, 1, 0);
-                            Dispatcher.Invoke(() => RysujNaEkranie(bryla), System.Windows.Threading.DispatcherPriority.Render);
-                        }
+                //        Thread.Sleep(50);
+                //    }
+                //}));
 
-                        //Dispatcher.Invoke(() => SetCursorPos((int)(pos.X /*+ rozmiarPlotna.Width/2*/), 
-                        //  (int)(pos.X /*+ rozmiarPlotna.Height/2*/)));
-                        Thread.Sleep(10);
-                    }
-                }));
-
-                t.IsBackground = true;
-                t.Start();
+                //t.IsBackground = true;
+                //t.Start();
             };
         }
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool SetCursorPos(int x, int y);
-
-        public void RysujNaEkranie(List<DenseVector> bryla)
+        private void RysujNaEkranie(List<WavefrontObj> modele)
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
             rysownik.CzyscEkran();
 
-            var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(bryla, 500, srodek.X, srodek.Y);
-            
-            if (sciany != null && punktyMod != null)
+            foreach(var model in modele)
             {
-                if (CheckTeksturuj.IsChecked == true)
+                var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, 500, srodek.X, srodek.Y);
+
+                if (model.Sciany != null && punktyMod != null)
                 {
-                    // Sortuj sciany względem współczynnika Z
-                    scianyTrojkatne.Sort((sciana1, sciana2) =>
+                    if (CheckTeksturuj.IsChecked == true && model.Teksturowanie != null)
                     {
-                        return (sciana2.Vertex.Max(wierzcholek => bryla[wierzcholek][2])).CompareTo
-                               (sciana1.Vertex.Max(wierzcholek => bryla[wierzcholek][2]));
-                    });
-
-                    // Rysowanie tekstury na ekranie
-                    foreach (var sciana in scianyTrojkatne)
-                    {
-                        //if (bryla[sciana.Vertex[0]][2] > -5 && bryla[sciana.Vertex[1]][2] > -5 && bryla[sciana.Vertex[2]][2] > -5)
+                        // Sortuj sciany względem współczynnika Z
+                        model.ScianyTrojkatne.Sort((sciana1, sciana2) =>
                         {
-                            teksturowanie.Teksturuj(
-                            new double[,]
-                            {
-                                { punktyMod[sciana.Vertex[0]].X, punktyMod[sciana.Vertex[0]].Y },
-                                { punktyMod[sciana.Vertex[1]].X, punktyMod[sciana.Vertex[1]].Y },
-                                { punktyMod[sciana.Vertex[2]].X, punktyMod[sciana.Vertex[2]].Y }
-                            },
+                            return (sciana2.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2])).CompareTo
+                                   (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2]));
+                        });
 
-                            new double[,]
+                        // Rysowanie tekstury na ekranie
+                        foreach (var sciana in model.ScianyTrojkatne)
+                        {
+                            if (model.VertexCoords[sciana.Vertex[0]][2] > -400 && model.VertexCoords[sciana.Vertex[1]][2] > -400
+                                && model.VertexCoords[sciana.Vertex[2]][2] > -400)
                             {
-                                { punktyTekstura[sciana.VertexTexture[0]].X, punktyTekstura[sciana.VertexTexture[0]].Y },
-                                { punktyTekstura[sciana.VertexTexture[1]].X, punktyTekstura[sciana.VertexTexture[1]].Y },
-                                { punktyTekstura[sciana.VertexTexture[2]].X, punktyTekstura[sciana.VertexTexture[2]].Y }
-                            });
+                                model.Teksturowanie.Teksturuj(
+                                new double[,]
+                                {
+                                    { punktyMod[sciana.Vertex[0]].X, punktyMod[sciana.Vertex[0]].Y },
+                                    { punktyMod[sciana.Vertex[1]].X, punktyMod[sciana.Vertex[1]].Y },
+                                    { punktyMod[sciana.Vertex[2]].X, punktyMod[sciana.Vertex[2]].Y }
+                                },
+
+                                new double[,]
+                                {
+                                    {
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]][0],
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]][1]
+                                    },
+
+                                    {
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]][0],
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]][1]
+                                    },
+                                    
+                                    {
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]][0],
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]][1]
+                                    }
+                                });
+                            }
                         }
                     }
-                }
 
-                // Rysowanie siatki na ekranie
-                if (CheckSiatka.IsChecked == true)
-                {
-                    foreach (var sciana in sciany)
+                    // Rysowanie siatki na ekranie
+                    if (CheckSiatka.IsChecked == true)
                     {
-                        //for (int i = 0; i < sciana.Vertex.Count; ++i)
-                        //{
-                        //    rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
-                        //}
-                        for (int i = 0; i < sciana.Vertex.Count; i += 2)
+                        foreach (var sciana in model.Sciany)
                         {
-                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
-                            rysownik.RysujLinie(punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]], punktyMod[sciana.Vertex[(i + 2) % sciana.Vertex.Count]]);
-                            rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 2) % sciana.Vertex.Count]]);
+                            for (int i = 0; i < sciana.Vertex.Count; ++i)
+                            {
+                                rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                            }
                         }
                     }
-                }
 
-                Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
-                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
+                    Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
+                    PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
+
+                }
 
                 stopWatch.Stop();
-                LabelFps.Content = (stopWatch.ElapsedMilliseconds).ToString() + " ms";
+                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
             }
         }
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if(e.Delta > 0)
+            if (e.Delta > 0)
             {
-                bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -10);
+                foreach (var model in modele)
+                {
+                    model.Przesun(0, 0, -10);
+                }
             }
             else
             {
-                bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 10);
+                foreach (var model in modele)
+                {
+                    model.Przesun(0, 0, 10);
+                }
             }
 
-            RysujNaEkranie(bryla);
+            RysujNaEkranie(modele);
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
@@ -192,118 +205,83 @@ namespace Projekt_LGiM
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    brylaMod = Przeksztalcenie3d.Rotacja(bryla, 0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
+                    foreach(var model in modele)
+                    {
+                        model.Obroc(0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
+                    }
                 }
                 else
                 {
-                    brylaMod = Przeksztalcenie3d.Rotacja(bryla, -(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
+                    foreach(var model in modele)
+                    {
+                        model.Obroc(-(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
+                    }
                 }
-                RysujNaEkranie(brylaMod);
+                RysujNaEkranie(modele);
+                lpm0 = e.GetPosition(Ekran);
             }
-            //bryla = Przeksztalcenie3d.Rotacja(bryla, -(RamkaEkran.ActualHeight / 2 - e.GetPosition(Ekran).Y),
-            //    RamkaEkran.ActualWidth / 2 - e.GetPosition(Ekran).X, 0);
-
-            //LabelFps.Content = RamkaEkran.ActualWidth / 2 - e.GetPosition(Ekran).X;
-
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                brylaMod = Przeksztalcenie3d.Translacja(bryla, -(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
-                RysujNaEkranie(brylaMod);
+                foreach(var model in modele)
+                {
+                    model.Przesun(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
+                }
+                RysujNaEkranie(modele);
+                ppm0 = e.GetPosition(Ekran);
             }
-        }
-
-        private void Ekran_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            bryla = brylaMod;
         }
 
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            brylaMod = Przeksztalcenie3d.Translacja(bryla, SliderTranslacjaX.Value, SliderTranslacjaY.Value, SliderTranslacjaZ.Value);
-            RysujNaEkranie(brylaMod);
-        }
-
-        private void CheckSiatka_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(bryla);
-
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch(e.Key)
+            foreach(var model in modele)
             {
-                case Key.W:
-                    bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, -10);
-                    break;
-                case Key.S:
-                    bryla = Przeksztalcenie3d.Translacja(bryla, 0, 0, 10);
-                    break;
-                case Key.A:
-                    bryla = Przeksztalcenie3d.Translacja(bryla, 10, 0, 0);
-                    break;
-                case Key.D:
-                    bryla = Przeksztalcenie3d.Translacja(bryla, -10, 0, 0);
-                    break;
+                model.Przesun(SliderTranslacjaX.Value - lastTransX, SliderTranslacjaY.Value - lastTransY, 
+                    SliderTranslacjaZ.Value - lastTransZ);
             }
+            RysujNaEkranie(modele);
+
+            lastTransX = SliderTranslacjaX.Value;
+            lastTransY = SliderTranslacjaY.Value;
+            lastTransZ = SliderTranslacjaZ.Value;
         }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new OpenFileDialog();
-
-            switch((sender as MenuItem).Name)
-            {
-                case "MenuItemModel":
-                    fileDialog.Filter = "Waveform (*.obj)|*.obj";
-                    if (fileDialog.ShowDialog() == true)
-                    {
-                        model = new WavefrontObj(fileDialog.FileName);
-                        scianyTrojkatne = model.PowierzchnieTrojkaty();
-                        sciany = model.Powierzchnie();
-                        bryla = model.Vertex();
-                        punktyTekstura = model.VertexTexture();
-                        RysujNaEkranie(bryla);
-                    }
-                    break;
-
-                case "MenuItemTekstura":
-                    fileDialog.Filter = "JPEG (*.jpg;*jpeg;*jpe;*jfif)|*.jpg;*jpeg;*jpe;*jfif";
-                    if (fileDialog.ShowDialog() == true)
-                    {
-                        teksturowanie = new Teksturowanie(fileDialog.FileName, rysownik);
-                        if (CheckTeksturuj.IsChecked == true)
-                        {
-                            RysujNaEkranie(bryla);
-                        }
-                    }
-                    break;
-            }
-            
-        }
-
-        private void SliderOdleglosc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            RysujNaEkranie(bryla);
-        }
-
-        private void CheckTeksturuj_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(bryla);
 
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            brylaMod = Przeksztalcenie3d.Rotacja(bryla, SliderRotacjaX.Value, SliderRotacjaY.Value, SliderRotacjaZ.Value);
-            RysujNaEkranie(brylaMod);
+            foreach (var model in modele)
+            {
+                model.Obroc(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
+                    SliderRotacjaZ.Value - lastRotateZ);
+            }
+            RysujNaEkranie(modele);
+
+            lastRotateX = SliderRotacjaX.Value;
+            lastRotateY = SliderRotacjaY.Value;
+            lastRotateZ = SliderRotacjaZ.Value;
         }
 
         private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            brylaMod = Przeksztalcenie3d.Skalowanie(bryla, SliderSkalowanieX.Value, SliderSkalowanieY.Value, SliderSkalowanieZ.Value);
-            RysujNaEkranie(brylaMod);
+            foreach (var model in modele)
+            {
+                model.Skaluj(SliderSkalowanieX.Value - lastScaleX, SliderSkalowanieY.Value - lastScaleY,
+                    SliderSkalowanieZ.Value - lastScaleZ);
+            }
+            RysujNaEkranie(modele);
+
+            lastScaleX = SliderSkalowanieX.Value;
+            lastScaleY = SliderSkalowanieY.Value;
+            lastScaleZ = SliderSkalowanieZ.Value;
         }
 
         private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
         {
-            bryla = brylaMod;
+            lastTransX = lastTransY = lastTransZ = 0;
+            lastRotateX = lastRotateY = lastRotateZ = 0;
+            lastScaleX = lastScaleY = lastScaleZ = 0;
 
             foreach (object slider in GridTranslacja.Children)
             {
-                if(slider is Slider)
+                if (slider is Slider)
                 {
                     ((Slider)slider).Value = 0;
                 }
@@ -324,7 +302,41 @@ namespace Projekt_LGiM
                     ((Slider)slider).Value = 0;
                 }
             }
-
         }
+
+        private void CheckSiatka_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(modele);
+        
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new OpenFileDialog();
+
+            switch((sender as MenuItem).Name)
+            {
+                case "MenuItemModel":
+                    fileDialog.Filter = "Waveform (*.obj)|*.obj";
+                    if (fileDialog.ShowDialog() == true)
+                    {
+                        modele.Add(new WavefrontObj(fileDialog.FileName));
+                        RysujNaEkranie(modele);
+                    }
+                    break;
+
+                case "MenuItemTekstura":
+                    fileDialog.Filter = "JPEG (*.jpg;*jpeg;*jpe;*jfif)|*.jpg;*jpeg;*jpe;*jfif";
+                    if (fileDialog.ShowDialog() == true)
+                    {
+                        modele[modele.Count - 1].Teksturowanie = new Teksturowanie(fileDialog.FileName, rysownik);
+                        if (CheckTeksturuj.IsChecked == true)
+                        {
+                            RysujNaEkranie(modele);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        private void SliderOdleglosc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => RysujNaEkranie(modele);
+
+        private void CheckTeksturuj_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(modele);
     }
 }
