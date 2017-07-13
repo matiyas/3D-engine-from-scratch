@@ -63,28 +63,25 @@ namespace Projekt_LGiM
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-                //Thread t = new Thread(new ParameterizedThreadStart((e) =>
-                //{
-                //    while (true)
-                //    {
-                //        if (modele != null)
-                //        {
-                //            if(true)
-                //            {
-                //                foreach (var model in modele)
-                //                {
-                //                    model.Obrot += new DenseVector(new double[] { 0, 1, 0 });
-                //                }
-                //            }
-                //            Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
-                //        }
+                Thread t = new Thread(new ParameterizedThreadStart((e) =>
+                {
+                    while (true)
+                    {
+                        if (modele != null)
+                        {
+                            foreach (var model in modele)
+                            {
+                                model.Obrot += new DenseVector(new double[] { 0, 1, 0 });
+                            }
+                            Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
+                        }
 
-                //        Thread.Sleep(50);
-                //    }
-                //}));
+                        Thread.Sleep(50);
+                    }
+                }));
 
-                //t.IsBackground = true;
-                //t.Start();
+                t.IsBackground = true;
+                t.Start();
             };
         }
 
@@ -110,11 +107,14 @@ namespace Projekt_LGiM
                                    (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2]));
                         });
 
+                        int i = 0;
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
                         {
-                            if (model.VertexCoords[sciana.Vertex[0]][2] > -400 && model.VertexCoords[sciana.Vertex[1]][2] > -400
-                                && model.VertexCoords[sciana.Vertex[2]][2] > -400)
+                            Console.WriteLine(++i);
+
+                            if (model.VertexCoords[sciana.Vertex[0]][2] > -450 && model.VertexCoords[sciana.Vertex[1]][2] > -450
+                                && model.VertexCoords[sciana.Vertex[2]][2] > -450)
                             {
                                 model.Teksturowanie.Teksturuj(
                                 new double[,]
@@ -152,6 +152,7 @@ namespace Projekt_LGiM
                         {
                             for (int i = 0; i < sciana.Vertex.Count; ++i)
                             {
+                                if(model.VertexCoords[sciana.Vertex[i]][2] > -450 && model.VertexCoords[sciana.Vertex[i]][2] > -450)
                                 rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
                             }
                         }
@@ -164,6 +165,7 @@ namespace Projekt_LGiM
 
                 stopWatch.Stop();
                 LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
+
             }
         }
         
@@ -317,6 +319,7 @@ namespace Projekt_LGiM
                     if (fileDialog.ShowDialog() == true)
                     {
                         modele.Add(new WavefrontObj(fileDialog.FileName));
+                        Console.WriteLine(modele[0].Nazwa);
                         RysujNaEkranie(modele);
                     }
                     break;

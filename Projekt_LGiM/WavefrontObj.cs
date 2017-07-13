@@ -25,6 +25,7 @@ namespace Projekt_LGiM
         public List<Sciana> Sciany { get; }
         public List<Sciana> ScianyTrojkatne { get; }
         public Teksturowanie Teksturowanie { get; set; }
+        public string Nazwa { get; private set; }
 
         private string sciezka;
 
@@ -36,11 +37,102 @@ namespace Projekt_LGiM
             Obrot = new DenseVector(3);
             Skalowanie = new DenseVector(new double[] { 1, 1, 1 });
 
-            VertexCoords = Parsuj("v");
-            VertexTextureCoords = VertexTexture();
-            VertexNormalsCoords = Parsuj("vn");
-            Sciany = Powierzchnie();
-            ScianyTrojkatne = PowierzchnieTrojkaty();
+            //ScianyTrojkatne = PowierzchnieTrojkaty();
+
+            VertexCoords = new List<DenseVector>();
+            VertexNormalsCoords = new List<DenseVector>();
+            VertexTextureCoords = new List<DenseVector>();
+            Sciany = new List<Sciana>();
+
+            string linia;
+            using (var streamReader = new StreamReader(sciezka))
+            {
+                while ((linia = streamReader.ReadLine()) != null)
+                {
+                    var wartosci = linia.Split(null);
+                    switch (wartosci[0])
+                    {
+                        case "o":
+                            Nazwa = wartosci[1];
+                            break;
+
+                        case "v":
+                            var wierzcholek = new List<double>();
+
+                            foreach (var wartosc in wartosci.Skip(1))
+                            {
+                                wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
+                            }
+                            VertexCoords.Add(wierzcholek.ToArray());
+                            break;
+
+                        case "vn":
+                            var wierzcholekNorm = new List<double>();
+
+                            foreach (var wartosc in wartosci.Skip(1))
+                            {
+                                wierzcholekNorm.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
+                            }
+                            VertexNormalsCoords.Add(wierzcholekNorm.ToArray());
+                            break;
+
+                        case "vt":
+                            VertexTextureCoords.Add(new DenseVector(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
+                                double.Parse(wartosci[2], CultureInfo.InvariantCulture) }));
+                            break;
+
+                        case "f":
+                            wartosci = wartosci.Skip(1).ToArray();
+
+                            var F = new Sciana()
+                            {
+                                Vertex = new List<int>(),
+                                VertexTexture = new List<int>(),
+                                VertexNormal = new List<int>()
+                            };
+
+                            foreach (var wartosc in wartosci)
+                            {
+                                F.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
+
+                                if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)
+                                {
+                                    F.VertexTexture.Add(-1);
+                                }
+                                else
+                                {
+                                    F.VertexTexture.Add(vt - 1);
+                                }
+
+                                if (wartosc.Split('/').ToArray().Length == 3)
+                                {
+                                    F.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
+                                }
+                                Sciany.Add(F);
+                            }
+                            break;
+                    }
+                }
+            }
+
+            //ScianyTrojkatne = new List<Sciana>();
+            //foreach (var sciana in Sciany)
+            //{
+            //    for (int i = 0; i < sciana.Vertex.Count - 2; i += 2)
+            //    {
+            //        ScianyTrojkatne.Add(new Sciana()
+            //        {
+            //            Vertex = new List<int>(new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Count],
+            //                sciana.Vertex[(i + 2) % sciana.Vertex.Count] }),
+
+            //            VertexTexture = new List<int>(new int[] { sciana.VertexTexture[i],
+            //                sciana.VertexTexture[(i + 1) % sciana.Vertex.Count], sciana.VertexTexture[(i + 2) % sciana.Vertex.Count] }),
+
+            //            VertexNormal = new List<int>(new int[] { sciana.VertexNormal[i],
+            //                sciana.VertexNormal[(i + 1) % sciana.Vertex.Count], sciana.VertexNormal[(i + 2) % sciana.Vertex.Count] })
+            //        });
+            //    }
+            //}
         }
 
         public void Przesun(double tx, double ty, double tz)
@@ -56,53 +148,6 @@ namespace Projekt_LGiM
         public void Skaluj(double sx, double sy, double sz)
         {
             VertexCoords = Przeksztalcenie3d.Skalowanie(VertexCoords, sx, sy, sz);
-        }
-
-        private List<Sciana> Powierzchnie()
-        {
-            string line;
-            var indices = new List<Sciana>();
-
-            using (var streamReader = new StreamReader(sciezka, true))
-            {
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var splittedLine = line.Split(null);
-
-                    if (splittedLine[0] == "f")
-                    {
-                        splittedLine = splittedLine.Skip(1).ToArray();
-
-                        var F = new Sciana()
-                        {
-                            Vertex = new List<int>(),
-                            VertexTexture = new List<int>(),
-                            VertexNormal = new List<int>()
-                        };
-
-                        foreach (var wartosc in splittedLine)
-                        {
-                            F.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
-
-                            if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)
-                            {
-                                F.VertexTexture.Add(-1);
-                            }
-                            else
-                            {
-                                F.VertexTexture.Add(vt - 1);
-                            }
-
-                            if (wartosc.Split('/').ToArray().Length == 3)
-                            {
-                                F.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
-                            }
-                            indices.Add(F);
-                        }
-                    }
-                }
-            }
-            return indices;
         }
 
         public List<Sciana> PowierzchnieTrojkaty()
@@ -153,51 +198,6 @@ namespace Projekt_LGiM
                 }
             }
             return indices;
-        }
-
-        private List<DenseVector> Parsuj(string typ)
-        {
-            string linia;
-            var wierzcholki = new List<DenseVector>();
-
-            using (var streamReader = new StreamReader(sciezka))
-            {
-                while ((linia = streamReader.ReadLine()) != null)
-                {
-                    var wartosci = linia.Split(null);
-                    if (wartosci[0] == typ)
-                    {
-                        var wierzcholek = new List<double>();
-
-                        foreach (var wartosc in wartosci.Skip(1))
-                        {
-                            wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
-                        }
-                        wierzcholki.Add(wierzcholek.ToArray());
-                    }
-                }
-            }
-            return wierzcholki;
-        }
-
-        public List<DenseVector> VertexTexture()
-        {
-            string linia;
-            var punkty = new List<DenseVector>();
-
-            using (var streamReader = new StreamReader(sciezka))
-            {
-                while ((linia = streamReader.ReadLine()) != null)
-                {
-                    var wartosci = linia.Split(null);
-                    if (wartosci[0] == "vt")
-                    {
-                        punkty.Add(new DenseVector(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
-                            double.Parse(wartosci[2], CultureInfo.InvariantCulture) }));
-                    }
-                }
-            }
-            return punkty;
         }
     }
 }
