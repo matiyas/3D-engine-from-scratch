@@ -63,7 +63,7 @@ namespace Projekt_LGiM
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-                Thread t = new Thread(new ParameterizedThreadStart((e) =>
+                var t = new Thread(new ParameterizedThreadStart((e) =>
                 {
                     while (true)
                     {
@@ -170,17 +170,11 @@ namespace Projekt_LGiM
         {
             if (e.Delta > 0)
             {
-                foreach (var model in modele)
-                {
-                    model.Przesun(0, 0, -10);
-                }
+                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, -10);
             }
             else
             {
-                foreach (var model in modele)
-                {
-                    model.Przesun(0, 0, 10);
-                }
+                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, 10);
             }
 
             RysujNaEkranie(modele);
@@ -204,27 +198,18 @@ namespace Projekt_LGiM
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    foreach(var model in modele)
-                    {
-                        model.Obroc(0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
-                    }
+                    modele[ComboBoxModele.SelectedIndex].Obroc(0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
                 }
                 else
                 {
-                    foreach(var model in modele)
-                    {
-                        model.Obroc(-(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
-                    }
+                    modele[ComboBoxModele.SelectedIndex].Obroc(-(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
                 }
                 RysujNaEkranie(modele);
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                foreach(var model in modele)
-                {
-                    model.Przesun(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
-                }
+                modele[ComboBoxModele.SelectedIndex].Przesun(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
                 RysujNaEkranie(modele);
                 ppm0 = e.GetPosition(Ekran);
             }
@@ -232,11 +217,8 @@ namespace Projekt_LGiM
 
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            foreach(var model in modele)
-            {
-                model.Przesun(SliderTranslacjaX.Value - lastTransX, SliderTranslacjaY.Value - lastTransY, 
-                    SliderTranslacjaZ.Value - lastTransZ);
-            }
+            modele[ComboBoxModele.SelectedIndex].Przesun(SliderTranslacjaX.Value - lastTransX, SliderTranslacjaY.Value - lastTransY, 
+                SliderTranslacjaZ.Value - lastTransZ);
             RysujNaEkranie(modele);
 
             lastTransX = SliderTranslacjaX.Value;
@@ -246,11 +228,8 @@ namespace Projekt_LGiM
 
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            foreach (var model in modele)
-            {
-                model.Obroc(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
-                    SliderRotacjaZ.Value - lastRotateZ);
-            }
+            modele[ComboBoxModele.SelectedIndex].Obroc(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
+                SliderRotacjaZ.Value - lastRotateZ);
             RysujNaEkranie(modele);
 
             lastRotateX = SliderRotacjaX.Value;
@@ -260,11 +239,8 @@ namespace Projekt_LGiM
 
         private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            foreach (var model in modele)
-            {
-                model.Skaluj(SliderSkalowanieX.Value - lastScaleX, SliderSkalowanieY.Value - lastScaleY,
-                    SliderSkalowanieZ.Value - lastScaleZ);
-            }
+            modele[ComboBoxModele.SelectedIndex].Skaluj(SliderSkalowanieX.Value - lastScaleX, SliderSkalowanieY.Value - lastScaleY,
+                SliderSkalowanieZ.Value - lastScaleZ);
             RysujNaEkranie(modele);
 
             lastScaleX = SliderSkalowanieX.Value;
@@ -316,8 +292,13 @@ namespace Projekt_LGiM
                     if (fileDialog.ShowDialog() == true)
                     {
                         modele.Add(new WavefrontObj(fileDialog.FileName));
-                        Console.WriteLine(modele[0].Nazwa);
                         RysujNaEkranie(modele);
+                        var item = new ComboBoxItem()
+                        {
+                            Content = modele[modele.Count - 1].Nazwa
+                        };
+                        ComboBoxModele.Items.Add(item);
+                        ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
                     }
                     break;
 
@@ -325,7 +306,7 @@ namespace Projekt_LGiM
                     fileDialog.Filter = "JPEG (*.jpg;*jpeg;*jpe;*jfif)|*.jpg;*jpeg;*jpe;*jfif";
                     if (fileDialog.ShowDialog() == true)
                     {
-                        modele[modele.Count - 1].Teksturowanie = new Teksturowanie(fileDialog.FileName, rysownik);
+                        modele[ComboBoxModele.SelectedIndex].Teksturowanie = new Teksturowanie(fileDialog.FileName, rysownik);
                         if (CheckTeksturuj.IsChecked == true)
                         {
                             RysujNaEkranie(modele);

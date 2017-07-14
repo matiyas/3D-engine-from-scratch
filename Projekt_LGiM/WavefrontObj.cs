@@ -79,7 +79,7 @@ namespace Projekt_LGiM
                         case "f":
                             wartosci = wartosci.Skip(1).ToArray();
 
-                            var F = new Sciana()
+                            var sciana = new Sciana()
                             {
                                 Vertex = new List<int>(),
                                 VertexTexture = new List<int>(),
@@ -88,23 +88,23 @@ namespace Projekt_LGiM
 
                             foreach (var wartosc in wartosci)
                             {
-                                F.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
+                                sciana.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
 
                                 if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)
                                 {
-                                    F.VertexTexture.Add(-1);
+                                    sciana.VertexTexture.Add(-1);
                                 }
                                 else
                                 {
-                                    F.VertexTexture.Add(vt - 1);
+                                    sciana.VertexTexture.Add(vt - 1);
                                 }
 
                                 if (wartosc.Split('/').ToArray().Length == 3)
                                 {
-                                    F.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
+                                    sciana.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
                                 }
                             }
-                            Sciany.Add(F);
+                            Sciany.Add(sciana);
                             break;
                     }
                 }
