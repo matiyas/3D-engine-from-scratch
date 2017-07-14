@@ -106,13 +106,10 @@ namespace Projekt_LGiM
                             return (sciana2.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2])).CompareTo
                                    (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2]));
                         });
-
-                        int i = 0;
+                        
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
                         {
-                            Console.WriteLine(++i);
-
                             if (model.VertexCoords[sciana.Vertex[0]][2] > -450 && model.VertexCoords[sciana.Vertex[1]][2] > -450
                                 && model.VertexCoords[sciana.Vertex[2]][2] > -450)
                             {

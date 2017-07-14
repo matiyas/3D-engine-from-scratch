@@ -3,7 +3,6 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.IO;
 using System.Globalization;
-using System.Windows;
 
 namespace Projekt_LGiM
 {
@@ -36,15 +35,13 @@ namespace Projekt_LGiM
             Pozycja = new DenseVector(3);
             Obrot = new DenseVector(3);
             Skalowanie = new DenseVector(new double[] { 1, 1, 1 });
-
-            //ScianyTrojkatne = PowierzchnieTrojkaty();
-
             VertexCoords = new List<DenseVector>();
             VertexNormalsCoords = new List<DenseVector>();
             VertexTextureCoords = new List<DenseVector>();
             Sciany = new List<Sciana>();
 
             string linia;
+            List<double> wierzcholek;
             using (var streamReader = new StreamReader(sciezka))
             {
                 while ((linia = streamReader.ReadLine()) != null)
@@ -57,23 +54,21 @@ namespace Projekt_LGiM
                             break;
 
                         case "v":
-                            var wierzcholek = new List<double>();
+                        case "vn":
+                            wierzcholek = new List<double>();
 
                             foreach (var wartosc in wartosci.Skip(1))
                             {
                                 wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
                             }
-                            VertexCoords.Add(wierzcholek.ToArray());
-                            break;
-
-                        case "vn":
-                            var wierzcholekNorm = new List<double>();
-
-                            foreach (var wartosc in wartosci.Skip(1))
+                            if (wartosci[0] == "v")
                             {
-                                wierzcholekNorm.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
+                                VertexCoords.Add(wierzcholek.ToArray());
                             }
-                            VertexNormalsCoords.Add(wierzcholekNorm.ToArray());
+                            else if(wartosci[0] == "vn")
+                            {
+                                VertexNormalsCoords.Add(wierzcholek.ToArray());
+                            }
                             break;
 
                         case "vt":
@@ -108,31 +103,31 @@ namespace Projekt_LGiM
                                 {
                                     F.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
                                 }
-                                Sciany.Add(F);
                             }
+                            Sciany.Add(F);
                             break;
                     }
                 }
             }
 
-            //ScianyTrojkatne = new List<Sciana>();
-            //foreach (var sciana in Sciany)
-            //{
-            //    for (int i = 0; i < sciana.Vertex.Count - 2; i += 2)
-            //    {
-            //        ScianyTrojkatne.Add(new Sciana()
-            //        {
-            //            Vertex = new List<int>(new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Count],
-            //                sciana.Vertex[(i + 2) % sciana.Vertex.Count] }),
+            ScianyTrojkatne = new List<Sciana>();
+            foreach (var sciana in Sciany)
+            {
+                for (int i = 0; i < sciana.Vertex.Count; i += 2)
+                {
+                    ScianyTrojkatne.Add(new Sciana()
+                    {
+                        Vertex = new List<int>(new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Count],
+                            sciana.Vertex[(i + 2) % sciana.Vertex.Count] }),
 
-            //            VertexTexture = new List<int>(new int[] { sciana.VertexTexture[i],
-            //                sciana.VertexTexture[(i + 1) % sciana.Vertex.Count], sciana.VertexTexture[(i + 2) % sciana.Vertex.Count] }),
+                        VertexTexture = new List<int>(new int[] { sciana.VertexTexture[i],
+                            sciana.VertexTexture[(i + 1) % sciana.Vertex.Count], sciana.VertexTexture[(i + 2) % sciana.Vertex.Count] }),
 
-            //            VertexNormal = new List<int>(new int[] { sciana.VertexNormal[i],
-            //                sciana.VertexNormal[(i + 1) % sciana.Vertex.Count], sciana.VertexNormal[(i + 2) % sciana.Vertex.Count] })
-            //        });
-            //    }
-            //}
+                        VertexNormal = new List<int>(new int[] { sciana.VertexNormal[i],
+                            sciana.VertexNormal[(i + 1) % sciana.Vertex.Count], sciana.VertexNormal[(i + 2) % sciana.Vertex.Count] })
+                    });
+                }
+            }
         }
 
         public void Przesun(double tx, double ty, double tz)
@@ -148,56 +143,6 @@ namespace Projekt_LGiM
         public void Skaluj(double sx, double sy, double sz)
         {
             VertexCoords = Przeksztalcenie3d.Skalowanie(VertexCoords, sx, sy, sz);
-        }
-
-        public List<Sciana> PowierzchnieTrojkaty()
-        {
-            string line;
-            var indices = new List<Sciana>();
-
-            using (var streamReader = new StreamReader(sciezka, true))
-            {
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var splittedLine = line.Split(null);
-
-                    if (splittedLine[0] == "f")
-                    {
-                        splittedLine = splittedLine.Skip(1).ToArray();
-
-                        for (int i = 0; i < splittedLine.Length; i += 2)
-                        {
-                            var F = new Sciana()
-                            {
-                                Vertex = new List<int>(),
-                                VertexTexture = new List<int>(),
-                                VertexNormal = new List<int>()
-                            };
-
-                            for (int j = 0; j < 3; ++j)
-                            {
-                                F.Vertex.Add(int.Parse(splittedLine[(i + j) % splittedLine.Length].Split('/')[0]) - 1);
-
-                                if (int.TryParse(splittedLine[(i + j) % splittedLine.Length].Split('/')[1], out int vt) == false)
-                                {
-                                    F.VertexTexture.Add(-1);
-                                }
-                                else
-                                {
-                                    F.VertexTexture.Add(vt - 1);
-                                }
-
-                                if (splittedLine[(i + j) % splittedLine.Length].Split('/').ToArray().Length == 3)
-                                {
-                                    F.VertexNormal.Add(int.Parse(splittedLine[(i + j) % splittedLine.Length].Split('/')[2]) - 1);
-                                }
-                            }
-                            indices.Add(F);
-                        }
-                    }
-                }
-            }
-            return indices;
         }
     }
 }
