@@ -299,6 +299,7 @@ namespace Projekt_LGiM
                         };
                         ComboBoxModele.Items.Add(item);
                         ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
+                        MenuItemTekstura.IsEnabled = true;
                     }
                     break;
 

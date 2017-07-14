@@ -122,7 +122,7 @@
             <MenuItem Header="Plik">
                 <MenuItem Header="Otwórz">
                     <MenuItem x:Name="MenuItemModel"  Header="Model (.obj)" Click="MenuItem_Click"/>
-                    <MenuItem x:Name="MenuItemTekstura" Header="Tekstura" Click="MenuItem_Click"/>
+                    <MenuItem x:Name="MenuItemTekstura" Header="Tekstura" Click="MenuItem_Click" IsEnabled="False"/>
                 </MenuItem>
             </MenuItem>
         </Menu>

@@ -15,17 +15,6 @@ namespace Projekt_LGiM
             public List<int> VertexNormal { get; set; }
         }
 
-        public DenseVector Pozycja { get; set; }
-        public DenseVector Obrot { get; set; }
-        public DenseVector Skalowanie { get; set; }
-        public List<DenseVector> VertexCoords { get; private set; }
-        public List<DenseVector> VertexTextureCoords { get; }
-        public List<DenseVector> VertexNormalsCoords { get; }
-        public List<Sciana> Sciany { get; }
-        public List<Sciana> ScianyTrojkatne { get; }
-        public Teksturowanie Teksturowanie { get; set; }
-        public string Nazwa { get; private set; }
-
         private string sciezka;
 
         public WavefrontObj(string sciezka)
@@ -129,6 +118,17 @@ namespace Projekt_LGiM
                 }
             }
         }
+
+        public DenseVector Pozycja { get; set; }
+        public DenseVector Obrot { get; set; }
+        public DenseVector Skalowanie { get; set; }
+        public List<DenseVector> VertexCoords { get; private set; }
+        public List<DenseVector> VertexTextureCoords { get; }
+        public List<DenseVector> VertexNormalsCoords { get; }
+        public List<Sciana> Sciany { get; }
+        public List<Sciana> ScianyTrojkatne { get; }
+        public Teksturowanie Teksturowanie { get; set; }
+        public string Nazwa { get; private set; }
 
         public void Przesun(double tx, double ty, double tz)
         {
