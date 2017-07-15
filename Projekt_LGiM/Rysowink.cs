@@ -103,9 +103,13 @@ namespace Projekt_LGiM
                     double y = (dy / (double)dx) * (x - p0.X) + p0.Y;
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
+                    {
                         RysujPiksel(x, (int)Math.Floor(y));
+                    }
                     else
+                    {
                         RysujPiksel(x, (int)(2 * p0.Y - Math.Floor(y)));
+                    }
                 }
             }
             else
@@ -115,9 +119,13 @@ namespace Projekt_LGiM
                     double x = (dx / (double)dy) * (y - p0.Y) + p0.X;
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
+                    {
                         RysujPiksel((int)Math.Floor(x), y);
+                    }
                     else
+                    {
                         RysujPiksel((int)(2 * p0.X - Math.Floor(x)), y);
+                    }
                 }
             }
         }

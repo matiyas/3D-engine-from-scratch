@@ -81,7 +81,7 @@ namespace Projekt_LGiM
                 }));
 
                 t.IsBackground = true;
-                t.Start();
+                //t.Start();
             };
         }
 
