@@ -100,8 +100,8 @@ namespace Projekt_LGiM
                             int txx = (int)tx + 1;
                             int tyy = (int)ty + 1;
 
-                            if (txx == rozmiarTekstury.Width)   { --txx; }
-                            if (tyy == rozmiarTekstury.Height)  { --tyy; }
+                            if (txx == rozmiarTekstury.Width) { --txx; }
+                            if (tyy == rozmiarTekstury.Height) { --tyy; }
 
                             if (tx < rozmiarTekstury.Width && ty < rozmiarTekstury.Height)
                             {
@@ -113,7 +113,7 @@ namespace Projekt_LGiM
 
                                 double db = 1 - b;
                                 double da = 1 - a;
-                                
+
                                 var c = new Color()
                                 {
                                     R = (byte)(db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)),
@@ -122,7 +122,7 @@ namespace Projekt_LGiM
                                     A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                                 };
 
-                                rysownik.RysujPiksel(x, y, c /*new Color() { R=255, G=255, B=255, A=255 }*/);
+                                rysownik.RysujPiksel(x, y, c);
                             }
                         }
                     }

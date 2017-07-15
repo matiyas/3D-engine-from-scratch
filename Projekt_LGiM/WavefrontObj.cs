@@ -124,7 +124,7 @@ namespace Projekt_LGiM
         public Vector3D Skalowanie { get; set; }
         public List<Vector3D> VertexCoords { get; private set; }
         public List<Vector2D> VertexTextureCoords { get; }
-        public List<Vector3D> VertexNormalsCoords { get; }
+        public List<Vector3D> VertexNormalsCoords { get; private set; }
         public List<Sciana> Sciany { get; }
         public List<Sciana> ScianyTrojkatne { get; }
         public Teksturowanie Teksturowanie { get; set; }
@@ -133,16 +133,19 @@ namespace Projekt_LGiM
         public void Przesun(double tx, double ty, double tz)
         {
             VertexCoords = Przeksztalcenie3d.Translacja(VertexCoords, tx, ty, tz);
+            VertexNormalsCoords = Przeksztalcenie3d.Translacja(VertexNormalsCoords, tx, ty, tz);
         }
 
         public void Obroc(double phiX, double phiY, double phiZ)
         {
             VertexCoords = Przeksztalcenie3d.Rotacja(VertexCoords, phiX, phiY, phiZ);
+            VertexNormalsCoords = Przeksztalcenie3d.Rotacja(VertexNormalsCoords, phiX, phiY, phiZ);
         }
 
         public void Skaluj(double sx, double sy, double sz)
         {
             VertexCoords = Przeksztalcenie3d.Skalowanie(VertexCoords, sx, sy, sz);
+            VertexNormalsCoords = Przeksztalcenie3d.Skalowanie(VertexNormalsCoords, sx, sy, sz);
         }
     }
 }

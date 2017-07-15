@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Media;
 using Drawing = System.Drawing;
-using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -87,7 +87,7 @@ namespace Projekt_LGiM
             }
         }
 
-        public void RysujLinie(Vector2D p0, Vector2D p1)
+        public void RysujLinie(Point p0, Point p1)
         {
             int startX = (int)Math.Min(p0.X, p1.X);
             int endX   = (int)Math.Max(p0.X, p1.X);
@@ -132,7 +132,7 @@ namespace Projekt_LGiM
 
         public void RysujLinie(int x0, int y0, int x1, int y1)
         {
-            RysujLinie(new Vector2D(x0, y0), new Vector2D(x1, y1));
+            RysujLinie(new Point(x0, y0), new Point(x1, y1));
         }
 
         public void RysujKolo(int x0, int y0, int x1, int y1)
@@ -195,9 +195,9 @@ namespace Projekt_LGiM
             }
         }
 
-        public void RysujKrzywa(Vector2D p0, Vector2D p1, Vector2D p2, Vector2D p3)
+        public void RysujKrzywa(Point p0, Point p1, Point p2, Point p3)
         {
-            Vector2D tmp = p0;
+            Point tmp = p0;
             double step = 1.0 / 25.0;
             double t = 0;
             for (int i = 0; i <= 25; ++i)
@@ -213,7 +213,7 @@ namespace Projekt_LGiM
                          + Math.Pow(t, 3) / 6 * p3.Y;
 
                 if (i > 0) RysujLinie((int)x, (int)y, (int)tmp.X, (int)tmp.Y);
-                tmp = new Vector2D(x, y);
+                tmp = new Point(x, y);
                 t += step;
             }
         }

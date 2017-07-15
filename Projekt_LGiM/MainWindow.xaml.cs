@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using MathNet.Numerics.LinearAlgebra.Double;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Linq;
@@ -30,7 +29,7 @@ namespace Projekt_LGiM
         public MainWindow()
         {
             InitializeComponent();
-
+            
             lastTransX = lastTransY = lastTransZ = 0;
             lastRotateX = lastRotateY = lastRotateZ = 0;
             lastScaleX = lastScaleY = lastScaleZ = 0;
@@ -91,11 +90,16 @@ namespace Projekt_LGiM
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
+            var swiatlo = new Vector3D(new double[] { 0, -srodek.Y, 0 });
+            var s = Przeksztalcenie3d.RzutPerspektywiczny(new List<Vector3D> { swiatlo }, 500, srodek.X, srodek.Y);
             rysownik.CzyscEkran();
+            rysownik.RysujKolo((int)s[0].X, (int)s[0].Y, (int)s[0].X + 10, (int)s[0].Y + 10);
 
-            foreach(var model in modele)
+
+            foreach (var model in modele)
             {
                 var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, 500, srodek.X, srodek.Y);
+                var norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
 
                 if (model.Sciany != null && punktyMod != null)
                 {
@@ -151,7 +155,11 @@ namespace Projekt_LGiM
                             for (int i = 0; i < sciana.Vertex.Count; ++i)
                             {
                                 if(model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
-                                rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                                {
+                                    rysownik.RysujLinie((int)punktyMod[sciana.Vertex[i]].X, (int)punktyMod[sciana.Vertex[i]].Y,
+                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
+                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
+                                }
                             }
                         }
                     }
