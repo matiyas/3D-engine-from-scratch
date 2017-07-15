@@ -229,12 +229,32 @@ namespace Projekt_LGiM
             }
         }
 
-        public static Color SprawdzKolor(int x, int y, byte[] pixs, int szerokosc, int wysokosc)
+        public static Color SprawdzKolor(int x, int y, byte[] pixsTab, int szerokosc, int wysokosc)
         {
             if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
             {
                 int pozycja = 4 * (y * szerokosc + x);
                 
+                return new Color()
+                {
+                    B = pixsTab[pozycja],
+                    G = pixsTab[pozycja + 1],
+                    R = pixsTab[pozycja + 2],
+                    A = pixsTab[pozycja + 3]
+                };
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
+            }
+        }
+
+        public Color SprawdzKolor(int x, int y)
+        {
+            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
+            {
+                int pozycja = 4 * (y * szerokosc + x);
+
                 return new Color()
                 {
                     B = pixs[pozycja],

@@ -3,6 +3,7 @@ using Drawing = System.Drawing;
 using System.Linq;
 using System.Windows.Media;
 using System.Collections.Generic;
+using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -31,7 +32,7 @@ namespace Projekt_LGiM
             }
         }
 
-        public void Teksturuj(double[,] obszar, double[,] tekstura)
+        public void Teksturuj(List<Vector2D> obszar, double[,] tekstura)
         {
             for (int i = 0; i < tekstura.GetLength(0); ++i)
             {
@@ -39,27 +40,26 @@ namespace Projekt_LGiM
                 tekstura[i, 1] *= rozmiarTekstury.Height;
             }
 
-            int startY = (int)Math.Min(Math.Min(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
-            int endY   = (int)Math.Max(Math.Max(obszar[0, 1], obszar[1, 1]), obszar[2, 1]);
+            int startY = obszar.Min(e => (int)e.Y);
+            int endY = obszar.Max(e => (int)e.Y);
 
-            List<double> punktyWypelnienie;
-
+            List <double> punktyWypelnienie;
+            
             // Przechodź po obszarze figury od góry
             for (int y = startY; y <= endY; ++y)
             {
                 punktyWypelnienie = new List<double>();
-
-                // Przechodź po krawędziach figury
-                for (int i = 0; i < obszar.GetLength(0); ++i)
+                
+                for (int i = 0; i < obszar.Count; ++i)
                 {
-                    int j = (i + 1) % obszar.GetLength(0);
-                    var maxX = Math.Max(obszar[i, 0], obszar[j, 0]);
-                    var minX = Math.Min(obszar[i, 0], obszar[j, 0]);
-                    var maxY = Math.Max(obszar[i, 1], obszar[j, 1]);
-                    var minY = Math.Min(obszar[i, 1], obszar[j, 1]);
-                    
-                    double m = (obszar[i, 0] - obszar[j, 0]) / (obszar[i, 1] - obszar[j, 1]);
-                    double x = m * (y - obszar[i, 1]) + obszar[i, 0];
+                    int j = (i + 1) % obszar.Count;
+                    var maxX = Math.Max(obszar[i].X, obszar[j].X);
+                    var minX = Math.Min(obszar[i].X, obszar[j].X);
+                    var maxY = Math.Max(obszar[i].Y, obszar[j].Y);
+                    var minY = Math.Min(obszar[i].Y, obszar[j].Y);
+
+                    double m = (obszar[i].X - obszar[j].X) / (obszar[i].Y - obszar[j].Y);
+                    double x = m * (y - obszar[i].Y) + obszar[i].X;
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
@@ -74,14 +74,14 @@ namespace Projekt_LGiM
                     int endX   = (int)punktyWypelnienie.Max();
 
                     // Dla obliczonych par punktów przechodź w poziomie
-                    for (int x = startX; x <= endX; ++x)
+                    for (int x = startX + 1; x <= endX; ++x)
                     {
-                        double d10x = obszar[1, 0] - obszar[0, 0];
-                        double d20y = obszar[2, 1] - obszar[0, 1];
-                        double d10y = obszar[1, 1] - obszar[0, 1];
-                        double d20x = obszar[2, 0] - obszar[0, 0];
-                        double d0x = x - obszar[0, 0];
-                        double d0y = y - obszar[0, 1];
+                        double d10x = obszar[1].X - obszar[0].X;
+                        double d20y = obszar[2].Y - obszar[0].Y;
+                        double d10y = obszar[1].Y - obszar[0].Y;
+                        double d20x = obszar[2].X - obszar[0].X;
+                        double d0x = x - obszar[0].X;
+                        double d0y = y - obszar[0].Y;
 
                         double mianownik = d10x * d20y - (d10y * d20x);
                         double v = (d0x * d20y - d0y * d20x) / mianownik;
@@ -105,7 +105,6 @@ namespace Projekt_LGiM
 
                             if (tx < rozmiarTekstury.Width && ty < rozmiarTekstury.Height)
                             {
-                                // ~12ms
                                 var kolorP1 = teksturaKolory[(int)tx, (int)ty];
                                 var kolorP2 = teksturaKolory[(int)tx, tyy];
                                 var kolorP3 = teksturaKolory[txx, (int)ty];
@@ -121,12 +120,62 @@ namespace Projekt_LGiM
                                     B = (byte)(db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)),
                                     A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                                 };
-
+                                
                                 rysownik.RysujPiksel(x, y, c);
                             }
                         }
                     }
-                } 
+                }
+            }
+        }
+
+        public void FlatShading(List<Vector2D> obszar, double cos)
+        {
+            int startY = obszar.Min(e => (int)e.Y);
+            int endY = obszar.Max(e => (int)e.Y);
+
+            List<double> punktyWypelnienie;
+
+            // Przechodź po obszarze figury od góry
+            for (int y = startY; y <= endY; ++y)
+            {
+                punktyWypelnienie = new List<double>();
+
+                for (int i = 0; i < obszar.Count; ++i)
+                {
+                    int j = (i + 1) % obszar.Count;
+                    var maxX = Math.Max(obszar[i].X, obszar[j].X);
+                    var minX = Math.Min(obszar[i].X, obszar[j].X);
+                    var maxY = Math.Max(obszar[i].Y, obszar[j].Y);
+                    var minY = Math.Min(obszar[i].Y, obszar[j].Y);
+
+                    double m = (obszar[i].X - obszar[j].X) / (obszar[i].Y - obszar[j].Y);
+                    double x = m * (y - obszar[i].Y) + obszar[i].X;
+
+                    // Sprawdź, czy punkt znajduje się na linii
+                    if (x >= minX && x <= maxX && y >= minY && y <= maxY)
+                    {
+                        punktyWypelnienie.Add(x);
+                    }
+                }
+
+                if (punktyWypelnienie.Count > 1)
+                {
+                    int startX = (int)punktyWypelnienie.Min();
+                    int endX = (int)punktyWypelnienie.Max();
+
+                    // Dla obliczonych par punktów przechodź w poziomie
+                    for (int x = startX + 1; x <= endX; ++x)
+                    {
+                        var kolor = rysownik.SprawdzKolor(x, y);
+
+                        kolor.R = (byte)(kolor.R * cos);
+                        kolor.G = (byte)(kolor.G * cos);
+                        kolor.B = (byte)(kolor.B * cos);
+
+                        rysownik.RysujPiksel(x, y, kolor);
+                    }
+                }
             }
         }
     }

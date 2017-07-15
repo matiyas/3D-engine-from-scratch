@@ -90,7 +90,7 @@ namespace Projekt_LGiM
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            var swiatlo = new Vector3D(new double[] { 0, -srodek.Y, 0 });
+            var swiatlo = new Vector3D(new double[] { -srodek.X, 0, 0 });
             var s = Przeksztalcenie3d.RzutPerspektywiczny(new List<Vector3D> { swiatlo }, 500, srodek.X, srodek.Y);
             rysownik.CzyscEkran();
             rysownik.RysujKolo((int)s[0].X, (int)s[0].Y, (int)s[0].X + 10, (int)s[0].Y + 10);
@@ -118,31 +118,34 @@ namespace Projekt_LGiM
                             if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
                                 && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
-                                model.Teksturowanie.Teksturuj(
-                                new double[,]
+                                var obszar = new List<Vector2D>()
                                 {
-                                    { punktyMod[sciana.Vertex[0]].X, punktyMod[sciana.Vertex[0]].Y },
-                                    { punktyMod[sciana.Vertex[1]].X, punktyMod[sciana.Vertex[1]].Y },
-                                    { punktyMod[sciana.Vertex[2]].X, punktyMod[sciana.Vertex[2]].Y }
-                                },
+                                    punktyMod[sciana.Vertex[0]],
+                                    punktyMod[sciana.Vertex[1]],
+                                    punktyMod[sciana.Vertex[2]]
+                                };
 
-                                new double[,]
-                                {
+                                model.Teksturowanie.Teksturuj(obszar,
+                                    new double[,]
                                     {
-                                        model.VertexTextureCoords[sciana.VertexTexture[0]].X,
-                                        model.VertexTextureCoords[sciana.VertexTexture[0]].Y
-                                    },
+                                        {
+                                            model.VertexTextureCoords[sciana.VertexTexture[0]].X,
+                                            model.VertexTextureCoords[sciana.VertexTexture[0]].Y
+                                        },
 
-                                    {
-                                        model.VertexTextureCoords[sciana.VertexTexture[1]].X,
-                                        model.VertexTextureCoords[sciana.VertexTexture[1]].Y
-                                    },
+                                        {
+                                            model.VertexTextureCoords[sciana.VertexTexture[1]].X,
+                                            model.VertexTextureCoords[sciana.VertexTexture[1]].Y
+                                        },
                                     
-                                    {
-                                        model.VertexTextureCoords[sciana.VertexTexture[2]].X,
-                                        model.VertexTextureCoords[sciana.VertexTexture[2]].Y
-                                    }
-                                });
+                                        {
+                                            model.VertexTextureCoords[sciana.VertexTexture[2]].X,
+                                            model.VertexTextureCoords[sciana.VertexTexture[2]].Y
+                                        }
+                                    });
+
+                                model.Teksturowanie.FlatShading(obszar, 
+                                    Math.Max(0, Math.Cos(swiatlo.AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)));
                             }
                         }
                     }
