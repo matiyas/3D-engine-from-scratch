@@ -10,6 +10,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Win32;
+using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -71,7 +72,7 @@ namespace Projekt_LGiM
                         {
                             foreach (var model in modele)
                             {
-                                model.Obrot += new DenseVector(new double[] { 0, 1, 0 });
+                                model.Obroc(0, 1, 0);
                             }
                             Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
                         }
@@ -103,15 +104,15 @@ namespace Projekt_LGiM
                         // Sortuj sciany względem współczynnika Z
                         model.ScianyTrojkatne.Sort((sciana1, sciana2) =>
                         {
-                            return (sciana2.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2])).CompareTo
-                                   (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek][2]));
+                            return (sciana2.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek].Z)).CompareTo
+                                   (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek].Z));
                         });
                         
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
                         {
-                            if (model.VertexCoords[sciana.Vertex[0]][2] > -450 && model.VertexCoords[sciana.Vertex[1]][2] > -450
-                                && model.VertexCoords[sciana.Vertex[2]][2] > -450)
+                            if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
+                                && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
                                 model.Teksturowanie.Teksturuj(
                                 new double[,]
@@ -124,18 +125,18 @@ namespace Projekt_LGiM
                                 new double[,]
                                 {
                                     {
-                                        model.VertexTextureCoords[sciana.VertexTexture[0]][0],
-                                        model.VertexTextureCoords[sciana.VertexTexture[0]][1]
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]].X,
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]].Y
                                     },
 
                                     {
-                                        model.VertexTextureCoords[sciana.VertexTexture[1]][0],
-                                        model.VertexTextureCoords[sciana.VertexTexture[1]][1]
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]].X,
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]].Y
                                     },
                                     
                                     {
-                                        model.VertexTextureCoords[sciana.VertexTexture[2]][0],
-                                        model.VertexTextureCoords[sciana.VertexTexture[2]][1]
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]].X,
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]].Y
                                     }
                                 });
                             }
@@ -149,7 +150,7 @@ namespace Projekt_LGiM
                         {
                             for (int i = 0; i < sciana.Vertex.Count; ++i)
                             {
-                                if(model.VertexCoords[sciana.Vertex[i]][2] > -450 && model.VertexCoords[sciana.Vertex[i]][2] > -450)
+                                if(model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
                                 rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
                             }
                         }

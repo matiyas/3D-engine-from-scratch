@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using MathNet.Numerics.LinearAlgebra.Double;
 using System.IO;
 using System.Globalization;
+using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -21,12 +21,12 @@ namespace Projekt_LGiM
         {
             this.sciezka = sciezka;
 
-            Pozycja = new DenseVector(3);
-            Obrot = new DenseVector(3);
-            Skalowanie = new DenseVector(new double[] { 1, 1, 1 });
-            VertexCoords = new List<DenseVector>();
-            VertexNormalsCoords = new List<DenseVector>();
-            VertexTextureCoords = new List<DenseVector>();
+            Pozycja = new Vector3D();
+            Obrot = new Vector3D();
+            Skalowanie = new Vector3D(new double[] { 1, 1, 1 });
+            VertexCoords = new List<Vector3D>();
+            VertexNormalsCoords = new List<Vector3D>();
+            VertexTextureCoords = new List<Vector2D>();
             Sciany = new List<Sciana>();
 
             string linia;
@@ -52,16 +52,16 @@ namespace Projekt_LGiM
                             }
                             if (wartosci[0] == "v")
                             {
-                                VertexCoords.Add(wierzcholek.ToArray());
+                                VertexCoords.Add(new Vector3D(wierzcholek.ToArray()));
                             }
                             else if(wartosci[0] == "vn")
                             {
-                                VertexNormalsCoords.Add(wierzcholek.ToArray());
+                                VertexNormalsCoords.Add(new Vector3D(wierzcholek.ToArray()));
                             }
                             break;
 
                         case "vt":
-                            VertexTextureCoords.Add(new DenseVector(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
+                            VertexTextureCoords.Add(new Vector2D(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
                                 double.Parse(wartosci[2], CultureInfo.InvariantCulture) }));
                             break;
 
@@ -119,12 +119,12 @@ namespace Projekt_LGiM
             }
         }
 
-        public DenseVector Pozycja { get; set; }
-        public DenseVector Obrot { get; set; }
-        public DenseVector Skalowanie { get; set; }
-        public List<DenseVector> VertexCoords { get; private set; }
-        public List<DenseVector> VertexTextureCoords { get; }
-        public List<DenseVector> VertexNormalsCoords { get; }
+        public Vector3D Pozycja { get; set; }
+        public Vector3D Obrot { get; set; }
+        public Vector3D Skalowanie { get; set; }
+        public List<Vector3D> VertexCoords { get; private set; }
+        public List<Vector2D> VertexTextureCoords { get; }
+        public List<Vector3D> VertexNormalsCoords { get; }
         public List<Sciana> Sciany { get; }
         public List<Sciana> ScianyTrojkatne { get; }
         public Teksturowanie Teksturowanie { get; set; }
