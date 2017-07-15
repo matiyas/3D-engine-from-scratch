@@ -10,7 +10,6 @@ using System.Linq;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Win32;
-using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -151,7 +150,11 @@ namespace Projekt_LGiM
                             for (int i = 0; i < sciana.Vertex.Count; ++i)
                             {
                                 if(model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
-                                rysownik.RysujLinie(punktyMod[sciana.Vertex[i]], punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]]);
+                                {
+                                    rysownik.RysujLinie((int)punktyMod[sciana.Vertex[i]].X, (int)punktyMod[sciana.Vertex[i]].Y,
+                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
+                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
+                                }
                             }
                         }
                     }
