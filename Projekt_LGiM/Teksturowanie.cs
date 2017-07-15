@@ -32,7 +32,7 @@ namespace Projekt_LGiM
             }
         }
 
-        public void Teksturuj(List<Vector2D> obszar, double[,] tekstura)
+        public void Teksturuj(List<Vector2D> obszar, double[,] tekstura, double cos=1)
         {
             for (int i = 0; i < tekstura.GetLength(0); ++i)
             {
@@ -115,9 +115,9 @@ namespace Projekt_LGiM
 
                                 var c = new Color()
                                 {
-                                    R = (byte)(db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)),
-                                    G = (byte)(db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)),
-                                    B = (byte)(db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)),
+                                    R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * cos),
+                                    G = (byte)((db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)) * cos),
+                                    B = (byte)((db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)) * cos),
                                     A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                                 };
                                 

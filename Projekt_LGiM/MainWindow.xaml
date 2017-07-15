@@ -111,9 +111,9 @@
             </StackPanel>
         </DockPanel>
         <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,0,0,36" Grid.Row="1" 
-                         VerticalAlignment="Bottom" Width="210" Click="CheckSiatka_Click" IsChecked="True" Height="16" Grid.Column="1"/>
+                         VerticalAlignment="Bottom" Width="210" Click="CheckSiatka_Click" IsChecked="False" Height="16" Grid.Column="1"/>
         <CheckBox x:Name="CheckTeksturuj" Content="Teksturowanie" HorizontalAlignment="Left" Margin="10,0,0,57" Grid.Row="1" 
-                         VerticalAlignment="Bottom" Width="210" Click="CheckTeksturuj_Click" IsChecked="False" Height="16" Grid.Column="1"/>
+                         VerticalAlignment="Bottom" Width="210" Click="CheckTeksturuj_Click" IsChecked="True" Height="16" Grid.Column="1"/>
         <CheckBox x:Name="CheckPrezentacja" Content="Prezentacja" VerticalContentAlignment="Center" VerticalAlignment="Bottom" 
                   Margin="10,0,10,78" Grid.Row="1" Grid.Column="1"/>
         <Label x:Name="LabelFps" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Bottom" Width="210" 

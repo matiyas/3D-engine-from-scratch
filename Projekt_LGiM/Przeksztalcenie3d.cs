@@ -8,14 +8,10 @@ namespace Projekt_LGiM
 {
 	class Przeksztalcenie3d
     {
-		public static List<double> ZnajdzSrodek(List<Vector3D> punkty)
+		public static Vector3D ZnajdzSrodek(List<Vector3D> punkty)
         {
-            return new List<double>(new double[]
-            {
-                (punkty.Max(v => v.X) + punkty.Min(v => v.X)) / 2,
-                (punkty.Max(v => v.Y) + punkty.Min(v => v.Y)) / 2,
-                (punkty.Max(v => v.Z) + punkty.Min(v => v.Z)) / 2
-            });
+            return new Vector3D((punkty.Max(v => v.X) + punkty.Min(v => v.X)) / 2, (punkty.Max(v => v.Y) + punkty.Min(v => v.Y)) / 2,
+                (punkty.Max(v => v.Z) + punkty.Min(v => v.Z)) / 2);
         }
 
         public static List<Vector3D> Translacja(List<Vector3D> punkty, double tx, double ty, double tz)
@@ -43,14 +39,14 @@ namespace Projekt_LGiM
 			var punktyMod = new List<Vector3D>();
             var srodek = ZnajdzSrodek(punkty);
 
-            var T0 = new DenseMatrix(4, 4, new double[]{		1,			0,			0, -srodek[0],
-																0,			1,			0, -srodek[1],
-																0,			0,			1, -srodek[2],
+            var T0 = new DenseMatrix(4, 4, new double[]{		1,			0,			0, -srodek.X,
+																0,			1,			0, -srodek.Y,
+																0,			0,			1, -srodek.Z,
 																0,			0,			0,			1 });
 
-            var T1 = new DenseMatrix(4, 4, new double[]{		1,			0,			0,	srodek[0],
-																0,			1,			0,	srodek[1],
-																0,			0,			1,	srodek[2],
+            var T1 = new DenseMatrix(4, 4, new double[]{		1,			0,			0,	srodek.X,
+																0,			1,			0,	srodek.Y,
+																0,			0,			1,	srodek.Z,
 																0,			0,			0,			1 });
 
             var Rx = new DenseMatrix(4, 4, new double[]{		1,			0,			0,			0, 
@@ -102,14 +98,14 @@ namespace Projekt_LGiM
 			
 			var srodek = ZnajdzSrodek(punkty);
 			
-			var T0 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, -srodek[0],
-														 0,	1, 0, -srodek[1],
-														 0,	0, 1, -srodek[2],
+			var T0 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, -srodek.X,
+														 0,	1, 0, -srodek.Y,
+														 0,	0, 1, -srodek.Z,
 														 0,	0, 0,	  1 	});
 
-            var T1 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, srodek[0],
-														 0,	1, 0, srodek[1],
-														 0,	0, 1, srodek[2],
+            var T1 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, srodek.X,
+														 0,	1, 0, srodek.Y,
+														 0,	0, 1, srodek.Z,
 														 0,	0, 0,	 1 		});
 
 			var S = new DenseMatrix(4, 4, new double[]{ sx,  0,  0,  0, 

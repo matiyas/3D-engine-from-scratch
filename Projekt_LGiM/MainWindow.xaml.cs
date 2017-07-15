@@ -29,7 +29,7 @@ namespace Projekt_LGiM
         public MainWindow()
         {
             InitializeComponent();
-            
+
             lastTransX = lastTransY = lastTransZ = 0;
             lastRotateX = lastRotateY = lastRotateZ = 0;
             lastScaleX = lastScaleY = lastScaleZ = 0;
@@ -54,6 +54,17 @@ namespace Projekt_LGiM
 
                 modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
+
+                modele.Add(new WavefrontObj(@"modele\swiatlo.obj"));
+                modele[0].Teksturowanie = new Teksturowanie(@"tekstury\sun.jpg", rysownik);
+                RysujNaEkranie(modele);
+                var item = new ComboBoxItem()
+                {
+                    Content = modele[modele.Count - 1].Nazwa
+                };
+                ComboBoxModele.Items.Add(item);
+                ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
+
 
                 // Przygotowanie ekranu i rysownika
                 rysownik.UstawTlo(0, 0, 0, 255);
@@ -82,6 +93,8 @@ namespace Projekt_LGiM
 
                 t.IsBackground = true;
                 //t.Start();
+
+                RysujNaEkranie(modele);
             };
         }
 
@@ -90,11 +103,7 @@ namespace Projekt_LGiM
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            var swiatlo = new Vector3D(new double[] { -srodek.X, 0, 0 });
-            var s = Przeksztalcenie3d.RzutPerspektywiczny(new List<Vector3D> { swiatlo }, 500, srodek.X, srodek.Y);
             rysownik.CzyscEkran();
-            rysownik.RysujKolo((int)s[0].X, (int)s[0].Y, (int)s[0].X + 10, (int)s[0].Y + 10);
-
 
             foreach (var model in modele)
             {
@@ -142,10 +151,14 @@ namespace Projekt_LGiM
                                             model.VertexTextureCoords[sciana.VertexTexture[2]].X,
                                             model.VertexTextureCoords[sciana.VertexTexture[2]].Y
                                         }
-                                    });
+                                    }, model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(
+                                        modele[0].VertexCoords).AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1);
 
-                                model.Teksturowanie.FlatShading(obszar, 
-                                    Math.Max(0, Math.Cos(swiatlo.AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)));
+                                //if(model != modele[0])
+                                //{
+                                //    model.Teksturowanie.FlatShading(obszar, Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(
+                                //       modele[0].VertexCoords).AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)));
+                                //}
                             }
                         }
                     }
