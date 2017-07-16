@@ -35,7 +35,7 @@ namespace Projekt_LGiM
             {
                 while ((linia = streamReader.ReadLine()) != null)
                 {
-                    var wartosci = linia.Split(null);
+                    string[] wartosci = linia.Split(null);
                     switch (wartosci[0])
                     {
                         case "o":
@@ -46,7 +46,7 @@ namespace Projekt_LGiM
                         case "vn":
                             wierzcholek = new List<double>();
 
-                            foreach (var wartosc in wartosci.Skip(1))
+                            foreach (string wartosc in wartosci.Skip(1))
                             {
                                 wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
                             }
@@ -75,7 +75,7 @@ namespace Projekt_LGiM
                                 VertexNormal = new List<int>()
                             };
 
-                            foreach (var wartosc in wartosci)
+                            foreach (string wartosc in wartosci)
                             {
                                 sciana.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
 
@@ -100,7 +100,7 @@ namespace Projekt_LGiM
             }
 
             ScianyTrojkatne = new List<Sciana>();
-            foreach (var sciana in Sciany)
+            foreach (Sciana sciana in Sciany)
             {
                 for (int i = 0; i < sciana.Vertex.Count; i += 2)
                 {

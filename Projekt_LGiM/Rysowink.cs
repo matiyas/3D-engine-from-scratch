@@ -191,7 +191,9 @@ namespace Projekt_LGiM
                 y = tmp * Math.Sin(beta) + y * Math.Cos(beta);
 
                 if (i > 0)
+                {
                     RysujLinie((int)oldX + x0, (int)oldY + y0, (int)x + x0, (int)y + y0);
+                }
             }
         }
 
@@ -200,6 +202,7 @@ namespace Projekt_LGiM
             Point tmp = p0;
             double step = 1.0 / 25.0;
             double t = 0;
+
             for (int i = 0; i <= 25; ++i)
             {
                 double x = (-Math.Pow(t, 3) + 3 * Math.Pow(t, 2) - 3 * t + 1) / 6 * p0.X 
@@ -292,4 +295,3 @@ namespace Projekt_LGiM
         }
     }
 }
-

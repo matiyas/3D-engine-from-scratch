@@ -37,7 +37,7 @@ namespace Projekt_LGiM
 			phiZ /= 100.0;
 
 			var punktyMod = new List<Vector3D>();
-            var srodek = ZnajdzSrodek(punkty);
+            Vector3D srodek = ZnajdzSrodek(punkty);
 
             var T0 = new DenseMatrix(4, 4, new double[]{		1,			0,			0, -srodek.X,
 																0,			1,			0, -srodek.Y,
@@ -96,7 +96,7 @@ namespace Projekt_LGiM
             if(tmpZ >= 0 || sz < 1.0)   sz++;
             else                        sz = 1.0 / sz;
 			
-			var srodek = ZnajdzSrodek(punkty);
+			Vector3D srodek = ZnajdzSrodek(punkty);
 			
 			var T0 = new DenseMatrix(4, 4, new double[]{ 1,	0, 0, -srodek.X,
 														 0,	1, 0, -srodek.Y,
@@ -113,7 +113,7 @@ namespace Projekt_LGiM
 														 0,  0, sz,  0, 
 														 0,  0,  0,  1});
 
-			foreach(var punkt in punkty)
+			foreach(Vector3D punkt in punkty)
             {
 				var p = new DenseVector(new double[]{ punkt.X, punkt.Y, punkt.Z, 1 }) * T0 * S * T1;
                 punktyMod.Add(new Vector3D(p.Take(3).ToArray()));
@@ -130,7 +130,7 @@ namespace Projekt_LGiM
                                                            0,  0,  0,  0,
                                                            0,  0, 1/d, 1 });
 
-            foreach (var punkt in punkty)
+            foreach (Vector3D punkt in punkty)
             {
                 var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * Proj;
                 punktyMod.Add(new Vector2D(p[0] / p[3] + srodekX, p[1] / p[3] + srodekY));
@@ -147,7 +147,7 @@ namespace Projekt_LGiM
                                                            0,  0,  0,  0,
                                                            0,  0, 1/d, 1 });
 
-            foreach (var punkt in punkty)
+            foreach (Vector3D punkt in punkty)
             {
                 var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * Proj;
                 punktyMod.Add(new Vector3D(p[0] / p[3] + srodekX, p[1] / p[3] + srodekY, punkt.Z));

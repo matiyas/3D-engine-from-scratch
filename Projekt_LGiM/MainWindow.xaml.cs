@@ -117,8 +117,8 @@ namespace Projekt_LGiM
 
             foreach (var model in modele)
             {
-                var punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
-                var norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
+                List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
+                List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
 
                 if (model.Sciany != null && punktyMod != null)
                 {
@@ -144,11 +144,9 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 };
 
-                                var cos = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
+                                double cos = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
                                     AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1;
-
-                                //var cos = 1;
-
+                                
                                 model.Teksturowanie.Teksturuj(obszar, tekstura, buforZ, cos);
                             }
                         }
@@ -157,7 +155,7 @@ namespace Projekt_LGiM
                     // Rysowanie siatki na ekranie
                     if (CheckSiatka.IsChecked == true)
                     {
-                        foreach (var sciana in model.Sciany)
+                        foreach (WavefrontObj.Sciana sciana in model.Sciany)
                         {
                             for (int i = 0; i < sciana.Vertex.Count; ++i)
                             {
@@ -178,7 +176,6 @@ namespace Projekt_LGiM
 
                 stopWatch.Stop();
                 LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
-
             }
         }
         
