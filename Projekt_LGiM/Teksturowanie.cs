@@ -12,7 +12,7 @@ namespace Projekt_LGiM
         private string sciezka;
         private Rysownik rysownik;
         private Drawing.Size rozmiarTekstury;
-        private Drawing.Color[,] teksturaKolory;
+        private Color[,] teksturaKolory;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
@@ -21,13 +21,19 @@ namespace Projekt_LGiM
 
             var bmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
             rozmiarTekstury = bmp.Size;
-            teksturaKolory = new Drawing.Color[rozmiarTekstury.Width, rozmiarTekstury.Height];
+            teksturaKolory = new Color[rozmiarTekstury.Width, rozmiarTekstury.Height];
 
             for(int y = 0; y < rozmiarTekstury.Height; ++y)
             {
-                for(int x = 0; x < rozmiarTekstury.Width; ++x)
+                for (int x = 0; x < rozmiarTekstury.Width; ++x)
                 {
-                    teksturaKolory[x, y] = bmp.GetPixel(x, y);
+                    teksturaKolory[x, y] = new Color()
+                    {
+                        R = bmp.GetPixel(x, y).R,
+                        G = bmp.GetPixel(x, y).G,
+                        B = bmp.GetPixel(x, y).B,
+                        A = bmp.GetPixel(x, y).A,
+                    };
                 }
             }
         }
@@ -39,28 +45,25 @@ namespace Projekt_LGiM
                 tekstura[i] = new Vector2D(tekstura[i].X * rozmiarTekstury.Width, tekstura[i].Y * rozmiarTekstury.Height);
             }
 
-            Vector3D startY = obszar[0].Y < obszar[1].Y ? obszar[0] : obszar[1];
-            startY = startY.Y < obszar[2].Y ? startY : obszar[2];
-
-            Vector3D endY = obszar[0].Y > obszar[1].Y ? obszar[0] : obszar[1];
-            endY = endY.Y > obszar[2].Y ? endY : obszar[2];
+            IOrderedEnumerable<Vector3D> tmp = obszar.OrderBy(e => e.Y);
+            Vector3D startY = tmp.First();
+            Vector3D endY = tmp.Last();
 
             List<Vector3D> punktyWypelnienie;
 
             // Przechodź po obszarze figury od góry
             for (int y = (int)startY.Y; y <= endY.Y; ++y)
             {
-                //var z = startY.Z + (y - startY.Y) * dzdy;
                 punktyWypelnienie = new List<Vector3D>();
 
                 // Przechodź po wszystkich krawędziach trójkąta
                 for (int i = 0; i < obszar.Count; ++i)
                 {
                     int j = (i + 1) % obszar.Count;
-                    var maxX = Math.Max(obszar[i].X, obszar[j].X);
-                    var minX = Math.Min(obszar[i].X, obszar[j].X);
-                    var maxY = Math.Max(obszar[i].Y, obszar[j].Y);
-                    var minY = Math.Min(obszar[i].Y, obszar[j].Y);
+                    double maxX = Math.Max(obszar[i].X, obszar[j].X);
+                    double minX = Math.Min(obszar[i].X, obszar[j].X);
+                    double maxY = Math.Max(obszar[i].Y, obszar[j].Y);
+                    double minY = Math.Min(obszar[i].Y, obszar[j].Y);
 
                     double dxdy = (obszar[i].X - obszar[j].X) / (obszar[i].Y - obszar[j].Y);
                     double x = dxdy * (y - obszar[i].Y) + obszar[i].X;
@@ -75,21 +78,9 @@ namespace Projekt_LGiM
 
                 if (punktyWypelnienie.Count > 1)
                 {
-                    Vector3D startX = punktyWypelnienie[0];
-                    Vector3D endX   = punktyWypelnienie[0];
-
-                    for(int i = 0; i < punktyWypelnienie.Count; ++i)
-                    {
-                        if(startX.X > punktyWypelnienie[i].X)
-                        {
-                            startX = punktyWypelnienie[i];
-                        }
-
-                        if(endX.X < punktyWypelnienie[i].X)
-                        {
-                            endX = punktyWypelnienie[i];
-                        }
-                    }
+                    tmp = punktyWypelnienie.OrderBy(e => e.X);
+                    Vector3D startX = tmp.First();
+                    Vector3D endX = tmp.Last();
 
                     // Dla obliczonych par punktów przechodź w poziomie
                     for (int x = (int)startX.X + 1; x <= endX.X; ++x)
@@ -108,7 +99,7 @@ namespace Projekt_LGiM
                             double mianownik = d10x * d20y - (d10y * d20x);
                             double v = (d0x * d20y - d0y * d20x) / mianownik;
                             double w = (d10x * d0y - d10y * d0x) / mianownik;
-                            double u = 1.0 - v - w;
+                            double u = 1 - v - w;
 
                             // Jeśli punkt znajduje się w trójkącie to oblicz współrzędne trójkąta z tekstury
                             if (u >= 0 && u <= 1 && v >= 0 && v <= 1 && w >= 0 && w <= 1)
@@ -118,19 +109,16 @@ namespace Projekt_LGiM
 
                                 double a = tx - Math.Floor(tx);
                                 double b = ty - Math.Floor(ty);
-
-                                int txx = (int)tx + 1;
-                                int tyy = (int)ty + 1;
-
-                                if (txx == rozmiarTekstury.Width) { --txx; }
-                                if (tyy == rozmiarTekstury.Height) { --tyy; }
+                                
+                                int txx = (int)(tx + 1 < rozmiarTekstury.Width  ? tx + 1 : tx);
+                                int tyy = (int)(ty + 1 < rozmiarTekstury.Height ? ty + 1 : ty);
 
                                 if (tx < rozmiarTekstury.Width && ty < rozmiarTekstury.Height)
                                 {
-                                    var kolorP1 = teksturaKolory[(int)tx, (int)ty];
-                                    var kolorP2 = teksturaKolory[(int)tx, tyy];
-                                    var kolorP3 = teksturaKolory[txx, (int)ty];
-                                    var kolorP4 = teksturaKolory[txx, tyy];
+                                    Color kolorP1 = teksturaKolory[(int)tx, (int)ty];
+                                    Color kolorP2 = teksturaKolory[(int)tx, tyy];
+                                    Color kolorP3 = teksturaKolory[txx, (int)ty];
+                                    Color kolorP4 = teksturaKolory[txx, tyy];
 
                                     double db = 1 - b;
                                     double da = 1 - a;
@@ -148,56 +136,6 @@ namespace Projekt_LGiM
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        public void FlatShading(List<Vector3D> obszar, double cos)
-        {
-            int startY = obszar.Min(e => (int)e.Y);
-            int endY = obszar.Max(e => (int)e.Y);
-
-            List<double> punktyWypelnienie;
-
-            // Przechodź po obszarze figury od góry
-            for (int y = startY; y <= endY; ++y)
-            {
-                punktyWypelnienie = new List<double>();
-
-                for (int i = 0; i < obszar.Count; ++i)
-                {
-                    int j = (i + 1) % obszar.Count;
-                    var maxX = Math.Max(obszar[i].X, obszar[j].X);
-                    var minX = Math.Min(obszar[i].X, obszar[j].X);
-                    var maxY = Math.Max(obszar[i].Y, obszar[j].Y);
-                    var minY = Math.Min(obszar[i].Y, obszar[j].Y);
-
-                    double m = (obszar[i].X - obszar[j].X) / (obszar[i].Y - obszar[j].Y);
-                    double x = m * (y - obszar[i].Y) + obszar[i].X;
-
-                    // Sprawdź, czy punkt znajduje się na linii
-                    if (x >= minX && x <= maxX && y >= minY && y <= maxY)
-                    {
-                        punktyWypelnienie.Add(x);
-                    }
-                }
-
-                if (punktyWypelnienie.Count > 1)
-                {
-                    int startX = (int)punktyWypelnienie.Min();
-                    int endX = (int)punktyWypelnienie.Max();
-
-                    // Dla obliczonych par punktów przechodź w poziomie
-                    for (int x = startX + 1; x <= endX; ++x)
-                    {
-                        var kolor = rysownik.SprawdzKolor(x, y);
-
-                        kolor.R = (byte)(kolor.R * cos);
-                        kolor.G = (byte)(kolor.G * cos);
-                        kolor.B = (byte)(kolor.B * cos);
-
-                        rysownik.RysujPiksel(x, y, kolor);
                     }
                 }
             }
