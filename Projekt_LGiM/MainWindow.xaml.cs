@@ -57,6 +57,7 @@ namespace Projekt_LGiM
 
                 modele.Add(new WavefrontObj(@"modele\swiatlo.obj"));
                 modele[0].Teksturowanie = new Teksturowanie(@"tekstury\sun.jpg", rysownik);
+                modele[0].Przesun(-srodek.X, -srodek.Y, 0);
                 RysujNaEkranie(modele);
                 var item = new ComboBoxItem()
                 {
@@ -105,60 +106,51 @@ namespace Projekt_LGiM
 
             rysownik.CzyscEkran();
 
+            var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
+
+            for (int i = 0; i < buforZ.GetLength(0); ++i)
+            {
+                for (int j = 0; j < buforZ.GetLength(1); ++j)
+                {
+                    buforZ[i, j] = double.PositiveInfinity;
+                }
+            }
+
             foreach (var model in modele)
             {
-                var punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, 500, srodek.X, srodek.Y);
+                var punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
                 var norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
 
                 if (model.Sciany != null && punktyMod != null)
                 {
                     if (CheckTeksturuj.IsChecked == true && model.Teksturowanie != null)
                     {
-                        // Sortuj sciany względem współczynnika Z
-                        model.ScianyTrojkatne.Sort((sciana1, sciana2) =>
-                        {
-                            return (sciana2.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek].Z)).CompareTo
-                                   (sciana1.Vertex.Max(wierzcholek => model.VertexCoords[wierzcholek].Z));
-                        });
-                        
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
                         {
                             if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
                                 && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
-                                var obszar = new List<Vector2D>()
+                                var obszar = new List<Vector3D>()
                                 {
                                     punktyMod[sciana.Vertex[0]],
                                     punktyMod[sciana.Vertex[1]],
                                     punktyMod[sciana.Vertex[2]]
                                 };
 
-                                model.Teksturowanie.Teksturuj(obszar,
-                                    new double[,]
-                                    {
-                                        {
-                                            model.VertexTextureCoords[sciana.VertexTexture[0]].X,
-                                            model.VertexTextureCoords[sciana.VertexTexture[0]].Y
-                                        },
+                                var tekstura = new List<Vector2D>
+                                {
+                                    model.VertexTextureCoords[sciana.VertexTexture[0]],
+                                    model.VertexTextureCoords[sciana.VertexTexture[1]],
+                                    model.VertexTextureCoords[sciana.VertexTexture[2]],
+                                };
 
-                                        {
-                                            model.VertexTextureCoords[sciana.VertexTexture[1]].X,
-                                            model.VertexTextureCoords[sciana.VertexTexture[1]].Y
-                                        },
-                                    
-                                        {
-                                            model.VertexTextureCoords[sciana.VertexTexture[2]].X,
-                                            model.VertexTextureCoords[sciana.VertexTexture[2]].Y
-                                        }
-                                    }, model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(
-                                        modele[0].VertexCoords).AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1);
+                                var cos = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
+                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1;
 
-                                //if(model != modele[0])
-                                //{
-                                //    model.Teksturowanie.FlatShading(obszar, Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(
-                                //       modele[0].VertexCoords).AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)));
-                                //}
+                                //var cos = 1;
+
+                                model.Teksturowanie.Teksturuj(obszar, tekstura, buforZ, cos);
                             }
                         }
                     }

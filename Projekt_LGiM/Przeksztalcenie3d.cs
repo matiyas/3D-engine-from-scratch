@@ -138,5 +138,22 @@ namespace Projekt_LGiM
 
             return punktyMod;
         }
+
+        public static List<Vector3D> RzutPerspektywicznyZ(List<Vector3D> punkty, double d, double srodekX, double srodekY)
+        {
+            var punktyMod = new List<Vector3D>();
+            var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
+                                                           0,  1,  0,  0,
+                                                           0,  0,  0,  0,
+                                                           0,  0, 1/d, 1 });
+
+            foreach (var punkt in punkty)
+            {
+                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * Proj;
+                punktyMod.Add(new Vector3D(p[0] / p[3] + srodekX, p[1] / p[3] + srodekY, punkt.Z));
+            }
+
+            return punktyMod;
+        }
     }
 }
