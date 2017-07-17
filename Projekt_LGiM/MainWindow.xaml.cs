@@ -130,11 +130,34 @@ namespace Projekt_LGiM
                             if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
                                 && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
-                                var obszar = new List<Vector3D>()
+                                double cos0 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
+                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1;
+
+                                double cos1 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
+                                                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[1]]).Radians)) : 1;
+
+                                double cos2 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
+                                                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[2]]).Radians)) : 1;
+
+                                var obszar = new List<Teksturowanie.Foo>()
                                 {
-                                    punktyMod[sciana.Vertex[0]],
-                                    punktyMod[sciana.Vertex[1]],
-                                    punktyMod[sciana.Vertex[2]]
+                                    new Teksturowanie.Foo()
+                                    {
+                                        V = punktyMod[sciana.Vertex[0]],
+                                        Cos = cos0
+                                    },
+
+                                    new Teksturowanie.Foo()
+                                    {
+                                        V = punktyMod[sciana.Vertex[1]],
+                                        Cos = cos1
+                                    },
+
+                                    new Teksturowanie.Foo()
+                                    {
+                                        V = punktyMod[sciana.Vertex[2]],
+                                        Cos = cos2
+                                    }
                                 };
 
                                 var tekstura = new List<Vector2D>
@@ -144,10 +167,7 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 };
 
-                                double cos = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
-                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1;
-                                
-                                model.Teksturowanie.Teksturuj(obszar, tekstura, buforZ, cos);
+                                model.Teksturowanie.Teksturuj(obszar, tekstura, buforZ);
                             }
                         }
                     }
