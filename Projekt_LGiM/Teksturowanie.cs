@@ -13,6 +13,11 @@ namespace Projekt_LGiM
         private Rysownik rysownik;
         private Drawing.Size rozmiarTekstury;
         private Color[,] teksturaKolory;
+        public struct Foo
+        {
+            public Vector3D V { get; set; }
+            public double Cos { get; set; }
+        }
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
@@ -46,13 +51,13 @@ namespace Projekt_LGiM
             }
 
             IOrderedEnumerable<Vector3D> tmp = obszar.OrderBy(e => e.Y);
-            Vector3D startY = tmp.First();
-            Vector3D endY = tmp.Last();
+            Vector3D y0 = tmp.First();
+            Vector3D y1 = tmp.Last();
 
             List<Vector3D> punktyWypelnienie;
 
             // Przechodź po obszarze figury od góry
-            for (int y = (int)startY.Y; y <= endY.Y; ++y)
+            for (int y = (int)y0.Y; y <= y1.Y; ++y)
             {
                 punktyWypelnienie = new List<Vector3D>();
 
@@ -67,11 +72,11 @@ namespace Projekt_LGiM
 
                     double dxdy = (obszar[i].X - obszar[j].X) / (obszar[i].Y - obszar[j].Y);
                     double x = dxdy * (y - obszar[i].Y) + obszar[i].X;
-                    double z = obszar[i].Z + (obszar[j].Z - obszar[i].Z) * (obszar[i].Y - y) / (obszar[i].Y - obszar[j].Y);
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
+                        double z = obszar[i].Z + (obszar[j].Z - obszar[i].Z) * (obszar[i].Y - y) / (obszar[i].Y - obszar[j].Y);
                         punktyWypelnienie.Add(new Vector3D(x, y, z));
                     }
                 }
@@ -79,13 +84,13 @@ namespace Projekt_LGiM
                 if (punktyWypelnienie.Count > 1)
                 {
                     tmp = punktyWypelnienie.OrderBy(e => e.X);
-                    Vector3D startX = tmp.First();
-                    Vector3D endX = tmp.Last();
+                    Vector3D x0 = tmp.First();
+                    Vector3D x1 = tmp.Last();
 
                     // Dla obliczonych par punktów przechodź w poziomie
-                    for (int x = (int)startX.X + 1; x <= endX.X; ++x)
+                    for (int x = (int)x0.X + 1; x <= x1.X; ++x)
                     {
-                        double z = endX.Z + (startX.Z - endX.Z) * (endX.X - x) / (endX.X - startX.X);
+                        double z = x1.Z + (x0.Z - x1.Z) * (x1.X - x) / (x1.X - x0.X);
 
                         if (x >= 0 && x < bufferZ.GetLength(0) && y >=0 && y < bufferZ.GetLength(1) && bufferZ[x, y] > z)
                         {
@@ -122,7 +127,7 @@ namespace Projekt_LGiM
 
                                     double db = 1 - b;
                                     double da = 1 - a;
-
+                                    
                                     var c = new Color()
                                     {
                                         R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * cos),
