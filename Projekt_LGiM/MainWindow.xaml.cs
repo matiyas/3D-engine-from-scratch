@@ -120,6 +120,9 @@ namespace Projekt_LGiM
                 List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
                 List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
 
+                var ss = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
+                var s = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+
                 if (model.Sciany != null && punktyMod != null)
                 {
                     if (CheckTeksturuj.IsChecked == true && model.Teksturowanie != null)
@@ -130,34 +133,20 @@ namespace Projekt_LGiM
                             if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
                                 && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
-                                double cos0 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
-                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[0]]).Radians)) : 1;
+                                List<double> lvn = new List<double>(3);
 
-                                double cos1 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
-                                                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[1]]).Radians)) : 1;
-
-                                double cos2 = model != modele[0] ? Math.Max(0, Math.Cos(Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords).
-                                                                    AngleTo(model.VertexNormalsCoords[sciana.VertexNormal[2]]).Radians)) : 1;
-
-                                var obszar = new List<Teksturowanie.Foo>()
+                                lvn = model != modele[0] ? new List<double>()
                                 {
-                                    new Teksturowanie.Foo()
-                                    {
-                                        V = punktyMod[sciana.Vertex[0]],
-                                        Cos = cos0
-                                    },
+                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[0]], ss),
+                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[1]], ss),
+                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[2]], ss)
+                                } : new List<double>() { 1, 1, 1 };
 
-                                    new Teksturowanie.Foo()
-                                    {
-                                        V = punktyMod[sciana.Vertex[1]],
-                                        Cos = cos1
-                                    },
-
-                                    new Teksturowanie.Foo()
-                                    {
-                                        V = punktyMod[sciana.Vertex[2]],
-                                        Cos = cos2
-                                    }
+                                var obszar = new List<Vector3D>()
+                                {
+                                    punktyMod[sciana.Vertex[0]],
+                                    punktyMod[sciana.Vertex[1]],
+                                    punktyMod[sciana.Vertex[2]],
                                 };
 
                                 var tekstura = new List<Vector2D>
@@ -167,7 +156,7 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 };
 
-                                model.Teksturowanie.Teksturuj(obszar, tekstura, buforZ);
+                                model.Teksturowanie.Teksturuj(obszar, lvn, tekstura, buforZ);
                             }
                         }
                     }
@@ -191,7 +180,6 @@ namespace Projekt_LGiM
 
                     Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                     PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
-
                 }
 
                 stopWatch.Stop();

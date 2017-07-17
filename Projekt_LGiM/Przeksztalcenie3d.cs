@@ -3,6 +3,7 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using MathNet.Spatial.Euclidean;
+using System;
 
 namespace Projekt_LGiM
 {
@@ -154,6 +155,14 @@ namespace Projekt_LGiM
             }
 
             return punktyMod;
+        }
+
+        public static double CosKat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
+        {
+            zrodlo -= srodek;
+            wierzcholek -= srodek;
+
+            return Math.Max(0, Math.Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
     }
 }
