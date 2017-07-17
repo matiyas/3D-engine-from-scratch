@@ -13,11 +13,6 @@ namespace Projekt_LGiM
         private Rysownik rysownik;
         private Drawing.Size rozmiarTekstury;
         private Color[,] teksturaKolory;
-        public struct Foo
-        {
-            public Vector3D V { get; set; }
-            public double Cos { get; set; }
-        }
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
@@ -43,67 +38,86 @@ namespace Projekt_LGiM
             }
         }
 
-        public void Teksturuj(List<Foo> obszar, List<Vector2D> tekstura, double[,] bufferZ)
+        public void Teksturuj(List<Vector3D> wektor, List<double> wektorNormalny, List<Vector2D> wektorTekstura, double[,] bufferZ)
         {
-            for(int i = 0; i < tekstura.Count; ++i)
+            for(int i = 0; i < wektorTekstura.Count; ++i)
             {
-                tekstura[i] = new Vector2D(tekstura[i].X * rozmiarTekstury.Width, tekstura[i].Y * rozmiarTekstury.Height);
+                wektorTekstura[i] = new Vector2D(wektorTekstura[i].X * rozmiarTekstury.Width, wektorTekstura[i].Y * rozmiarTekstury.Height);
             }
 
-            IOrderedEnumerable<Foo> tmp = obszar.OrderBy(e => e.V.Y);
-            Foo y0 = tmp.First();
-            Foo y1 = tmp.Last();
+            IOrderedEnumerable<Vector3D> tmp = wektor.OrderBy(e => e.Y);
+            Vector3D y0 = tmp.First();
+            Vector3D y1 = tmp.Last();
 
-            List<Foo> punktyWypelnienie;
+            List<Vector3D> punktyWypelnienie;
+            List<double> lvn;
 
             // Przechodź po obszarze figury od góry
-            for (int y = (int)y0.V.Y; y <= y1.V.Y; ++y)
+            for (int y = (int)y0.Y; y <= y1.Y; ++y)
             {
-                punktyWypelnienie = new List<Foo>();
+                punktyWypelnienie = new List<Vector3D>();
+                lvn = new List<double>(); 
 
                 // Przechodź po wszystkich krawędziach trójkąta
-                for (int i = 0; i < obszar.Count; ++i)
+                for (int i = 0; i < wektor.Count; ++i)
                 {
-                    int j = (i + 1) % obszar.Count;
-                    double maxX = Math.Max(obszar[i].V.X, obszar[j].V.X);
-                    double minX = Math.Min(obszar[i].V.X, obszar[j].V.X);
-                    double maxY = Math.Max(obszar[i].V.Y, obszar[j].V.Y);
-                    double minY = Math.Min(obszar[i].V.Y, obszar[j].V.Y);
+                    int j = (i + 1) % wektor.Count;
+                    double maxX = Math.Max(wektor[i].X, wektor[j].X);
+                    double minX = Math.Min(wektor[i].X, wektor[j].X);
+                    double maxY = Math.Max(wektor[i].Y, wektor[j].Y);
+                    double minY = Math.Min(wektor[i].Y, wektor[j].Y);
 
-                    double dxdy = (obszar[i].V.X - obszar[j].V.X) / (obszar[i].V.Y - obszar[j].V.Y);
-                    double x = dxdy * (y - obszar[i].V.Y) + obszar[i].V.X;
+                    double dxdy = (wektor[i].X - wektor[j].X) / (wektor[i].Y - wektor[j].Y);
+                    double x = dxdy * (y - wektor[i].Y) + wektor[i].X;
 
                     // Sprawdź, czy punkt znajduje się na linii
                     if (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        double m = (obszar[i].V.Y - y) / (obszar[i].V.Y - obszar[j].V.Y);
-                        double z = obszar[i].V.Z + (obszar[j].V.Z - obszar[i].V.Z) * m;
-                        //double cos = obszar[i].Cos + (obszar[j].Cos - obszar[i].Cos) * m;
-                        punktyWypelnienie.Add(new Foo() { V = new Vector3D(x, y, z), Cos = 1 /*cos*/ });
+                        double m = (wektor[i].Y - y) / (wektor[i].Y - wektor[j].Y);
+                        double z = wektor[i].Z + (wektor[j].Z - wektor[i].Z) * m;
+                        double cos = wektorNormalny[i] + (wektorNormalny[j] - wektorNormalny[i]) * m;
+                        punktyWypelnienie.Add(new Vector3D(x, y, z));
+                        lvn.Add(cos);
                     }
                 }
 
                 if (punktyWypelnienie.Count > 1)
                 {
-                    tmp = punktyWypelnienie.OrderBy(e => e.V.X);
-                    Foo x0 = tmp.First();
-                    Foo x1 = tmp.Last();
+                    Vector3D x0 = punktyWypelnienie[0];
+                    Vector3D x1 = punktyWypelnienie[0];
+                    double vn0 = lvn[0];
+                    double vn1 = lvn[0];
+                    
+                    for (int i = 1; i < punktyWypelnienie.Count; ++i)
+                    {
+                        if (x0.X > punktyWypelnienie[i].X)
+                        {
+                            x0 = punktyWypelnienie[i];
+                            vn0 = lvn[i];
+                        }
+
+                        if (x1.X < punktyWypelnienie[i].X)
+                        {
+                            x1 = punktyWypelnienie[i];
+                            vn1 = lvn[i];
+                        }
+                    }
 
                     // Dla obliczonych par punktów przechodź w poziomie
-                    for (int x = (int)x0.V.X + 1; x <= x1.V.X; ++x)
+                    for (int x = (int)x0.X + 1; x <= x1.X; ++x)
                     {
-                        double m = (x1.V.X - x) / (x1.V.X - x0.V.X);
-                        double z = x1.V.Z + (x0.V.Z - x1.V.Z) * m;
-                        //double cos = x1.Cos + (x0.Cos - x1.Cos) * m;
+                        double m = (x1.X - x) / (x1.X - x0.X);
+                        double z = x1.Z + (x0.Z - x1.Z) * m;
+                        double cos = vn1 + (vn0 - vn1) * m;
 
                         if (x >= 0 && x < bufferZ.GetLength(0) && y >=0 && y < bufferZ.GetLength(1) && bufferZ[x, y] > z)
                         {
-                            double d10x = obszar[1].V.X - obszar[0].V.X;
-                            double d20y = obszar[2].V.Y - obszar[0].V.Y;
-                            double d10y = obszar[1].V.Y - obszar[0].V.Y;
-                            double d20x = obszar[2].V.X - obszar[0].V.X;
-                            double d0x = x - obszar[0].V.X;
-                            double d0y = y - obszar[0].V.Y;
+                            double d10x = wektor[1].X - wektor[0].X;
+                            double d20y = wektor[2].Y - wektor[0].Y;
+                            double d10y = wektor[1].Y - wektor[0].Y;
+                            double d20x = wektor[2].X - wektor[0].X;
+                            double d0x = x - wektor[0].X;
+                            double d0y = y - wektor[0].Y;
 
                             double mianownik = d10x * d20y - (d10y * d20x);
                             double v = (d0x * d20y - d0y * d20x) / mianownik;
@@ -113,8 +127,8 @@ namespace Projekt_LGiM
                             // Jeśli punkt znajduje się w trójkącie to oblicz współrzędne trójkąta z tekstury
                             if (u >= 0 && u <= 1 && v >= 0 && v <= 1 && w >= 0 && w <= 1)
                             {
-                                double tx = u * tekstura[0].X + v * tekstura[1].X + w * tekstura[2].X;
-                                double ty = u * tekstura[0].Y + v * tekstura[1].Y + w * tekstura[2].Y;
+                                double tx = u * wektorTekstura[0].X + v * wektorTekstura[1].X + w * wektorTekstura[2].X;
+                                double ty = u * wektorTekstura[0].Y + v * wektorTekstura[1].Y + w * wektorTekstura[2].Y;
 
                                 double a = tx - Math.Floor(tx);
                                 double b = ty - Math.Floor(ty);
@@ -134,9 +148,9 @@ namespace Projekt_LGiM
                                     
                                     var c = new Color()
                                     {
-                                        R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * 1 /*cos*/),
-                                        G = (byte)((db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)) * 1 /*cos*/),
-                                        B = (byte)((db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)) * 1 /*cos*/),
+                                        R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * cos),
+                                        G = (byte)((db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)) * cos),
+                                        B = (byte)((db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)) * cos),
                                         A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                                     };
 
