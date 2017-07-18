@@ -24,6 +24,7 @@ namespace Projekt_LGiM
         private double lastTransX, lastTransY, lastTransZ;
         private double lastRotateX, lastRotateY, lastRotateZ;
         private double lastScaleX, lastScaleY, lastScaleZ;
+        Vector3D lightSource;
 
         public MainWindow()
         {
@@ -54,20 +55,43 @@ namespace Projekt_LGiM
                 modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
 
+                double odleglosc = 1500;
+
                 WczytajModel(@"modele\shaded.obj", @"tekstury\sun1.jpg", "Słońce");
-                modele[0].Przesun(new Vector3D(0, 0, 500));
+                modele[0].Przesun(new Vector3D(0, 0, odleglosc));
+                modele[0].Skaluj(new Vector3D(100, 100, 100));
 
                 WczytajModel(@"modele\shaded.obj", @"tekstury\mercury.jpg", "Merkury");
-                modele[1].Przesun(new Vector3D(300, 0, 500));
-                modele[1].Skaluj(new Vector3D(-75, -75, -75));
+                modele[1].Przesun(new Vector3D(300, 0, odleglosc));
+                modele[1].Skaluj(new Vector3D(-95, -95, -95));
 
                 WczytajModel(@"modele\shaded.obj", @"tekstury\venus.jpg", "Wenus");
-                modele[2].Przesun(new Vector3D(500, 0, 500));
-                modele[2].Skaluj(new Vector3D(-75, -75, -75));
+                modele[2].Przesun(new Vector3D(400, 0, odleglosc));
+                modele[2].Skaluj(new Vector3D(-88, -88, -88));
 
                 WczytajModel(@"modele\shaded.obj", @"tekstury\earth.jpg", "Ziemia");
-                modele[3].Przesun(new Vector3D(700, 0, 500));
-                modele[3].Skaluj(new Vector3D(-70, -70, -70));
+                modele[3].Przesun(new Vector3D(600, 0, odleglosc));
+                modele[3].Skaluj(new Vector3D(-87, -87, -87));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\mars.jpg", "Mars");
+                modele[4].Przesun(new Vector3D(900, 0, odleglosc));
+                modele[4].Skaluj(new Vector3D(-93, -93, -93));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\jupiter.jpg", "Jowisz");
+                modele[5].Przesun(new Vector3D(1300, 0, odleglosc));
+                modele[5].Skaluj(new Vector3D(42, 42, 42));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\saturn.jpg", "Saturn");
+                modele[6].Przesun(new Vector3D(1800, 0, odleglosc));
+                modele[6].Skaluj(new Vector3D(20, 20, 20));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\uran.jpg", "Uran");
+                modele[7].Przesun(new Vector3D(2400, 0, odleglosc));
+                modele[7].Skaluj(new Vector3D(-49, -49, -49));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\neptun.jpg", "Neptun");
+                modele[8].Przesun(new Vector3D(3100, 0, odleglosc));
+                modele[8].Skaluj(new Vector3D(-51, -51, -51));
 
 
                 // Przygotowanie ekranu i rysownika
@@ -76,30 +100,50 @@ namespace Projekt_LGiM
 
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
-                
+
+                lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+
                 var t = new Thread(new ParameterizedThreadStart((e) =>
                 {
                     while (true)
                     {
                         if (modele != null)
                         {
-                            Vector3D lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+                            Dispatcher.Invoke(() =>
+                            {
+                                modele[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
 
-                            modele[0].Obroc(new Vector3D(0, -2, 0));
+                                modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
+                                modele[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), lightSource);
 
-                            modele[1].Obroc(new Vector3D(0, -4, 0));
-                            modele[1].Obroc(new Vector3D(0, -6, 0), lightSource);
+                                modele[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
+                                modele[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), lightSource);
 
-                            modele[2].Obroc(new Vector3D(0, -4, 0));
-                            modele[2].Obroc(new Vector3D(0, -4, 0), lightSource);
+                                modele[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
+                                modele[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), lightSource);
 
-                            modele[3].Obroc(new Vector3D(0, -4, 0));
-                            modele[3].Obroc(new Vector3D(0, -2, 0), lightSource);
+                                modele[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
+                                modele[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), lightSource);
 
-                           Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
+                                modele[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                modele[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), lightSource);
+
+                                modele[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
+                                modele[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), lightSource);
+
+                                modele[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
+                                modele[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), lightSource);
+
+                                modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), lightSource);
+
+                                RysujNaEkranie(modele);
+                            }, System.Windows.Threading.DispatcherPriority.Render);
+                            
+                            //Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
                         }
 
-                        Thread.Sleep(30);
+                        Thread.Sleep(20);
                     }
                 }));
 
@@ -120,9 +164,6 @@ namespace Projekt_LGiM
 
         private void RysujNaEkranie(List<WavefrontObj> modele)
         {
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            
             rysownik.Reset();
 
             var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
@@ -204,9 +245,6 @@ namespace Projekt_LGiM
                     Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                     PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
                 }
-
-                stopWatch.Stop();
-                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
             }
         }
         
@@ -216,16 +254,18 @@ namespace Projekt_LGiM
             {
                 foreach(WavefrontObj model in modele)
                 {
-                    model.Przesun(new Vector3D(0, 0, -10));
+                    model.Przesun(new Vector3D(0, 0, -50));
                 }
             }
             else
             {
                 foreach (WavefrontObj model in modele)
                 {
-                    model.Przesun(new Vector3D(0, 0, 10));
+                    model.Przesun(new Vector3D(0, 0, 50));
                 }
             }
+
+            lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
