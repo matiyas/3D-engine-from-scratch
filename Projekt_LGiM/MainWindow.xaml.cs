@@ -29,9 +29,9 @@ namespace Projekt_LGiM
         {
             InitializeComponent();
 
-            lastTransX = lastTransY = lastTransZ = 0;
+            lastTransX  = lastTransY  = lastTransZ  = 0;
             lastRotateX = lastRotateY = lastRotateZ = 0;
-            lastScaleX = lastScaleY = lastScaleZ = 0;
+            lastScaleX  = lastScaleY  = lastScaleZ  = 0;
 
             SliderRotacjaX.Minimum = SliderRotacjaY.Minimum = SliderRotacjaZ.Minimum = -200 * Math.PI;
             SliderRotacjaX.Maximum = SliderRotacjaY.Maximum = SliderRotacjaZ.Maximum =  200 * Math.PI;
@@ -54,16 +54,20 @@ namespace Projekt_LGiM
                 modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
 
-                modele.Add(new WavefrontObj(@"modele\swiatlo.obj"));
-                modele[0].Teksturowanie = new Teksturowanie(@"tekstury\sun.jpg", rysownik);
-                modele[0].Przesun(-srodek.X, -srodek.Y, 0);
-                RysujNaEkranie(modele);
-                var item = new ComboBoxItem()
-                {
-                    Content = modele[modele.Count - 1].Nazwa
-                };
-                ComboBoxModele.Items.Add(item);
-                ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
+                WczytajModel(@"modele\shaded.obj", @"tekstury\sun1.jpg", "Słońce");
+                modele[0].Przesun(new Vector3D(0, 0, 500));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\mercury.jpg", "Merkury");
+                modele[1].Przesun(new Vector3D(300, 0, 500));
+                modele[1].Skaluj(new Vector3D(-75, -75, -75));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\venus.jpg", "Wenus");
+                modele[2].Przesun(new Vector3D(500, 0, 500));
+                modele[2].Skaluj(new Vector3D(-75, -75, -75));
+
+                WczytajModel(@"modele\shaded.obj", @"tekstury\world.jpg", "Ziemia");
+                modele[3].Przesun(new Vector3D(700, 0, 500));
+                modele[3].Skaluj(new Vector3D(-70, -70, -70));
 
 
                 // Przygotowanie ekranu i rysownika
@@ -74,28 +78,47 @@ namespace Projekt_LGiM
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
+                Vector3D lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+
                 var t = new Thread(new ParameterizedThreadStart((e) =>
                 {
                     while (true)
                     {
                         if (modele != null)
                         {
-                            foreach (var model in modele)
-                            {
-                                model.Obroc(0, 1, 0);
-                            }
+                            modele[0].Obroc(new Vector3D(0, -2, 0));
+
+                            modele[1].Obroc(new Vector3D(0, -4, 0));
+                            modele[1].Obroc(new Vector3D(0, -6, 0), lightSource);
+
+                            modele[2].Obroc(new Vector3D(0, -4, 0));
+                            modele[2].Obroc(new Vector3D(0, -4, 0), lightSource);
+
+                            modele[3].Obroc(new Vector3D(0, -4, 0));
+                            modele[3].Obroc(new Vector3D(0, -2, 0), lightSource);
+
                             Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
                         }
 
-                        Thread.Sleep(50);
+                        Thread.Sleep(30);
                     }
                 }));
 
                 t.IsBackground = true;
-                //t.Start();
+                t.Start();
 
                 RysujNaEkranie(modele);
             };
+        }
+
+        private void WczytajModel(string sciezkaModel, string sciezkaTekstura, string nazwa)
+        {
+            modele.Add(new WavefrontObj(sciezkaModel));
+            modele[modele.Count - 1].Teksturowanie = new Teksturowanie(sciezkaTekstura, rysownik);
+
+            var item = new ComboBoxItem() { Content = nazwa };
+            ComboBoxModele.Items.Add(item);
+            ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
         }
 
         private void RysujNaEkranie(List<WavefrontObj> modele)
@@ -117,8 +140,11 @@ namespace Projekt_LGiM
 
             foreach (var model in modele)
             {
-                List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
-                List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
+                List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, 
+                    new Vector2D(srodek.X, srodek.Y));
+
+                List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, 
+                    new Vector2D(srodek.X, srodek.Y));
 
                 var ss = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
                 var s = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
@@ -191,11 +217,11 @@ namespace Projekt_LGiM
         {
             if (e.Delta > 0)
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, -10);
+                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(0, 0, -10));
             }
             else
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, 10);
+                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(0, 0, 10));
             }
 
             RysujNaEkranie(modele);
@@ -219,18 +245,22 @@ namespace Projekt_LGiM
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    modele[ComboBoxModele.SelectedIndex].Obroc(0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
+                    modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(0, 0, -(lpm0.X - e.GetPosition(Ekran).X)));
                 }
                 else
                 {
-                    modele[ComboBoxModele.SelectedIndex].Obroc(-(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
+                    modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y),
+                        lpm0.X - e.GetPosition(Ekran).X, 0));
+                    //modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y),
+                    //    lpm0.X - e.GetPosition(Ekran).X, 0), new Vector3D(0, 0, 0));
                 }
                 RysujNaEkranie(modele);
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
+                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X), 
+                    -(ppm0.Y - e.GetPosition(Ekran).Y), 0));
                 RysujNaEkranie(modele);
                 ppm0 = e.GetPosition(Ekran);
             }
@@ -238,8 +268,8 @@ namespace Projekt_LGiM
 
         private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            modele[ComboBoxModele.SelectedIndex].Przesun(SliderTranslacjaX.Value - lastTransX, SliderTranslacjaY.Value - lastTransY, 
-                SliderTranslacjaZ.Value - lastTransZ);
+            modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(SliderTranslacjaX.Value - lastTransX, 
+                SliderTranslacjaY.Value - lastTransY, SliderTranslacjaZ.Value - lastTransZ));
             RysujNaEkranie(modele);
 
             lastTransX = SliderTranslacjaX.Value;
@@ -249,8 +279,8 @@ namespace Projekt_LGiM
 
         private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            modele[ComboBoxModele.SelectedIndex].Obroc(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
-                SliderRotacjaZ.Value - lastRotateZ);
+            modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
+                SliderRotacjaZ.Value - lastRotateZ));
             RysujNaEkranie(modele);
 
             lastRotateX = SliderRotacjaX.Value;
@@ -260,8 +290,8 @@ namespace Projekt_LGiM
 
         private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            modele[ComboBoxModele.SelectedIndex].Skaluj(SliderSkalowanieX.Value - lastScaleX, SliderSkalowanieY.Value - lastScaleY,
-                SliderSkalowanieZ.Value - lastScaleZ);
+            modele[ComboBoxModele.SelectedIndex].Skaluj(new Vector3D(SliderSkalowanieX.Value - lastScaleX, 
+                SliderSkalowanieY.Value - lastScaleY, SliderSkalowanieZ.Value - lastScaleZ));
             RysujNaEkranie(modele);
 
             lastScaleX = SliderSkalowanieX.Value;
