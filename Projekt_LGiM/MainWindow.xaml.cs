@@ -270,12 +270,13 @@ namespace Projekt_LGiM
                 else
                 {
                     var t = new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X) * 10, -(lpm0.Y - e.GetPosition(Ekran).Y) * 10, 0);
-                    srodek = new Point(srodek.X - 0.14 * t.X, srodek.Y - 0.14 * t.Y);
 
                     foreach (WavefrontObj model in modele)
                     {
                         model.Przesun(t);
                     }
+
+                    srodek = new Point(srodek.X - 0.14 * t.X, srodek.Y - 0.14 * t.Y);
                 }
 
                 lpm0 = e.GetPosition(Ekran);
