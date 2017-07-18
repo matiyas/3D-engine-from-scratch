@@ -54,18 +54,6 @@ namespace Projekt_LGiM
                 modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
 
-                modele.Add(new WavefrontObj(@"modele\swiatlo.obj"));
-                modele[0].Teksturowanie = new Teksturowanie(@"tekstury\sun.jpg", rysownik);
-                modele[0].Przesun(-srodek.X, -srodek.Y, 0);
-                RysujNaEkranie(modele);
-                var item = new ComboBoxItem()
-                {
-                    Content = modele[modele.Count - 1].Nazwa
-                };
-                ComboBoxModele.Items.Add(item);
-                ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
-
-
                 // Przygotowanie ekranu i rysownika
                 rysownik.UstawTlo(0, 0, 0, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
