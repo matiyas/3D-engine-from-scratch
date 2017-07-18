@@ -42,14 +42,14 @@ namespace Projekt_LGiM
             // jej rozmiaru rozmiaru tablicy przechowującej piksele.
             Loaded += delegate
             {
-                rozmiarPlotna.Width = RamkaEkran.ActualWidth;
-                rozmiarPlotna.Height = RamkaEkran.ActualHeight;
+                pixs = Rysownik.ToByteArray(@"tekstury\stars.jpg");
+                tmpPixs = Rysownik.ToByteArray(@"tekstury\stars.jpg");
+
+                rozmiarPlotna.Width = System.Drawing.Image.FromFile(@"tekstury\stars.jpg").Width;
+                rozmiarPlotna.Height = System.Drawing.Image.FromFile(@"tekstury\stars.jpg").Height;
 
                 srodek.X = rozmiarPlotna.Width / 2;
                 srodek.Y = rozmiarPlotna.Height / 2;
-
-                pixs    = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
-                tmpPixs = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
 
                 modele = new List<WavefrontObj>();
                 rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
@@ -65,7 +65,7 @@ namespace Projekt_LGiM
                 modele[2].Przesun(new Vector3D(500, 0, 500));
                 modele[2].Skaluj(new Vector3D(-75, -75, -75));
 
-                WczytajModel(@"modele\shaded.obj", @"tekstury\world.jpg", "Ziemia");
+                WczytajModel(@"modele\shaded.obj", @"tekstury\earth.jpg", "Ziemia");
                 modele[3].Przesun(new Vector3D(700, 0, 500));
                 modele[3].Skaluj(new Vector3D(-70, -70, -70));
 
@@ -73,19 +73,18 @@ namespace Projekt_LGiM
                 // Przygotowanie ekranu i rysownika
                 rysownik.UstawTlo(0, 0, 0, 255);
                 rysownik.UstawPedzel(0, 255, 0, 255);
-                rysownik.CzyscEkran();
 
                 Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
-
-                Vector3D lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
-
+                
                 var t = new Thread(new ParameterizedThreadStart((e) =>
                 {
                     while (true)
                     {
                         if (modele != null)
                         {
+                            Vector3D lightSource = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+
                             modele[0].Obroc(new Vector3D(0, -2, 0));
 
                             modele[1].Obroc(new Vector3D(0, -4, 0));
@@ -97,7 +96,7 @@ namespace Projekt_LGiM
                             modele[3].Obroc(new Vector3D(0, -4, 0));
                             modele[3].Obroc(new Vector3D(0, -2, 0), lightSource);
 
-                            Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
+                           Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
                         }
 
                         Thread.Sleep(30);
@@ -106,8 +105,6 @@ namespace Projekt_LGiM
 
                 t.IsBackground = true;
                 t.Start();
-
-                RysujNaEkranie(modele);
             };
         }
 
@@ -125,8 +122,8 @@ namespace Projekt_LGiM
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-
-            rysownik.CzyscEkran();
+            
+            rysownik.Reset();
 
             var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
 
@@ -217,14 +214,18 @@ namespace Projekt_LGiM
         {
             if (e.Delta > 0)
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(0, 0, -10));
+                foreach(WavefrontObj model in modele)
+                {
+                    model.Przesun(new Vector3D(0, 0, -10));
+                }
             }
             else
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(0, 0, 10));
+                foreach (WavefrontObj model in modele)
+                {
+                    model.Przesun(new Vector3D(0, 0, 10));
+                }
             }
-
-            RysujNaEkranie(modele);
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
@@ -251,17 +252,18 @@ namespace Projekt_LGiM
                 {
                     modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y),
                         lpm0.X - e.GetPosition(Ekran).X, 0));
-                    //modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y),
-                    //    lpm0.X - e.GetPosition(Ekran).X, 0), new Vector3D(0, 0, 0));
                 }
-                RysujNaEkranie(modele);
+
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                modele[ComboBoxModele.SelectedIndex].Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X), 
+                foreach(WavefrontObj model in modele)
+                {
+                    model.Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X),
                     -(ppm0.Y - e.GetPosition(Ekran).Y), 0));
-                RysujNaEkranie(modele);
+                }
+
                 ppm0 = e.GetPosition(Ekran);
             }
         }

@@ -8,6 +8,7 @@ namespace Projekt_LGiM
     class Rysownik
     {
         private byte[] pixs;
+        private byte[] orgPixs;
         private int wysokosc, szerokosc;
         public Color KolorPedzla;
         public Color KolorTla;
@@ -20,6 +21,8 @@ namespace Projekt_LGiM
             KolorTla.R = KolorTla.G = KolorTla.B = KolorTla.A = 255;
 
             this.pixs = pixs;
+            orgPixs = new byte[4 * szerokosc * wysokosc];
+            pixs.CopyTo(orgPixs, 0);
             this.szerokosc = szerokosc;
             this.wysokosc = wysokosc;
         }
@@ -85,6 +88,11 @@ namespace Projekt_LGiM
                 pixs[i + 2] = KolorTla.R;
                 pixs[i + 3] = KolorTla.A;
             }
+        }
+
+        public void Reset()
+        {
+            orgPixs.CopyTo(pixs, 0);
         }
 
         public void RysujLinie(Point p0, Point p1)
