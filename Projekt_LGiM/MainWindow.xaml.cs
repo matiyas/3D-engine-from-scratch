@@ -93,7 +93,7 @@ namespace Projekt_LGiM
             {
                 while (true)
                 {
-                    if (modele != null)
+                    if (modele.Count >= 9)
                     {
                         Dispatcher.Invoke(() =>
                         {
@@ -143,32 +143,31 @@ namespace Projekt_LGiM
 
         private void RysujNaEkranie(List<WavefrontObj> modele)
         {
-            rysownik.Reset();
-
-            var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
-
-            for (int i = 0; i < buforZ.GetLength(0); ++i)
+            if (CheckSiatka.IsChecked == false)
             {
-                for (int j = 0; j < buforZ.GetLength(1); ++j)
+                rysownik.Reset();
+
+                var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
+
+                for (int i = 0; i < buforZ.GetLength(0); ++i)
                 {
-                    buforZ[i, j] = double.PositiveInfinity;
+                    for (int j = 0; j < buforZ.GetLength(1); ++j)
+                    {
+                        buforZ[i, j] = double.PositiveInfinity;
+                    }
                 }
-            }
 
-            foreach (var model in modele)
-            {
-                List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, odleglosc, 
-                    new Vector2D(srodek.X, srodek.Y));
-
-                List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, odleglosc, 
-                    new Vector2D(srodek.X, srodek.Y));
-
-                var ss = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
-                var s = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
-
-                if (model.Sciany != null && punktyMod != null)
+                foreach (WavefrontObj model in modele)
                 {
-                    if (CheckTeksturuj.IsChecked == true && model.Teksturowanie != null)
+                    List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, odleglosc,
+                        new Vector2D(srodek.X, srodek.Y));
+
+                    List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, odleglosc,
+                        new Vector2D(srodek.X, srodek.Y));
+
+                    var srodekObiektu = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
+
+                    if (model.Sciany != null && punktyMod != null && model.Teksturowanie != null)
                     {
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
@@ -176,13 +175,13 @@ namespace Projekt_LGiM
                             if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
                                 && model.VertexCoords[sciana.Vertex[2]].Z > -450)
                             {
-                                List<double> lvn = new List<double>(3);
+                                List<double> gradient = new List<double>(3);
 
-                                lvn = model != modele[0] ? new List<double>()
+                                gradient = model != modele[0] ? new List<double>()
                                 {
-                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[0]], ss),
-                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[1]], ss),
-                                    Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[2]], ss)
+                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
                                 } : new List<double>() { 1, 1, 1 };
 
                                 var obszar = new List<Vector3D>()
@@ -199,32 +198,40 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 };
 
-                                model.Teksturowanie.Teksturuj(obszar, lvn, tekstura, buforZ);
+                                model.Teksturowanie.Teksturuj(obszar, gradient, tekstura, buforZ);
                             }
                         }
                     }
-
-                    // Rysowanie siatki na ekranie
-                    if (CheckSiatka.IsChecked == true)
-                    {
-                        foreach (WavefrontObj.Sciana sciana in model.Sciany)
-                        {
-                            for (int i = 0; i < sciana.Vertex.Count; ++i)
-                            {
-                                if(model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
-                                {
-                                    rysownik.RysujLinie((int)punktyMod[sciana.Vertex[i]].X, (int)punktyMod[sciana.Vertex[i]].Y,
-                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
-                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
-                                }
-                            }
-                        }
-                    }
-
-                    Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
-                    PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
                 }
             }
+
+            // Rysowanie siatki na ekranie
+            else if (CheckSiatka.IsChecked == true)
+            {
+                rysownik.CzyscEkran();
+
+                foreach (WavefrontObj model in modele)
+                {
+                    List<Vector2D> punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                        new Vector2D(srodek.X, srodek.Y));
+
+                    foreach (WavefrontObj.Sciana sciana in model.Sciany)
+                    {
+                        for (int i = 0; i < sciana.Vertex.Count; ++i)
+                        {
+                            if (model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
+                            {
+                                rysownik.RysujLinie((int)punktyMod[sciana.Vertex[i]].X, (int)punktyMod[sciana.Vertex[i]].Y,
+                                (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
+                                (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
+            PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
         }
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -263,22 +270,15 @@ namespace Projekt_LGiM
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (Keyboard.IsKeyDown(Key.LeftShift))
-                {
-                    //modele[ComboBoxModele.SelectedIndex].Obroc(new Vector3D(0, 0, -(lpm0.X - e.GetPosition(Ekran).X)));
-                }
-                else
-                {
-                    var t = new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X) * 10, -(lpm0.Y - e.GetPosition(Ekran).Y) * 10, 0);
+                var t = new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X) * 10, -(lpm0.Y - e.GetPosition(Ekran).Y) * 10, 0);
 
-                    foreach (WavefrontObj model in modele)
-                    {
-                        model.Przesun(t);
-                    }
-
-                    srodek = new Point(srodek.X - 0.14 * t.X, srodek.Y - 0.14 * t.Y);
+                foreach (WavefrontObj model in modele)
+                {
+                    model.Przesun(t);
                 }
 
+                zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+                srodek = new Point(srodek.X - 0.14 * t.X, srodek.Y - 0.14 * t.Y);
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)
@@ -288,6 +288,7 @@ namespace Projekt_LGiM
                     model.Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0));
                 }
 
+                zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
                 ppm0 = e.GetPosition(Ekran);
             }
         }
