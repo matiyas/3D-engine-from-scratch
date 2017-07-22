@@ -5,6 +5,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Input;
 using System.Threading;
 using MathNet.Spatial.Euclidean;
+using System.Windows.Controls;
+using System;
 
 namespace Projekt_LGiM
 {
@@ -18,7 +20,8 @@ namespace Projekt_LGiM
         private Point lpm0, ppm0;
         private List<WavefrontObj> modele;
         Vector3D zrodloSwiatla;
-        double odleglosc = 500;
+        double odleglosc = 1000;
+        Kamera kamera;
 
         public MainWindow()
         {
@@ -39,46 +42,48 @@ namespace Projekt_LGiM
             srodek.Y = rozmiarPlotna.Height / 2;
 
             modele = new List<WavefrontObj>();
+            kamera = new Kamera();
+            kamera.Przesun(new Vector3D(0, 0, 300));
             rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
 
-            double odleglosc = 3000;
-
             WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-            modele[0].Przesun(new Vector3D(0, 0, odleglosc));
+            modele[0].Przesun(new Vector3D(0, 0, 0));
             modele[0].Skaluj(new Vector3D(100, 100, 100));
 
-            WczytajModel(sciezkaModel, @"tekstury\mercury.jpg");
-            modele[1].Przesun(new Vector3D(300, 0, odleglosc));
-            modele[1].Skaluj(new Vector3D(-95, -95, -95));
+            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            modele[1].Przesun(new Vector3D(600, 0, 0));
+            //modele[1].Przesun(new Vector3D(300, 0, 0));
+            //modele[1].Skaluj(new Vector3D(-95, -95, -95));
 
-            WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
-            modele[2].Przesun(new Vector3D(400, 0, odleglosc));
-            modele[2].Skaluj(new Vector3D(-88, -88, -88));
+            //WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
+            //modele[2].Przesun(new Vector3D(400, 0, 0));
+            //modele[2].Skaluj(new Vector3D(-88, -88, -88));
 
-            WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
-            modele[3].Przesun(new Vector3D(600, 0, odleglosc));
-            modele[3].Skaluj(new Vector3D(-87, -87, -87));
+            //WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
+            //modele[3].Przesun(new Vector3D(600, 0, 0));
+            //modele[3].Skaluj(new Vector3D(-87, -87, -87));
 
-            WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
-            modele[4].Przesun(new Vector3D(900, 0, odleglosc));
-            modele[4].Skaluj(new Vector3D(-93, -93, -93));
+            //WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
+            //modele[4].Przesun(new Vector3D(900, 0, 0));
+            //modele[4].Skaluj(new Vector3D(-93, -93, -93));
 
-            WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
-            modele[5].Przesun(new Vector3D(1300, 0, odleglosc));
-            modele[5].Skaluj(new Vector3D(42, 42, 42));
+            //WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
+            //modele[5].Przesun(new Vector3D(1300, 0, 0));
+            //modele[5].Skaluj(new Vector3D(42, 42, 42));
 
-            WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
-            modele[6].Przesun(new Vector3D(1800, 0, odleglosc));
-            modele[6].Skaluj(new Vector3D(20, 20, 20));
+            //WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
+            //modele[6].Przesun(new Vector3D(1800, 0, 0));
+            //modele[6].Skaluj(new Vector3D(20, 20, 20));
 
-            WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
-            modele[7].Przesun(new Vector3D(2400, 0, odleglosc));
-            modele[7].Skaluj(new Vector3D(-49, -49, -49));
+            //WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
+            //modele[7].Przesun(new Vector3D(2400, 0, 0));
+            //modele[7].Skaluj(new Vector3D(-49, -49, -49));
 
-            WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
-            modele[8].Przesun(new Vector3D(3100, 0, odleglosc));
-            modele[8].Skaluj(new Vector3D(-51, -51, -51));
+            //WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
+            //modele[8].Przesun(new Vector3D(3100, 0, 0));
+            //modele[8].Skaluj(new Vector3D(-51, -51, -51));
 
+            ComboModele.SelectedIndex = 0;
 
             // Przygotowanie ekranu i rysownika
             rysownik.UstawTlo(0, 0, 0, 255);
@@ -93,35 +98,40 @@ namespace Projekt_LGiM
             {
                 while (true)
                 {
-                    if (modele.Count >= 9)
+                    //if (modele.Count >= 9)
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            modele[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                            //modele[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
 
-                            modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
-                            modele[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                            //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
-                            modele[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
+                            //modele[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
-                            modele[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
+                            //modele[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
-                            modele[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
+                            //modele[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                            modele[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
+                            //modele[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
-                            modele[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                            //modele[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
-                            modele[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
+                            //modele[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
-                            modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                            //modele[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
+                            //modele[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                            //modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                            //modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                            kamera.Cel = Przeksztalcenie3d.ZnajdzSrodek(modele[ComboModele.SelectedIndex].VertexCoords);
 
                             RysujNaEkranie(modele);
                         }, System.Windows.Threading.DispatcherPriority.Render);
@@ -139,6 +149,15 @@ namespace Projekt_LGiM
         {
             modele.Add(new WavefrontObj(sciezkaModel));
             modele[modele.Count - 1].Teksturowanie = new Teksturowanie(sciezkaTekstura, rysownik);
+
+            var item = new ComboBoxItem()
+            {
+                Content = modele[modele.Count - 1].Nazwa
+            };
+            ComboModele.Items.Add(item);
+            ComboModele.SelectedIndex = ComboModele.Items.Count - 1;
+
+            modele[ComboModele.SelectedIndex].Obroc(new Vector3D(Math.PI * 100, 0, 0));
         }
 
         private void RysujNaEkranie(List<WavefrontObj> modele)
@@ -160,10 +179,12 @@ namespace Projekt_LGiM
                 foreach (WavefrontObj model in modele)
                 {
                     List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, odleglosc,
-                        new Vector2D(srodek.X, srodek.Y));
+                        new Vector2D(srodek.X, srodek.Y), kamera);
 
                     List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, odleglosc,
-                        new Vector2D(srodek.X, srodek.Y));
+                        new Vector2D(srodek.X, srodek.Y), kamera);
+
+                    //Console.WriteLine(punktyMod[0].Z);
 
                     var srodekObiektu = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
 
@@ -172,8 +193,8 @@ namespace Projekt_LGiM
                         // Rysowanie tekstury na ekranie
                         foreach (var sciana in model.ScianyTrojkatne)
                         {
-                            if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
-                                && model.VertexCoords[sciana.Vertex[2]].Z > -450)
+                            if (punktyMod[sciana.Vertex[0]].Z < -150 && punktyMod[sciana.Vertex[1]].Z < -150
+                                && punktyMod[sciana.Vertex[2]].Z < -150)
                             {
                                 List<double> gradient = new List<double>(3);
 
@@ -191,12 +212,17 @@ namespace Projekt_LGiM
                                     punktyMod[sciana.Vertex[2]],
                                 };
 
-                                var tekstura = new List<Vector2D>
+                                List<Vector2D> tekstura = new List<Vector2D> { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
+                                
+                                if(sciana.VertexTexture[0] >=0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0)
                                 {
-                                    model.VertexTextureCoords[sciana.VertexTexture[0]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[1]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[2]],
-                                };
+                                    tekstura = new List<Vector2D>
+                                    {
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]],
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]],
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]],
+                                    };
+                                }
 
                                 model.Teksturowanie.Teksturuj(obszar, gradient, tekstura, buforZ);
                             }
@@ -213,7 +239,7 @@ namespace Projekt_LGiM
                 foreach (WavefrontObj model in modele)
                 {
                     List<Vector2D> punktyMod = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
-                        new Vector2D(srodek.X, srodek.Y));
+                        new Vector2D(srodek.X, srodek.Y), kamera);
 
                     foreach (WavefrontObj.Sciana sciana in model.Sciany)
                     {
@@ -236,22 +262,44 @@ namespace Projekt_LGiM
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            kamera.Cel = zrodloSwiatla;
+            UnitVector3D kierunek = (kamera.Cel - kamera.Pozycja).Normalize();
+
             if (e.Delta > 0)
             {
-                foreach(WavefrontObj model in modele)
-                {
-                    model.Przesun(new Vector3D(0, 0, -50));
-                }
+                kamera.Przesun(new Vector3D(kierunek.X * 10, kierunek.Y * 10, kierunek.Z * 10));
             }
             else
             {
-                foreach (WavefrontObj model in modele)
-                {
-                    model.Przesun(new Vector3D(0, 0, 50));
-                }
+                kamera.Przesun(new Vector3D(kierunek.X * -10, kierunek.Y * -10, kierunek.Z * -10));
             }
+            Console.WriteLine(kamera.Pozycja);
+        }
 
-            zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch(e.Key)
+            {
+                case Key.W:
+                    kamera.Pozycja -= new Vector3D(0, 0, 10);
+                    kamera.Cel -= new Vector3D(0, 0, 10);
+                    break;
+
+                case Key.S:
+                    kamera.Pozycja -= new Vector3D(0, 0, -10);
+                    kamera.Cel -= new Vector3D(0, 0, -10);
+                    break;
+
+                case Key.A:
+                    kamera.Pozycja -= new Vector3D(-10, 0, 0);
+                    kamera.Cel -= new Vector3D(-10, 0, 0);
+                    break;
+
+                case Key.D:
+                    kamera.Pozycja -= new Vector3D(10, 0, 0);
+                    kamera.Cel -= new Vector3D(10, 0, 0);
+                    break;
+            }
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
@@ -270,27 +318,16 @@ namespace Projekt_LGiM
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                var t = new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X) * 10, -(lpm0.Y - e.GetPosition(Ekran).Y) * 10, 0);
-
-                foreach (WavefrontObj model in modele)
-                {
-                    model.Przesun(t);
-                }
-
-                zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
-                srodek = new Point(srodek.X - 0.14 * t.X, srodek.Y - 0.14 * t.Y);
+                kamera.Obroc(new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X), -(lpm0.Y - e.GetPosition(Ekran).Y), 0));
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                foreach(WavefrontObj model in modele)
-                {
-                    model.Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0));
-                }
-
-                zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+                kamera.Przesun(new Vector3D(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0));
                 ppm0 = e.GetPosition(Ekran);
             }
         }
+
+        
     }
 }

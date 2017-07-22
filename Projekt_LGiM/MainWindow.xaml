@@ -8,7 +8,8 @@
     mc:Ignorable="d"
     Title="MainWindow"
     Height="620" 
-    Width="1075">
+    Width="1075"
+    KeyDown="Window_KeyDown">
     <Grid 
         x:Name="GridMain">
         <Grid.RowDefinitions>
@@ -62,5 +63,13 @@
             IsChecked="False" 
             Height="16" 
             Grid.Column="1"/>
+        <ComboBox 
+            x:Name="ComboModele" 
+            Grid.Column="1" 
+            HorizontalAlignment="Left" 
+            Margin="10,100,0,0" 
+            Grid.RowSpan="2" 
+            VerticalAlignment="Top" 
+            Width="205"/>
     </Grid>
 </Window>

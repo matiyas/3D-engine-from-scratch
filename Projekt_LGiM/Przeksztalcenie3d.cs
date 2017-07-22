@@ -3,7 +3,6 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using MathNet.Spatial.Euclidean;
-using System;
 
 namespace Projekt_LGiM
 {
@@ -120,7 +119,7 @@ namespace Projekt_LGiM
             return wierzcholkiMod;
         }
 
-        public static List<Vector2D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c)
+        public static List<Vector2D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
         {
             var punktyMod = new List<Vector2D>();
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
@@ -128,16 +127,21 @@ namespace Projekt_LGiM
                                                            0,  0,  0,  0,
                                                            0,  0, 1/d, 1 });
 
+            var macierzWidoku = new DenseMatrix(4, 4, new double[] { 1, 0, 0, kamera.Pozycja.X,
+                                                                     0, 1, 0, kamera.Pozycja.Y,
+                                                                     0, 0, 1, kamera.Pozycja.Z,
+                                                                     0, 0, 0,                1, });
+
             foreach (Vector3D punkt in punkty)
             {
-                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * Proj;
+                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * macierzWidoku * Proj;
                 punktyMod.Add(new Vector2D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y));
             }
 
             return punktyMod;
         }
 
-        public static List<Vector3D> RzutPerspektywicznyZ(List<Vector3D> punkty, double d, Vector2D c)
+        public static List<Vector3D> RzutPerspektywicznyZ(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
         {
             var punktyMod = new List<Vector3D>();
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
@@ -147,8 +151,8 @@ namespace Projekt_LGiM
 
             foreach (Vector3D punkt in punkty)
             {
-                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * Proj;
-                punktyMod.Add(new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, punkt.Z));
+                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt.Inverse() * Proj;
+                punktyMod.Add(new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, -Odleglosc(punkt, kamera.Pozycja)));
             }
 
             return punktyMod;
@@ -159,7 +163,9 @@ namespace Projekt_LGiM
             zrodlo -= srodek;
             wierzcholek -= srodek;
 
-            return Math.Max(0, Math.Cos(zrodlo.AngleTo(wierzcholek).Radians));
+            return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
+
+        public static double Odleglosc(Vector3D v1, Vector3D v2) => Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2));
     }
 }
