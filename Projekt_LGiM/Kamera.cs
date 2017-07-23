@@ -1,5 +1,6 @@
 ﻿using MathNet.Spatial.Euclidean;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Collections.Generic;
 
 namespace Projekt_LGiM
 {

@@ -62,7 +62,8 @@
             Width="210" 
             IsChecked="False" 
             Height="16" 
-            Grid.Column="1" Focusable="False"
+            Grid.Column="1" 
+            Focusable="False"
             />
         <ComboBox 
             x:Name="ComboModele" 

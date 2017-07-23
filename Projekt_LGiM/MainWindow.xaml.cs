@@ -27,7 +27,7 @@ namespace Projekt_LGiM
         public MainWindow()
         {
             InitializeComponent();
-
+            
             dpi = 96;
             czuloscMyszy = 0.3;
             odleglosc = 1000;
@@ -49,7 +49,7 @@ namespace Projekt_LGiM
             rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
             
             WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-            swiat[0].Przesun(new Vector3D(0, 0, 0));
+            swiat[0].Przesun(new Vector3D(-600, 0, 0));
             swiat[0].Skaluj(new Vector3D(100, 100, 100));
 
             WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
@@ -149,7 +149,7 @@ namespace Projekt_LGiM
             t.Start();
         }
 
-        private void WczytajModel(string sciezkaModel, string sciezkaTekstura)
+        void WczytajModel(string sciezkaModel, string sciezkaTekstura)
         {
             swiat.Add(new WavefrontObj(sciezkaModel));
             swiat[swiat.Count - 1].Teksturowanie = new Teksturowanie(sciezkaTekstura, rysownik);
@@ -167,12 +167,12 @@ namespace Projekt_LGiM
         void RysujSiatke()
         {
             rysownik.CzyscEkran();
-            
-            for(int z = -1000; z <= 1000; z += 100)
+
+            for (int z = -1000; z <= 1000; z += 100)
             {
-                for(int x = -1000; x <= 1000; x += 100)
+                for (int x = -1000; x <= 1000; x += 100)
                 {
-                    var p0 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, 
+                    var p0 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc,
                         new Vector2D(srodek.X, srodek.Y), kamera);
 
                     var p1 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(-x, 0, z), odleglosc,
@@ -184,24 +184,35 @@ namespace Projekt_LGiM
                     var p3 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, -z), odleglosc,
                         new Vector2D(srodek.X, srodek.Y), kamera);
 
-                    rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y);
-                    rysownik.RysujLinie((int)p2.X, (int)p2.Y, (int)p3.X, (int)p3.Y);
+                    if (x == 0)
+                    {
+                        rysownik.RysujLinie((int)p2.X, (int)p2.Y, (int)p3.X, (int)p3.Y, 0, 0, 255);
+                    }
+                    else if (z == 0)
+                    {
+                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 255, 0, 0);
+                    }
+                    else
+                    {
+                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 127, 127, 127);
+                        rysownik.RysujLinie((int)p2.X, (int)p2.Y, (int)p3.X, (int)p3.Y, 127, 127, 127);
+                    }
                 }
             }
 
-
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector2D> modelRzut = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                List<Vector3D> modelRzut = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
                 foreach (WavefrontObj.Sciana sciana in model.Sciany)
                 {
                     for (int i = 0; i < sciana.Vertex.Count; ++i)
                     {
+                        if(modelRzut[sciana.Vertex[i]].Z < -100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z < -100)
                         rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
                             (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
-                            (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
+                            (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y, 0, 255, 0);
                     }
                 }
             }
@@ -223,18 +234,17 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> modelRzut = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, odleglosc,
+                List<Vector3D> modelRzut = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
                 var srodekObiektu = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
 
                 if (model.Sciany != null && modelRzut != null && model.Teksturowanie != null)
                 {
-                    // Rysowanie tekstury na ekranie
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        if (modelRzut[sciana.Vertex[0]].Z < -150 && modelRzut[sciana.Vertex[1]].Z < -150
-                            && modelRzut[sciana.Vertex[2]].Z < -150)
+                        //if (modelRzut[sciana.Vertex[0]].Z < -150 && modelRzut[sciana.Vertex[1]].Z < -150
+                        //    && modelRzut[sciana.Vertex[2]].Z < -150)
                         {
                             List<double> gradient = new List<double>(3);
 
@@ -271,22 +281,22 @@ namespace Projekt_LGiM
             }
         }
 
-        private void RysujNaEkranie(List<WavefrontObj> modele)
+        void RysujNaEkranie(List<WavefrontObj> modele)
         {
-            if (CheckSiatka.IsChecked == false) { RysujTeksture(); }
-            else                                { RysujSiatke();   }
-
+            if (CheckSiatka.IsChecked == false)      { RysujTeksture(); }
+            else                                     { RysujSiatke();   }
+            
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
         }
         
-        private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
+        void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (e.Delta > 0) { odleglosc += 100; }
             else             { odleglosc -= 100; }
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -316,18 +326,18 @@ namespace Projekt_LGiM
             }
         }
 
-        private void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             kamera.Cel = Przeksztalcenie3d.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
         }
 
-        private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
+        void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
         {
             if (e.LeftButton  == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
             if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
         }
 
-        private void Ekran_MouseMove(object sender,  MouseEventArgs e)
+        void Ekran_MouseMove(object sender,  MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {

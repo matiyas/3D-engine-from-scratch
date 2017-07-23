@@ -143,6 +143,49 @@ namespace Projekt_LGiM
             RysujLinie(new Point(x0, y0), new Point(x1, y1));
         }
 
+        public void RysujLinie(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
+        {
+            int startX = (int)Math.Min(x0, x1);
+            int endX   = (int)Math.Max(x0, x1);
+            int startY = (int)Math.Min(y0, y1);
+            int endY   = (int)Math.Max(y0, y1);
+            int dx = endX - startX;
+            int dy = endY - startY;
+
+            if (dx > dy)
+            {
+                for (int x = startX; x <= endX; ++x)
+                {
+                    double y = (dy / (double)dx) * (x - x0) + y0;
+
+                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
+                    {
+                        RysujPiksel(x, (int)Math.Floor(y), r, g, b, 255);
+                    }
+                    else
+                    {
+                        RysujPiksel(x, (int)(2 * y0 - Math.Floor(y)), r, g, b, 255);
+                    }
+                }
+            }
+            else
+            {
+                for (int y = startY; y <= endY; ++y)
+                {
+                    double x = (dx / (double)dy) * (y - y0) + x0;
+
+                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
+                    {
+                        RysujPiksel((int)Math.Floor(x), y, r, g, b, 255);
+                    }
+                    else
+                    {
+                        RysujPiksel((int)(2 * x0 - Math.Floor(x)), y, r, g, b, 255);
+                    }
+                }
+            }
+        }
+
         public void RysujKolo(int x0, int y0, int x1, int y1)
         {
             int r = (int)Math.Abs(Math.Sqrt(Math.Pow(x1 - x0, 2) + Math.Pow(y1 - y0, 2)));
