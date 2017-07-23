@@ -131,8 +131,6 @@ namespace Projekt_LGiM
                             //modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
                             //modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                            kamera.Cel = Przeksztalcenie3d.ZnajdzSrodek(modele[ComboModele.SelectedIndex].VertexCoords);
-
                             RysujNaEkranie(modele);
                         }, System.Windows.Threading.DispatcherPriority.Render);
                     }
@@ -262,44 +260,61 @@ namespace Projekt_LGiM
         
         private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            kamera.Cel = zrodloSwiatla;
-            UnitVector3D kierunek = (kamera.Cel - kamera.Pozycja).Normalize();
-
             if (e.Delta > 0)
             {
-                kamera.Przesun(new Vector3D(kierunek.X * 10, kierunek.Y * 10, kierunek.Z * 10));
+                kamera.Pozycja -= new Vector3D(kamera.Kierunek.X * -100, kamera.Kierunek.Y * -100, kamera.Kierunek.Z * 100);
+                kamera.Cel     -= new Vector3D(kamera.Kierunek.X * -100, kamera.Kierunek.Y * -100, kamera.Kierunek.Z * 100);
             }
             else
             {
-                kamera.Przesun(new Vector3D(kierunek.X * -10, kierunek.Y * -10, kierunek.Z * -10));
+                kamera.Pozycja -= new Vector3D(kamera.Kierunek.X * 100, kamera.Kierunek.Y * 100, kamera.Kierunek.Z * -100);
+                kamera.Cel     -= new Vector3D(kamera.Kierunek.X * 100, kamera.Kierunek.Y * 100, kamera.Kierunek.Z * -100);
             }
-            Console.WriteLine(kamera.Pozycja);
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            switch(e.Key)
+            UnitVector3D kierunek = kamera.Kierunek;
+            UnitVector3D right = kamera.Right;
+            UnitVector3D up = kamera.Up;
+
+            switch (e.Key)
             {
                 case Key.W:
-                    kamera.Pozycja -= new Vector3D(0, 0, 10);
-                    kamera.Cel -= new Vector3D(0, 0, 10);
+                    kamera.Pozycja -= new Vector3D(kierunek.X * -100, kierunek.Y * -100, kierunek.Z * 100);
+                    kamera.Cel     -= new Vector3D(kierunek.X * -100, kierunek.Y * -100, kierunek.Z * 100);
                     break;
 
                 case Key.S:
-                    kamera.Pozycja -= new Vector3D(0, 0, -10);
-                    kamera.Cel -= new Vector3D(0, 0, -10);
+                    kamera.Pozycja -= new Vector3D(kierunek.X * 100, kierunek.Y * 100, kierunek.Z * -100);
+                    kamera.Cel     -= new Vector3D(kierunek.X * 100, kierunek.Y * 100, kierunek.Z * -100);
                     break;
 
                 case Key.A:
-                    kamera.Pozycja -= new Vector3D(-10, 0, 0);
-                    kamera.Cel -= new Vector3D(-10, 0, 0);
+                    kamera.Pozycja -= new Vector3D(right.X * -50, right.Y * -50, right.Z * 50);
+                    kamera.Cel     -= new Vector3D(right.X * -50, right.Y * -50, right.Z * 50);
                     break;
 
                 case Key.D:
-                    kamera.Pozycja -= new Vector3D(10, 0, 0);
-                    kamera.Cel -= new Vector3D(10, 0, 0);
+                    kamera.Pozycja -= new Vector3D(right.X * 50, right.Y * 50, right.Z * -50);
+                    kamera.Cel     -= new Vector3D(right.X * 50, right.Y * 50, right.Z * -50);
+                    break;
+
+                case Key.Space:
+                    kamera.Pozycja -= new Vector3D(kamera.Up.X * -100, kamera.Up.Y * -100, kamera.Up.Z * -100);
+                    kamera.Cel     -= new Vector3D(kamera.Up.X * -100, kamera.Up.Y * -100, kamera.Up.Z * -100);
+                    break;
+
+                case Key.LeftCtrl:
+                    kamera.Pozycja -= new Vector3D(kamera.Up.X * 100, kamera.Up.Y * 100, kamera.Up.Z * 100);
+                    kamera.Cel     -= new Vector3D(kamera.Up.X * 100, kamera.Up.Y * 100, kamera.Up.Z * 100);
                     break;
             }
+        }
+
+        private void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            kamera.Cel = Przeksztalcenie3d.ZnajdzSrodek(modele[ComboModele.SelectedIndex].VertexCoords);
         }
 
         private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
@@ -318,7 +333,7 @@ namespace Projekt_LGiM
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                kamera.Obroc(new Vector3D(-(lpm0.X - e.GetPosition(Ekran).X), -(lpm0.Y - e.GetPosition(Ekran).Y), 0));
+                kamera.Obroc(new Vector3D(0, (lpm0.X - e.GetPosition(Ekran).X) / 2, 0));
                 lpm0 = e.GetPosition(Ekran);
             }
             if (e.RightButton == MouseButtonState.Pressed)

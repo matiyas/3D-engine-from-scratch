@@ -1,16 +1,43 @@
 ﻿using MathNet.Spatial.Euclidean;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Collections.Generic;
+using m3d = System.Windows.Media.Media3D;
 
 namespace Projekt_LGiM
 {
     class Kamera
     {
-        public Vector3D Pozycja { get; set; }
-        public Vector3D Cel { get; set; }
-        public UnitVector3D Kierunek => (Pozycja - Cel).Normalize();
-        public UnitVector3D Right => new Vector3D(0, 1, 0).CrossProduct(Kierunek).Normalize();
-        public UnitVector3D Up => Kierunek.CrossProduct(Right);
+        private Vector3D pozycja = new Vector3D(0, 0, 0);
+        private Vector3D cel = new Vector3D(0, 1, 0);
+        private UnitVector3D kierunek = new UnitVector3D(0, 0, 1);
+        private UnitVector3D up = new UnitVector3D(0, 1, 0);
+        private UnitVector3D right = new UnitVector3D(1, 0, 0);
+
+        public Vector3D Pozycja
+        {
+            get { return pozycja; }
+            set
+            {
+                pozycja = value;
+                kierunek = (pozycja - cel).Normalize();
+                right = up.CrossProduct(kierunek);
+                //up = kierunek.CrossProduct(right);
+            }
+        }
+        public Vector3D Cel
+        {
+            get { return cel; }
+            set
+            {
+                cel = value;
+                kierunek = (pozycja - cel).Normalize();
+                right = up.CrossProduct(kierunek);
+                //up = kierunek.CrossProduct(right);
+            }
+        }
+        public UnitVector3D Kierunek => kierunek;
+        public UnitVector3D Right => right;
+        public UnitVector3D Up => up;
         public DenseMatrix LookAt
         {
             get
@@ -28,18 +55,6 @@ namespace Projekt_LGiM
             }
         }
 
-        public Kamera()
-        {
-            Pozycja = new Vector3D(0, 0, 0);
-            Cel = new Vector3D(0, 0, 0);
-        }
-
-        public Kamera(Vector3D pozycja, Vector3D cel)
-        {
-            Pozycja = pozycja;
-            Cel = cel;
-        }
-        
         public void Przesun(Vector3D t)
         {
             Pozycja = Przeksztalcenie3d.Translacja(new List<Vector3D>() { Pozycja }, t)[0];
@@ -47,7 +62,7 @@ namespace Projekt_LGiM
 
         public void Obroc(Vector3D t)
         {
-            Cel = Przeksztalcenie3d.Translacja(new List<Vector3D>() { Cel }, t)[0];
+            Cel = Przeksztalcenie3d.Rotacja(new List<Vector3D>() { Cel }, t, Pozycja)[0];
         }
     }
 }
