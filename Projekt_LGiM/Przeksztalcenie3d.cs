@@ -134,11 +134,23 @@ namespace Projekt_LGiM
 
             foreach (Vector3D punkt in punkty)
             {
-                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * macierzWidoku * Proj;
+                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt.Inverse() * Proj;
                 punktyMod.Add(new Vector2D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y));
             }
 
             return punktyMod;
+        }
+
+        public static Vector2D RzutPerspektywiczny(Vector3D punkt, double d, Vector2D c, Kamera kamera)
+        {
+            var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
+                                                           0,  1,  0,  0,
+                                                           0,  0,  0,  0,
+                                                           0,  0, 1/d, 1 });
+            
+            var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt.Inverse() * Proj;
+
+            return new Vector2D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y);
         }
 
         public static List<Vector3D> RzutPerspektywicznyZ(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
@@ -167,5 +179,32 @@ namespace Projekt_LGiM
         }
 
         public static double Odleglosc(Vector3D v1, Vector3D v2) => Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2));
+
+        public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
+        {
+            kat /= 100;
+
+            var T0 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,      -c.X,
+                                                                0,           1,         0,      -c.Y,
+                                                                0,           0,         1,      -c.Z,
+                                                                0,           0,         0,         1, });
+
+            var T1 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,       c.X,
+                                                                0,           1,         0,       c.Y,
+                                                                0,           0,         1,       c.Z,
+                                                                0,           0,         0,         1, });
+
+            var R = new DenseMatrix(4, 4, new double[]
+            {
+                os.X * os.X * (1 - Cos(kat)) + Cos(kat),            os.X * os.Y * (1 - Cos(kat)) - os.Z * Sin(kat),     os.X * os.Z * (1 - Cos(kat)) + os.Y * Sin(kat), 0,
+                os.X * os.Y * (1 - Cos(kat)) + os.Z * Sin(kat),     os.Y * os.Y * (1 - Cos(kat)) + Cos(kat),            os.Y * os.Z * (1 - Cos(kat)) - os.X * Sin(kat), 0,
+                os.X * os.Z * (1 - Cos(kat)) - os.Y * Sin(kat),     os.Y * os.Z * (1 - Cos(kat)) + os.X * Sin(kat),     os.Z * os.Z * (1 - Cos(kat)) + Cos(kat),        0,
+                                                             0,                                                  0,                                                  0, 1,
+            });
+            
+            var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 });
+
+            return new Vector3D((p * T0 * R * T1).Take(3).ToArray());
+        }
     }
 }

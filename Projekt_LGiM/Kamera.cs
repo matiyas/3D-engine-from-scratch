@@ -1,17 +1,15 @@
 ﻿using MathNet.Spatial.Euclidean;
 using MathNet.Numerics.LinearAlgebra.Double;
-using System.Collections.Generic;
-using m3d = System.Windows.Media.Media3D;
 
 namespace Projekt_LGiM
 {
     class Kamera
     {
-        private Vector3D pozycja = new Vector3D(0, 0, 0);
-        private Vector3D cel = new Vector3D(0, 1, 0);
-        private UnitVector3D kierunek = new UnitVector3D(0, 0, 1);
-        private UnitVector3D up = new UnitVector3D(0, 1, 0);
-        private UnitVector3D right = new UnitVector3D(1, 0, 0);
+        private Vector3D pozycja   = new Vector3D(0, 0, 500);
+        private Vector3D cel       = new Vector3D(0, 0, 0);
+        private UnitVector3D przod = new UnitVector3D(0, 0, 1);
+        private UnitVector3D gora  = new UnitVector3D(0, 1, 0);
+        private UnitVector3D prawo = new UnitVector3D(1, 0, 0);
 
         public Vector3D Pozycja
         {
@@ -19,9 +17,9 @@ namespace Projekt_LGiM
             set
             {
                 pozycja = value;
-                kierunek = (pozycja - cel).Normalize();
-                right = up.CrossProduct(kierunek);
-                //up = kierunek.CrossProduct(right);
+                przod   = (pozycja - cel).Normalize();
+                prawo   = gora.CrossProduct(przod);
+                gora    = przod.CrossProduct(prawo);
             }
         }
         public Vector3D Cel
@@ -29,40 +27,58 @@ namespace Projekt_LGiM
             get { return cel; }
             set
             {
-                cel = value;
-                kierunek = (pozycja - cel).Normalize();
-                right = up.CrossProduct(kierunek);
-                //up = kierunek.CrossProduct(right);
+                cel   = value;
+                przod = (pozycja - cel).Normalize();
+                prawo = gora.CrossProduct(przod);
+                gora  = przod.CrossProduct(prawo);
             }
         }
-        public UnitVector3D Kierunek => kierunek;
-        public UnitVector3D Right => right;
-        public UnitVector3D Up => up;
+        public UnitVector3D Przod => przod;
+        public UnitVector3D Prawo => prawo;
+        public UnitVector3D Gora => gora;
         public DenseMatrix LookAt
         {
             get
             {
-                var p = new DenseMatrix(4, 4, new double[] { 1, 0, 0, -Pozycja.X,
-                                                             0, 1, 0, -Pozycja.Y,
-                                                             0, 0, 1, -Pozycja.Z,
-                                                             0, 0, 0,          1, });
+                var p = new DenseMatrix(4, 4, new double[] {         1,          0,          0, -Pozycja.X,
+                                                                     0,          1,          0, -Pozycja.Y,
+                                                                     0,          0,          1, -Pozycja.Z,
+                                                                     0,          0,          0,      1, });
 
-                var nvu = new DenseMatrix(4, 4, new double[] {    Right.X,    Right.Y,    Right.Z,      0,
-                                                                     Up.X,       Up.Y,       Up.Z,      0,
-                                                               Kierunek.X, Kierunek.Y, Kierunek.Z,      0,
-                                                                        0,          0,          0,      1, });
+                var nvu = new DenseMatrix(4, 4, new double[] { Prawo.X,    Prawo.Y,    Prawo.Z,      0,
+                                                                Gora.X,     Gora.Y,     Gora.Z,      0,
+                                                               Przod.X,    Przod.Y,    Przod.Z,      0,
+                                                                     0,          0,          0,      1, });
                 return nvu * p;
             }
         }
 
-        public void Przesun(Vector3D t)
+        public void DoPrzodu(double ile)
         {
-            Pozycja = Przeksztalcenie3d.Translacja(new List<Vector3D>() { Pozycja }, t)[0];
+            UnitVector3D kierunek = Przod;
+            Pozycja -= new Vector3D(kierunek.X * -ile, kierunek.Y * -ile, kierunek.Z * ile);
+            Cel     -= new Vector3D(kierunek.X * -ile, kierunek.Y * -ile, kierunek.Z * ile);
+        }
+
+        public void WBok(double ile)
+        {
+            UnitVector3D right = Prawo;
+            Pozycja -= new Vector3D(right.X * -ile, right.Y * -ile, right.Z * ile);
+            Cel     -= new Vector3D(right.X * -ile, right.Y * -ile, right.Z * ile);
+        }
+
+        public void WGore(double ile)
+        {
+            UnitVector3D up = Gora;
+            Pozycja -= new Vector3D(up.X * -ile, up.Y * -ile, up.Z * ile);
+            Cel     -= new Vector3D(up.X * -ile, up.Y * -ile, up.Z * ile);
         }
 
         public void Obroc(Vector3D t)
         {
-            Cel = Przeksztalcenie3d.Rotacja(new List<Vector3D>() { Cel }, t, Pozycja)[0];
+            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, gora, t.Y, Pozycja);
+            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, prawo, t.X, Pozycja);
+            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, przod, t.Z, Pozycja);
         }
     }
 }
