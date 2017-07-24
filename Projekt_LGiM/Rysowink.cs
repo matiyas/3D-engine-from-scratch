@@ -7,9 +7,9 @@ namespace Projekt_LGiM
 {
     class Rysownik
     {
-        private byte[] pixs;
-        private byte[] orgPixs;
-        private int wysokosc, szerokosc;
+        byte[] pixs;
+        byte[] orgPixs;
+        int wysokosc, szerokosc;
         public Color KolorPedzla;
         public Color KolorTla;
 

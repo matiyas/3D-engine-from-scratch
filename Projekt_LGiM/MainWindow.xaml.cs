@@ -27,7 +27,7 @@ namespace Projekt_LGiM
         public MainWindow()
         {
             InitializeComponent();
-            
+
             dpi = 96;
             czuloscMyszy = 0.3;
             odleglosc = 1000;
@@ -46,14 +46,14 @@ namespace Projekt_LGiM
 
             swiat    = new List<WavefrontObj>();
             kamera   = new Kamera();
+
             rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
-            
             WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-            swiat[0].Przesun(new Vector3D(-600, 0, 0));
+            swiat[0].Przesun(new Vector3D(0, 0, 600));
             swiat[0].Skaluj(new Vector3D(100, 100, 100));
 
-            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
-            swiat[1].Przesun(new Vector3D(600, 0, 0));
+            //WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            //swiat[1].Przesun(new Vector3D(600, 0, -600));
             {
                 //modele[1].Przesun(new Vector3D(300, 0, 0));
                 //modele[1].Skaluj(new Vector3D(-95, -95, -95));
@@ -96,7 +96,7 @@ namespace Projekt_LGiM
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-            zrodloSwiatla = Przeksztalcenie3d.ZnajdzSrodek(swiat[0].VertexCoords);
+            zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[0].VertexCoords);
 
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
@@ -172,47 +172,41 @@ namespace Projekt_LGiM
             {
                 for (int x = -1000; x <= 1000; x += 100)
                 {
-                    var p0 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc,
-                        new Vector2D(srodek.X, srodek.Y), kamera);
+                    var p0 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+                    var p1 = Math3D.RzutPerspektywiczny(new Vector3D(-x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+                    var p2 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, -z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
 
-                    var p1 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(-x, 0, z), odleglosc,
-                        new Vector2D(srodek.X, srodek.Y), kamera);
-
-                    var p2 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc,
-                        new Vector2D(srodek.X, srodek.Y), kamera);
-
-                    var p3 = Przeksztalcenie3d.RzutPerspektywiczny(new Vector3D(x, 0, -z), odleglosc,
-                        new Vector2D(srodek.X, srodek.Y), kamera);
-
-                    if (x == 0)
+                    if (x == 0/* && p0.Z > 100 && p2.Z > 100*/)
                     {
-                        rysownik.RysujLinie((int)p2.X, (int)p2.Y, (int)p3.X, (int)p3.Y, 0, 0, 255);
+                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 0, 0, 255);
                     }
-                    else if (z == 0)
+                    else if (z == 0 /*&& p0.Z > 100 && p1.Z > 100*/)
                     {
                         rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 255, 0, 0);
                     }
-                    else
+                    else /*if(p0.X > 100)*/
                     {
-                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 127, 127, 127);
-                        rysownik.RysujLinie((int)p2.X, (int)p2.Y, (int)p3.X, (int)p3.Y, 127, 127, 127);
+                        /*if (p1.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 127, 127, 127); }
+                        /*if (p2.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 127, 127, 127); }
                     }
                 }
             }
 
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> modelRzut = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
                 foreach (WavefrontObj.Sciana sciana in model.Sciany)
                 {
                     for (int i = 0; i < sciana.Vertex.Count; ++i)
                     {
-                        if(modelRzut[sciana.Vertex[i]].Z < -100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z < -100)
-                        rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
-                            (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
-                            (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y, 0, 255, 0);
+                        //if(modelRzut[sciana.Vertex[i]].Z > 100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z > 100)
+                        {
+                            rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
+                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
+                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y, 0, 255, 0);
+                        }
                     }
                 }
             }
@@ -234,10 +228,10 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> modelRzut = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc, 
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
-                var srodekObiektu = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
+                var srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
 
                 if (model.Sciany != null && modelRzut != null && model.Teksturowanie != null)
                 {
@@ -250,9 +244,9 @@ namespace Projekt_LGiM
 
                             gradient = model != swiat[0] ? new List<double>()
                                 {
-                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Przeksztalcenie3d.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
                                 } : new List<double>() { 1, 1, 1 };
 
                             var obszar = new List<Vector3D>()
@@ -294,10 +288,15 @@ namespace Projekt_LGiM
         {
             if (e.Delta > 0) { odleglosc += 100; }
             else             { odleglosc -= 100; }
+
+            Console.WriteLine(odleglosc);
         }
 
         void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            Console.WriteLine(kamera.Pozycja);
+            //Console.WriteLine(-Math3D.Odleglosc(kamera.Pozycja, zrodloSwiatla, kamera.Przod));
+
             switch (e.Key)
             {
                 case Key.W:
@@ -328,7 +327,7 @@ namespace Projekt_LGiM
 
         void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            kamera.Cel = Przeksztalcenie3d.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
+            //kamera.Cel = Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
         }
 
         void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)

@@ -60,7 +60,7 @@
             Grid.Row="1" 
             VerticalAlignment="Bottom" 
             Width="210" 
-            IsChecked="False" 
+            IsChecked="True" 
             Height="16" 
             Grid.Column="1" 
             Focusable="False"

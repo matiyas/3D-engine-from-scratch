@@ -9,10 +9,10 @@ namespace Projekt_LGiM
 {
     class Teksturowanie
     {
-        private string sciezka;
-        private Rysownik rysownik;
-        private Drawing.Size rozmiarTekstury;
-        private Color[,] teksturaKolory;
+        string sciezka;
+        Rysownik rysownik;
+        Drawing.Size rozmiarTekstury;
+        Color[,] teksturaKolory;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
