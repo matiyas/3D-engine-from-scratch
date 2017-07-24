@@ -75,7 +75,7 @@ namespace Projekt_LGiM
             return punktyMod;
         }
 
-		public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D s)
+        public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D s)
         {
             double tmpX = s.X, tmpY = s.Y, tmpZ = s.Z, x, y, z;
 			var wierzcholkiMod = new List<Vector3D>();
@@ -186,6 +186,20 @@ namespace Projekt_LGiM
             var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 });
 
             return new Vector3D((p * T0 * R * T1).Take(3).ToArray());
+        }
+
+        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat, Vector3D c)
+        {
+            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, c);
+
+            return new UnitVector3D(wynik.X, wynik.Y, wynik.Z);
+        }
+
+        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat)
+        {
+            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, new Vector3D(0, 0, 0));
+
+            return new UnitVector3D(wynik.X, wynik.Y, wynik.Z);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MathNet.Spatial.Euclidean;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Collections.Generic;
+using System;
 
 namespace Projekt_LGiM
 {
@@ -18,9 +19,9 @@ namespace Projekt_LGiM
             set
             {
                 pozycja = value;
-                przod   = (pozycja - cel).Normalize();
-                prawo   = gora.CrossProduct(przod);
-                gora    = przod.CrossProduct(prawo);
+                przod = (pozycja - cel).Normalize();
+                prawo = gora.CrossProduct(przod);
+                gora = przod.CrossProduct(prawo);
             }
         }
         public Vector3D Cel
@@ -31,7 +32,7 @@ namespace Projekt_LGiM
                 cel   = value;
                 przod = (pozycja - cel).Normalize();
                 prawo = gora.CrossProduct(przod);
-                gora  = przod.CrossProduct(prawo);
+                gora = przod.CrossProduct(prawo);
             }
         }
         public UnitVector3D Przod => przod;
@@ -56,30 +57,45 @@ namespace Projekt_LGiM
 
         public void DoPrzodu(double ile)
         {
-            UnitVector3D kierunek = Przod;
-            Pozycja -= new Vector3D(kierunek.X * -ile, kierunek.Y * -ile, kierunek.Z * ile);
-            Cel     -= new Vector3D(kierunek.X * -ile, kierunek.Y * -ile, kierunek.Z * ile);
+            UnitVector3D przod = this.przod;
+            pozycja -= new Vector3D(przod.X * -ile, przod.Y * -ile, przod.Z * ile);
+            cel     -= new Vector3D(przod.X * -ile, przod.Y * -ile, przod.Z * ile);
         }
 
         public void WBok(double ile)
         {
-            UnitVector3D right = Prawo;
-            Pozycja -= new Vector3D(right.X * -ile, right.Y * -ile, right.Z * ile);
-            Cel     -= new Vector3D(right.X * -ile, right.Y * -ile, right.Z * ile);
+            UnitVector3D prawo = this.prawo;
+            pozycja -= new Vector3D(prawo.X * -ile, prawo.Y * -ile, prawo.Z * ile);
+            cel     -= new Vector3D(prawo.X * -ile, prawo.Y * -ile, prawo.Z * ile);
         }
 
         public void WGore(double ile)
         {
-            UnitVector3D up = Gora;
-            Pozycja -= new Vector3D(up.X * -ile, up.Y * -ile, up.Z * ile);
-            Cel     -= new Vector3D(up.X * -ile, up.Y * -ile, up.Z * ile);
+            UnitVector3D gora = this.gora;
+            pozycja -= new Vector3D(gora.X * -ile, gora.Y * -ile, gora.Z * ile);
+            cel     -= new Vector3D(gora.X * -ile, gora.Y * -ile, gora.Z * ile);
         }
 
         public void Obroc(Vector3D t)
         {
-            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, gora, t.Y, Pozycja);
-            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, prawo, t.X, Pozycja);
-            Cel = Przeksztalcenie3d.ObrocWokolOsi(Cel, przod, t.Z, Pozycja);
+            var prawo = this.prawo;
+            var przod = this.przod;
+            var gora = this.gora;
+
+            przod = Przeksztalcenie3d.ObrocWokolOsi(przod, new UnitVector3D(0, 1, 0), t.Y);
+            prawo = Przeksztalcenie3d.ObrocWokolOsi(prawo, new UnitVector3D(0, 1, 0), t.Y);
+
+            przod = Przeksztalcenie3d.ObrocWokolOsi(przod, new UnitVector3D(1, 0, 0), t.X);
+            gora = Przeksztalcenie3d.ObrocWokolOsi(gora, new UnitVector3D(1, 0, 0), t.X);
+
+            prawo = Przeksztalcenie3d.ObrocWokolOsi(prawo, new UnitVector3D(0, 0, 1), t.Z);
+            gora = Przeksztalcenie3d.ObrocWokolOsi(gora, new UnitVector3D(0, 0, 1), t.Z);
+
+            this.prawo = prawo;
+            this.przod = przod;
+            this.gora = gora;
+
+            cel = pozycja - przod;
         }
     }
 }
