@@ -199,7 +199,7 @@ namespace Projekt_LGiM
         {
             Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, new Vector3D(0, 0, 0));
 
-            return new UnitVector3D(wynik.X, wynik.Y, wynik.Z);
+            return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }
     }
 }

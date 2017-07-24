@@ -91,6 +91,10 @@ namespace Projekt_LGiM
             prawo = Przeksztalcenie3d.ObrocWokolOsi(prawo, new UnitVector3D(0, 0, 1), t.Z);
             gora = Przeksztalcenie3d.ObrocWokolOsi(gora, new UnitVector3D(0, 0, 1), t.Z);
 
+            prawo = gora.CrossProduct(przod);
+            gora = przod.CrossProduct(prawo);
+            przod = prawo.CrossProduct(gora);
+
             this.prawo = prawo;
             this.przod = przod;
             this.gora = gora;
