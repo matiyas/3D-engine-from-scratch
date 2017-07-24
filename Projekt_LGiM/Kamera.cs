@@ -1,13 +1,11 @@
 ﻿using MathNet.Spatial.Euclidean;
 using MathNet.Numerics.LinearAlgebra.Double;
-using System.Collections.Generic;
-using System;
 
 namespace Projekt_LGiM
 {
     class Kamera
     {
-        private Vector3D pozycja   = new Vector3D(0, 0, 500);
+        private Vector3D pozycja   = new Vector3D(0, 0, -500);
         private Vector3D cel       = new Vector3D(0, 0, 0);
         private UnitVector3D przod = new UnitVector3D(0, 0, 1);
         private UnitVector3D gora  = new UnitVector3D(0, 1, 0);
@@ -57,23 +55,23 @@ namespace Projekt_LGiM
 
         public void DoPrzodu(double ile)
         {
-            UnitVector3D przod = this.przod;
-            pozycja -= new Vector3D(przod.X * -ile, przod.Y * -ile, przod.Z * ile);
-            cel     -= new Vector3D(przod.X * -ile, przod.Y * -ile, przod.Z * ile);
+            UnitVector3D przod = new UnitVector3D(0, 0, 1);
+            pozycja -= new Vector3D(przod.X * ile, przod.Y * ile, przod.Z * -ile);
+            cel     -= new Vector3D(przod.X * ile, przod.Y * ile, przod.Z * -ile);
         }
 
         public void WBok(double ile)
         {
-            UnitVector3D prawo = this.prawo;
-            pozycja -= new Vector3D(prawo.X * -ile, prawo.Y * -ile, prawo.Z * ile);
-            cel     -= new Vector3D(prawo.X * -ile, prawo.Y * -ile, prawo.Z * ile);
+            UnitVector3D prawo = new UnitVector3D(1, 0, 0);
+            pozycja -= new Vector3D(prawo.X * ile, prawo.Y * ile, prawo.Z * -ile);
+            cel     -= new Vector3D(prawo.X * ile, prawo.Y * ile, prawo.Z * -ile);
         }
 
         public void WGore(double ile)
         {
-            UnitVector3D gora = this.gora;
-            pozycja -= new Vector3D(gora.X * -ile, gora.Y * -ile, gora.Z * ile);
-            cel     -= new Vector3D(gora.X * -ile, gora.Y * -ile, gora.Z * ile);
+            UnitVector3D gora = new UnitVector3D(0, 1, 0);
+            pozycja -= new Vector3D(gora.X * ile, gora.Y * ile, gora.Z * -ile);
+            cel     -= new Vector3D(gora.X * ile, gora.Y * ile, gora.Z * -ile);
         }
 
         public void Obroc(Vector3D t)
@@ -81,19 +79,19 @@ namespace Projekt_LGiM
             var prawo = this.prawo;
             var przod = this.przod;
             var gora = this.gora;
+            
+            przod = Math3D.ObrocWokolOsi(przod, gora, -t.Y);
+            prawo = Math3D.ObrocWokolOsi(prawo, gora, -t.Y);
 
-            przod = Przeksztalcenie3d.ObrocWokolOsi(przod, new UnitVector3D(0, 1, 0), t.Y);
-            prawo = Przeksztalcenie3d.ObrocWokolOsi(prawo, new UnitVector3D(0, 1, 0), t.Y);
+            przod = Math3D.ObrocWokolOsi(przod, prawo, -t.X);
+            gora  = Math3D.ObrocWokolOsi( gora, prawo, -t.X);
 
-            przod = Przeksztalcenie3d.ObrocWokolOsi(przod, new UnitVector3D(1, 0, 0), t.X);
-            gora = Przeksztalcenie3d.ObrocWokolOsi(gora, new UnitVector3D(1, 0, 0), t.X);
+            prawo = Math3D.ObrocWokolOsi(prawo, przod, -t.Z);
+            gora  = Math3D.ObrocWokolOsi( gora, przod, -t.Z);
 
-            prawo = Przeksztalcenie3d.ObrocWokolOsi(prawo, new UnitVector3D(0, 0, 1), t.Z);
-            gora = Przeksztalcenie3d.ObrocWokolOsi(gora, new UnitVector3D(0, 0, 1), t.Z);
-
+            przod = prawo.CrossProduct(gora);
             prawo = gora.CrossProduct(przod);
             gora = przod.CrossProduct(prawo);
-            przod = prawo.CrossProduct(gora);
 
             this.prawo = prawo;
             this.przod = przod;

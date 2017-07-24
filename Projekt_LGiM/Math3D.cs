@@ -3,10 +3,11 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using MathNet.Spatial.Euclidean;
+using System;
 
 namespace Projekt_LGiM
 {
-	class Przeksztalcenie3d
+	class Math3D
     {
 		public static Vector3D ZnajdzSrodek(List<Vector3D> punkty)
         {
@@ -126,26 +127,22 @@ namespace Projekt_LGiM
                                                            0,  0,  0,  0,
                                                            0,  0, 1/d, 1 });
             
-            var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt.Inverse() * Proj;
-            
-            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, Odleglosc(punkt, kamera.Pozycja));
+            var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt * Proj;
+
+
+            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, -Odleglosc(kamera.Pozycja, punkt, kamera.Przod));
         }
 
         public static List<Vector3D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
         {
-            var punktyMod = new List<Vector3D>();
-            var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
-                                                           0,  1,  0,  0,
-                                                           0,  0,  0,  0,
-                                                           0,  0, 1/d, 1 });
+            var punktyRzut = new List<Vector3D>(punkty.Count);
 
-            foreach (Vector3D punkt in punkty)
+            foreach(var punkt in punkty)
             {
-                var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt.Inverse() * Proj;
-                punktyMod.Add(new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, -Odleglosc(punkt, kamera.Pozycja)));
+                punktyRzut.Add(RzutPerspektywiczny(punkt, d, c, kamera));
             }
 
-            return punktyMod;
+            return punktyRzut;
         }
 
         public static double CosKat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
@@ -156,9 +153,23 @@ namespace Projekt_LGiM
             return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
 
+        public static double Kat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
+        {
+            zrodlo -= srodek;
+            wierzcholek -= srodek;
+
+            return zrodlo.AngleTo(wierzcholek).Degrees;
+        }
+
         public static double Odleglosc(Vector3D v1, Vector3D v2)
         {
             return Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2));
+        }
+
+        public static double Odleglosc(Vector3D v1, Vector3D v2, UnitVector3D kierunek)
+        {
+            return Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2)) 
+                * Sign((v1.X - v2.X) * kierunek.X + (v1.Y - v2.Y) * kierunek.Y + (v1.Z - v2.Z) * kierunek.Z) - 1000;
         }
 
         public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
