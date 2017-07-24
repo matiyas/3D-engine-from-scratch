@@ -52,8 +52,8 @@ namespace Projekt_LGiM
             swiat[0].Przesun(new Vector3D(0, 0, 600));
             swiat[0].Skaluj(new Vector3D(100, 100, 100));
 
-            //WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
-            //swiat[1].Przesun(new Vector3D(600, 0, -600));
+            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            swiat[1].Przesun(new Vector3D(600, 0, 600));
             {
                 //modele[1].Przesun(new Vector3D(300, 0, 0));
                 //modele[1].Skaluj(new Vector3D(-95, -95, -95));
