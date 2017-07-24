@@ -294,8 +294,8 @@ namespace Projekt_LGiM
 
         void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            Console.WriteLine(kamera.Pozycja);
-            Console.WriteLine(-Math3D.Odleglosc(kamera.Pozycja, zrodloSwiatla, kamera.Przod));
+            //Console.WriteLine(kamera.Pozycja);
+            //Console.WriteLine(-Math3D.Odleglosc(kamera.Pozycja, zrodloSwiatla, kamera.Przod));
 
             switch (e.Key)
             {
