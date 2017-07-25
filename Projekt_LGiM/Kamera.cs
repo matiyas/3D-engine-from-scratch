@@ -5,12 +5,14 @@ namespace Projekt_LGiM
 {
     class Kamera
     {
-        Vector3D pozycja   = new Vector3D(0, 0, -500);
+        Vector3D pozycja   = new Vector3D(0, 0, 10);
         Vector3D cel       = new Vector3D(0, 0, 0);
         UnitVector3D przod = new UnitVector3D(0, 0, 1);
         UnitVector3D gora  = new UnitVector3D(0, 1, 0);
         UnitVector3D prawo = new UnitVector3D(1, 0, 0);
 
+        public Vector3D RealPos { get; private set; }  = new Vector3D(0, 0, 10);
+        public Vector3D RealTarget { get; private set; } = new Vector3D(0, 0, 0);
         public Vector3D Pozycja
         {
             get { return pozycja; }
@@ -76,23 +78,15 @@ namespace Projekt_LGiM
 
         public void Obroc(Vector3D t)
         {
-            var prawo = this.prawo;
-            var przod = this.przod;
-            var gora = this.gora;
-            
             przod = Math3D.ObrocWokolOsi(przod, gora, -t.Y);
-            prawo = Math3D.ObrocWokolOsi(prawo, gora, -t.Y);
+            prawo = gora.CrossProduct(przod);
 
             przod = Math3D.ObrocWokolOsi(przod, prawo, -t.X);
-            gora  = Math3D.ObrocWokolOsi( gora, prawo, -t.X);
+            gora = przod.CrossProduct(prawo);
 
             prawo = Math3D.ObrocWokolOsi(prawo, przod, -t.Z);
-            gora  = Math3D.ObrocWokolOsi( gora, przod, -t.Z);
-
-            this.prawo = prawo;
-            this.przod = przod;
-            this.gora = gora;
-
+            gora = przod.CrossProduct(prawo);
+            
             cel = pozycja - przod;
         }
     }

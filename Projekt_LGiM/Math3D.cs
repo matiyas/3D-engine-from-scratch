@@ -125,10 +125,10 @@ namespace Projekt_LGiM
                                                            0,  1,  0,  0,
                                                            0,  0,  1,  0,
                                                            0,  0, 1/d, 1 });
-            
+
             var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt * Proj;
 
-            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, p[2] / p[3]);
+            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, p[2] + d/* kalibracja */);
         }
 
         public static List<Vector3D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
@@ -143,6 +143,11 @@ namespace Projekt_LGiM
             return punktyRzut;
         }
 
+        public static bool CzyStoiPrzed(Vector3D v0, Vector3D v1, UnitVector3D kierunek)
+        {
+            return (v0.X - v1.X) * kierunek.X + (v0.Y - v1.Y) * kierunek.Y + (v0.Z - v1.Z) * kierunek.Z > 0;
+        }
+
         public static double CosKat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
         {
             zrodlo -= srodek;
@@ -151,6 +156,24 @@ namespace Projekt_LGiM
             return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
         
+        public static double Kat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
+        {
+            zrodlo -= srodek;
+            wierzcholek -= srodek;
+
+            double wynik;
+            
+            try
+            {
+                wynik = zrodlo.AngleTo(wierzcholek).Degrees;
+            }
+            catch
+            {
+                wynik = 0;
+            }
+            return wynik;
+        }
+
         public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
         {
             kat /= 100;
@@ -181,6 +204,13 @@ namespace Projekt_LGiM
         public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat)
         {
             Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, new Vector3D(0, 0, 0));
+
+            return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
+        }
+
+        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat, Vector3D c)
+        {
+            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, c);
 
             return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }

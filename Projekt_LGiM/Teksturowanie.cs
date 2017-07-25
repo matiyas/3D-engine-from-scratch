@@ -110,7 +110,7 @@ namespace Projekt_LGiM
                         double z = x1.Z + (x0.Z - x1.Z) * m;
                         double jasnosc = vn1 + (vn0 - vn1) * m;
 
-                        if (x >= 0 && x < buforZ.GetLength(0) && y >=0 && y < buforZ.GetLength(1) && buforZ[x, y] > z)
+                        if (x >= 0 && x < buforZ.GetLength(0) && y >=0 && y < buforZ.GetLength(1) && buforZ[x, y] > z && z > 300)
                         {
                             double d10x = wektor[1].X - wektor[0].X;
                             double d20y = wektor[2].Y - wektor[0].Y;
