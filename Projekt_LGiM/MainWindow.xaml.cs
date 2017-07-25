@@ -378,6 +378,12 @@ namespace Projekt_LGiM
             }
         }
 
+        private void MenuSterowanie_Click(object sender, RoutedEventArgs e)
+        {
+            var sterowanie = new Sterowaniexaml();
+            sterowanie.Show();
+        }
+
         void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
         {
             if (e.LeftButton  == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
