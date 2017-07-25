@@ -1,97 +1,220 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Diagnostics;
 using System.Threading;
-using Microsoft.Win32;
 using MathNet.Spatial.Euclidean;
+using System.Windows.Controls;
+using System;
 
 namespace Projekt_LGiM
 {
     public partial class MainWindow : Window
     {
-        private byte[] pixs, tmpPixs;
-        private Rysownik rysownik;
-        private double dpi;
-        private Size rozmiarPlotna;
-        private Point srodek;
-        private Point lpm0, ppm0;
-        private List<WavefrontObj> modele;
-        private double lastTransX, lastTransY, lastTransZ;
-        private double lastRotateX, lastRotateY, lastRotateZ;
-        private double lastScaleX, lastScaleY, lastScaleZ;
+        byte[] pixs, tmpPixs;
+        Rysownik rysownik;
+        Size rozmiarPlotna;
+        Point srodek;
+        Point lpm0, ppm0;
+        List<WavefrontObj> swiat;
+        Vector3D zrodloSwiatla;
+        Kamera kamera;
+        double dpi;
+        double odleglosc;
+        double czuloscMyszy;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            lastTransX = lastTransY = lastTransZ = 0;
-            lastRotateX = lastRotateY = lastRotateZ = 0;
-            lastScaleX = lastScaleY = lastScaleZ = 0;
-
-            SliderRotacjaX.Minimum = SliderRotacjaY.Minimum = SliderRotacjaZ.Minimum = -200 * Math.PI;
-            SliderRotacjaX.Maximum = SliderRotacjaY.Maximum = SliderRotacjaZ.Maximum =  200 * Math.PI;
-
             dpi = 96;
+            czuloscMyszy = 0.3;
+            odleglosc = 1000;
 
-            // Poczekanie na załadowanie się ramki i obliczenie na podstawie 
-            // jej rozmiaru rozmiaru tablicy przechowującej piksele.
-            Loaded += delegate
+            string sciezkaTlo   = @"tekstury\stars.jpg";
+            string sciezkaModel = @"modele\shaded.obj";
+
+            pixs    = Rysownik.ToByteArray(sciezkaTlo);
+            tmpPixs = Rysownik.ToByteArray(sciezkaTlo);
+
+            rozmiarPlotna.Width  = System.Drawing.Image.FromFile(sciezkaTlo).Width;
+            rozmiarPlotna.Height = System.Drawing.Image.FromFile(sciezkaTlo).Height;
+
+            srodek.X = rozmiarPlotna.Width / 2;
+            srodek.Y = rozmiarPlotna.Height / 2;
+
+            swiat    = new List<WavefrontObj>();
+            kamera   = new Kamera();
+
+            rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
+            WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
+            swiat[0].Przesun(new Vector3D(0, 0, 600));
+            swiat[0].Skaluj(new Vector3D(100, 100, 100));
+
+            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            swiat[1].Przesun(new Vector3D(600, 0, 600));
             {
-                rozmiarPlotna.Width = RamkaEkran.ActualWidth;
-                rozmiarPlotna.Height = RamkaEkran.ActualHeight;
+                //modele[1].Przesun(new Vector3D(300, 0, 0));
+                //modele[1].Skaluj(new Vector3D(-95, -95, -95));
 
-                srodek.X = rozmiarPlotna.Width / 2;
-                srodek.Y = rozmiarPlotna.Height / 2;
+                //WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
+                //modele[2].Przesun(new Vector3D(400, 0, 0));
+                //modele[2].Skaluj(new Vector3D(-88, -88, -88));
 
-                pixs    = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
-                tmpPixs = new byte[(int)(4 * rozmiarPlotna.Width * rozmiarPlotna.Height)];
+                //WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
+                //modele[3].Przesun(new Vector3D(600, 0, 0));
+                //modele[3].Skaluj(new Vector3D(-87, -87, -87));
 
-                modele = new List<WavefrontObj>();
-                rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
+                //WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
+                //modele[4].Przesun(new Vector3D(900, 0, 0));
+                //modele[4].Skaluj(new Vector3D(-93, -93, -93));
 
-                // Przygotowanie ekranu i rysownika
-                rysownik.UstawTlo(0, 0, 0, 255);
-                rysownik.UstawPedzel(0, 255, 0, 255);
-                rysownik.CzyscEkran();
+                //WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
+                //modele[5].Przesun(new Vector3D(1300, 0, 0));
+                //modele[5].Skaluj(new Vector3D(42, 42, 42));
 
-                Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
+                //WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
+                //modele[6].Przesun(new Vector3D(1800, 0, 0));
+                //modele[6].Skaluj(new Vector3D(20, 20, 20));
+
+                //WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
+                //modele[7].Przesun(new Vector3D(2400, 0, 0));
+                //modele[7].Skaluj(new Vector3D(-49, -49, -49));
+
+                //WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
+                //modele[8].Przesun(new Vector3D(3100, 0, 0));
+                //modele[8].Skaluj(new Vector3D(-51, -51, -51));
+            }
+
+            ComboModele.SelectedIndex = 0;
+
+            // Przygotowanie ekranu i rysownika
+            rysownik.UstawTlo(0, 0, 0, 255);
+            rysownik.UstawPedzel(0, 255, 0, 255);
+
+            Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-                var t = new Thread(new ParameterizedThreadStart((e) =>
+            zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[0].VertexCoords);
+
+            var t = new Thread(new ParameterizedThreadStart((e) =>
+            {
+                while (true)
                 {
-                    while (true)
+                    //if (modele.Count >= 9)
                     {
-                        if (modele != null)
+                        Dispatcher.Invoke(() =>
                         {
-                            foreach (var model in modele)
                             {
-                                model.Obroc(0, 1, 0);
+                                //modele[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+
+                                //modele[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
+                                //modele[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
+                                //modele[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
+                                //modele[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
+                                //modele[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                //modele[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
+                                //modele[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
+                                //modele[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+
+                                //modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                //modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
                             }
-                            Dispatcher.Invoke(() => RysujNaEkranie(modele), System.Windows.Threading.DispatcherPriority.Render);
-                        }
 
-                        Thread.Sleep(50);
+                            RysujNaEkranie(swiat);
+                        }, System.Windows.Threading.DispatcherPriority.Render);
                     }
-                }));
 
-                t.IsBackground = true;
-                //t.Start();
+                    Thread.Sleep(20);
+                }
+            }));
 
-                RysujNaEkranie(modele);
-            };
+            t.IsBackground = true;
+            t.Start();
         }
 
-        private void RysujNaEkranie(List<WavefrontObj> modele)
+        void WczytajModel(string sciezkaModel, string sciezkaTekstura)
         {
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            swiat.Add(new WavefrontObj(sciezkaModel));
+            swiat[swiat.Count - 1].Teksturowanie = new Teksturowanie(sciezkaTekstura, rysownik);
 
+            var item = new ComboBoxItem()
+            {
+                Content = swiat[swiat.Count - 1].Nazwa
+            };
+            ComboModele.Items.Add(item);
+            ComboModele.SelectedIndex = ComboModele.Items.Count - 1;
+
+            swiat[ComboModele.SelectedIndex].Obroc(new Vector3D(Math.PI * 100, 0, 0));
+        }
+
+        void RysujSiatke()
+        {
             rysownik.CzyscEkran();
+
+            for (int z = -1000; z <= 1000; z += 100)
+            {
+                for (int x = -1000; x <= 1000; x += 100)
+                {
+                    var p0 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+                    var p1 = Math3D.RzutPerspektywiczny(new Vector3D(-x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+                    var p2 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, -z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+
+                    if (x == 0/* && p0.Z > 100 && p2.Z > 100*/)
+                    {
+                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 0, 0, 255);
+                    }
+                    else if (z == 0 /*&& p0.Z > 100 && p1.Z > 100*/)
+                    {
+                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 255, 0, 0);
+                    }
+                    else /*if(p0.X > 100)*/
+                    {
+                        /*if (p1.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 127, 127, 127); }
+                        /*if (p2.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 127, 127, 127); }
+                    }
+                }
+            }
+
+            foreach (WavefrontObj model in swiat)
+            {
+                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                    new Vector2D(srodek.X, srodek.Y), kamera);
+
+                foreach (WavefrontObj.Sciana sciana in model.Sciany)
+                {
+                    for (int i = 0; i < sciana.Vertex.Count; ++i)
+                    {
+                        //if(modelRzut[sciana.Vertex[i]].Z > 100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z > 100)
+                        {
+                            rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
+                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
+                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y, 0, 255, 0);
+                        }
+                    }
+                }
+            }
+        }
+
+        void RysujTeksture()
+        {
+            rysownik.Reset();
 
             var buforZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
 
@@ -103,239 +226,132 @@ namespace Projekt_LGiM
                 }
             }
 
-            foreach (var model in modele)
+            foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> punktyMod = Przeksztalcenie3d.RzutPerspektywicznyZ(model.VertexCoords, 500, srodek.X, srodek.Y);
-                List<Vector2D> norm = Przeksztalcenie3d.RzutPerspektywiczny(model.VertexNormalsCoords, 500, srodek.X, srodek.Y);
+                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc, 
+                    new Vector2D(srodek.X, srodek.Y), kamera);
 
-                var ss = Przeksztalcenie3d.ZnajdzSrodek(model.VertexCoords);
-                var s = Przeksztalcenie3d.ZnajdzSrodek(modele[0].VertexCoords);
+                var srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
 
-                if (model.Sciany != null && punktyMod != null)
+                if (model.Sciany != null && modelRzut != null && model.Teksturowanie != null)
                 {
-                    if (CheckTeksturuj.IsChecked == true && model.Teksturowanie != null)
+                    foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        // Rysowanie tekstury na ekranie
-                        foreach (var sciana in model.ScianyTrojkatne)
+                        //if (modelRzut[sciana.Vertex[0]].Z < -150 && modelRzut[sciana.Vertex[1]].Z < -150
+                        //    && modelRzut[sciana.Vertex[2]].Z < -150)
                         {
-                            if (model.VertexCoords[sciana.Vertex[0]].Z > -450 && model.VertexCoords[sciana.Vertex[1]].Z > -450
-                                && model.VertexCoords[sciana.Vertex[2]].Z > -450)
-                            {
-                                List<double> lvn = new List<double>(3);
+                            List<double> gradient = new List<double>(3);
 
-                                if (model != modele[0])
+                            gradient = model != swiat[0] ? new List<double>()
                                 {
-                                    lvn = new List<double>()
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
+                                } : new List<double>() { 1, 1, 1 };
+
+                            var obszar = new List<Vector3D>()
+                                {
+                                    modelRzut[sciana.Vertex[0]],
+                                    modelRzut[sciana.Vertex[1]],
+                                    modelRzut[sciana.Vertex[2]],
+                                };
+
+                            List<Vector2D> tekstura = new List<Vector2D> { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
+
+                            if (sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0)
+                            {
+                                tekstura = new List<Vector2D>
                                     {
-                                        Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[0]], ss),
-                                        Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[1]], ss),
-                                        Przeksztalcenie3d.CosKat(s, model.VertexNormalsCoords[sciana.VertexNormal[2]], ss)
+                                        model.VertexTextureCoords[sciana.VertexTexture[0]],
+                                        model.VertexTextureCoords[sciana.VertexTexture[1]],
+                                        model.VertexTextureCoords[sciana.VertexTexture[2]],
                                     };
-                                }
-                                else
-                                {
-                                    lvn = new List<double>() { 1, 1, 1 };
-                                }
-
-                                var obszar = new List<Vector3D>()
-                                {
-                                    punktyMod[sciana.Vertex[0]],
-                                    punktyMod[sciana.Vertex[1]],
-                                    punktyMod[sciana.Vertex[2]],
-                                };
-
-                                var tekstura = new List<Vector2D>
-                                {
-                                    model.VertexTextureCoords[sciana.VertexTexture[0]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[1]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[2]],
-                                };
-
-                                model.Teksturowanie.Teksturuj(obszar, lvn, tekstura, buforZ);
                             }
+
+                            model.Teksturowanie.Teksturuj(obszar, gradient, tekstura, buforZ);
                         }
                     }
-
-                    // Rysowanie siatki na ekranie
-                    if (CheckSiatka.IsChecked == true)
-                    {
-                        foreach (WavefrontObj.Sciana sciana in model.Sciany)
-                        {
-                            for (int i = 0; i < sciana.Vertex.Count; ++i)
-                            {
-                                if(model.VertexCoords[sciana.Vertex[i]].Z > -450 && model.VertexCoords[sciana.Vertex[i]].Z > -450)
-                                {
-                                    rysownik.RysujLinie((int)punktyMod[sciana.Vertex[i]].X, (int)punktyMod[sciana.Vertex[i]].Y,
-                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
-                                    (int)punktyMod[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y);
-                                }
-                            }
-                        }
-                    }
-
-                    Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
-                    PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
-
                 }
-
-                stopWatch.Stop();
-                LabelFps.Content = (1000 / stopWatch.ElapsedMilliseconds).ToString() + " fps";
             }
+        }
+
+        void RysujNaEkranie(List<WavefrontObj> modele)
+        {
+            if (CheckSiatka.IsChecked == false)      { RysujTeksture(); }
+            else                                     { RysujSiatke();   }
+            
+            Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
+                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
         }
         
-        private void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
+        void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0)
-            {
-                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, -10);
-            }
-            else
-            {
-                modele[ComboBoxModele.SelectedIndex].Przesun(0, 0, 10);
-            }
+            if (e.Delta > 0) { odleglosc += 100; }
+            else             { odleglosc -= 100; }
 
-            RysujNaEkranie(modele);
+            Console.WriteLine(odleglosc);
         }
 
-        private void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
+        void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            Console.WriteLine(kamera.Pozycja);
+            Console.WriteLine(Math3D.RzutPerspektywiczny(zrodloSwiatla, odleglosc, new Vector2D(srodek.X, srodek.Y), kamera).Z);
+
+            switch (e.Key)
+            {
+                case Key.W:
+                    kamera.DoPrzodu(50);
+                    break;
+
+                case Key.S:
+                    kamera.DoPrzodu(-50);
+                    break;
+
+                case Key.A:
+                    kamera.WBok(50);
+                    break;
+
+                case Key.D:
+                    kamera.WBok(-50);
+                    break;
+
+                case Key.Space:
+                    kamera.WGore(50);
+                    break;
+
+                case Key.LeftCtrl:
+                    kamera.WGore(-50);
+                    break;
+            }
+        }
+
+        void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //kamera.Cel = Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
+        }
+
+        void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
+        {
+            if (e.LeftButton  == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
+            if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
+        }
+
+        void Ekran_MouseMove(object sender,  MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                lpm0 = e.GetPosition(Ekran);
-            }
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                ppm0 = e.GetPosition(Ekran);
-            }
-        }
-
-        private void Ekran_MouseMove(object sender,  MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (Keyboard.IsKeyDown(Key.LeftShift))
+                if(Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    modele[ComboBoxModele.SelectedIndex].Obroc(0, 0, -(lpm0.X - e.GetPosition(Ekran).X));
+                    kamera.Obroc(new Vector3D(0, 0, -(lpm0.X - e.GetPosition(Ekran).X) / 2));
                 }
                 else
                 {
-                    modele[ComboBoxModele.SelectedIndex].Obroc(-(lpm0.Y - e.GetPosition(Ekran).Y), lpm0.X - e.GetPosition(Ekran).X, 0);
+                    kamera.Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y) * czuloscMyszy, 
+                        (lpm0.X - e.GetPosition(Ekran).X) * czuloscMyszy, 0));
                 }
-                RysujNaEkranie(modele);
+
                 lpm0 = e.GetPosition(Ekran);
             }
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                modele[ComboBoxModele.SelectedIndex].Przesun(-(ppm0.X - e.GetPosition(Ekran).X), -(ppm0.Y - e.GetPosition(Ekran).Y), 0);
-                RysujNaEkranie(modele);
-                ppm0 = e.GetPosition(Ekran);
-            }
         }
-
-        private void SliderTranslacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            modele[ComboBoxModele.SelectedIndex].Przesun(SliderTranslacjaX.Value - lastTransX, SliderTranslacjaY.Value - lastTransY, 
-                SliderTranslacjaZ.Value - lastTransZ);
-            RysujNaEkranie(modele);
-
-            lastTransX = SliderTranslacjaX.Value;
-            lastTransY = SliderTranslacjaY.Value;
-            lastTransZ = SliderTranslacjaZ.Value;
-        }
-
-        private void SliderRotacja_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            modele[ComboBoxModele.SelectedIndex].Obroc(SliderRotacjaX.Value - lastRotateX, SliderRotacjaY.Value - lastRotateY,
-                SliderRotacjaZ.Value - lastRotateZ);
-            RysujNaEkranie(modele);
-
-            lastRotateX = SliderRotacjaX.Value;
-            lastRotateY = SliderRotacjaY.Value;
-            lastRotateZ = SliderRotacjaZ.Value;
-        }
-
-        private void SliderSkalowanie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            modele[ComboBoxModele.SelectedIndex].Skaluj(SliderSkalowanieX.Value - lastScaleX, SliderSkalowanieY.Value - lastScaleY,
-                SliderSkalowanieZ.Value - lastScaleZ);
-            RysujNaEkranie(modele);
-
-            lastScaleX = SliderSkalowanieX.Value;
-            lastScaleY = SliderSkalowanieY.Value;
-            lastScaleZ = SliderSkalowanieZ.Value;
-        }
-
-        private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
-        {
-            lastTransX = lastTransY = lastTransZ = 0;
-            lastRotateX = lastRotateY = lastRotateZ = 0;
-            lastScaleX = lastScaleY = lastScaleZ = 0;
-
-            foreach (object slider in GridTranslacja.Children)
-            {
-                if (slider is Slider)
-                {
-                    ((Slider)slider).Value = 0;
-                }
-            }
-
-            foreach (object slider in GridRotacja.Children)
-            {
-                if (slider is Slider)
-                {
-                    ((Slider)slider).Value = 0;
-                }
-            }
-
-            foreach (object slider in GridSkalowanie.Children)
-            {
-                if (slider is Slider)
-                {
-                    ((Slider)slider).Value = 0;
-                }
-            }
-        }
-
-        private void CheckSiatka_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(modele);
-        
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new OpenFileDialog();
-
-            switch((sender as MenuItem).Name)
-            {
-                case "MenuItemModel":
-                    fileDialog.Filter = "Waveform (*.obj)|*.obj";
-                    if (fileDialog.ShowDialog() == true)
-                    {
-                        modele.Add(new WavefrontObj(fileDialog.FileName));
-                        RysujNaEkranie(modele);
-                        var item = new ComboBoxItem()
-                        {
-                            Content = modele[modele.Count - 1].Nazwa
-                        };
-                        ComboBoxModele.Items.Add(item);
-                        ComboBoxModele.SelectedIndex = ComboBoxModele.Items.Count - 1;
-                        MenuItemTekstura.IsEnabled = true;
-                    }
-                    break;
-
-                case "MenuItemTekstura":
-                    fileDialog.Filter = "JPEG (*.jpg;*jpeg;*jpe;*jfif)|*.jpg;*jpeg;*jpe;*jfif";
-                    if (fileDialog.ShowDialog() == true)
-                    {
-                        modele[ComboBoxModele.SelectedIndex].Teksturowanie = new Teksturowanie(fileDialog.FileName, rysownik);
-                        if (CheckTeksturuj.IsChecked == true)
-                        {
-                            RysujNaEkranie(modele);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        private void SliderOdleglosc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => RysujNaEkranie(modele);
-
-        private void CheckTeksturuj_Click(object sender, RoutedEventArgs e) => RysujNaEkranie(modele);
     }
 }

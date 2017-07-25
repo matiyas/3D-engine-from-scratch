@@ -64,7 +64,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Przeksztalcenie3d.cs" />
+    <Compile Include="Kamera.cs" />
+    <Compile Include="Math3D.cs" />
     <Compile Include="Rysowink.cs" />
     <Compile Include="Teksturowanie.cs" />
     <Compile Include="WavefrontObj.cs" />
@@ -99,6 +100,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="bin\Debug\modele\shaded.obj" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -107,6 +109,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\tekstury\earth.jpg" />
+    <Resource Include="bin\Debug\tekstury\jupiter.jpg" />
+    <Resource Include="bin\Debug\tekstury\mars.jpg" />
+    <Resource Include="bin\Debug\tekstury\mercury.jpg" />
+    <Resource Include="bin\Debug\tekstury\neptun.jpg" />
+    <Resource Include="bin\Debug\tekstury\saturn.jpg" />
+    <Resource Include="bin\Debug\tekstury\stars.jpg" />
+    <Resource Include="bin\Debug\tekstury\sun.jpg" />
+    <Resource Include="bin\Debug\tekstury\uran.jpg" />
+    <Resource Include="bin\Debug\tekstury\venus.jpg" />
+    <Resource Include="bin\Debug\tekstury\world.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

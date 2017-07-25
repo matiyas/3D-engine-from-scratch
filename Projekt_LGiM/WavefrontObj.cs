@@ -130,22 +130,28 @@ namespace Projekt_LGiM
         public Teksturowanie Teksturowanie { get; set; }
         public string Nazwa { get; private set; }
 
-        public void Przesun(double tx, double ty, double tz)
+        public void Przesun(Vector3D t)
         {
-            VertexCoords = Przeksztalcenie3d.Translacja(VertexCoords, tx, ty, tz);
-            VertexNormalsCoords = Przeksztalcenie3d.Translacja(VertexNormalsCoords, tx, ty, tz);
+            VertexCoords = Math3D.Translacja(VertexCoords, t);
+            VertexNormalsCoords = Math3D.Translacja(VertexNormalsCoords, t);
         }
 
-        public void Obroc(double phiX, double phiY, double phiZ)
+        public void Obroc(Vector3D phi)
         {
-            VertexCoords = Przeksztalcenie3d.Rotacja(VertexCoords, phiX, phiY, phiZ);
-            VertexNormalsCoords = Przeksztalcenie3d.Rotacja(VertexNormalsCoords, phiX, phiY, phiZ);
+            VertexCoords = Math3D.Rotacja(VertexCoords, phi, Math3D.ZnajdzSrodek(VertexCoords));
+            VertexNormalsCoords = Math3D.Rotacja(VertexNormalsCoords, phi, Math3D.ZnajdzSrodek(VertexNormalsCoords));
         }
 
-        public void Skaluj(double sx, double sy, double sz)
+        public void Obroc(Vector3D phi, Vector3D c)
         {
-            VertexCoords = Przeksztalcenie3d.Skalowanie(VertexCoords, sx, sy, sz);
-            VertexNormalsCoords = Przeksztalcenie3d.Skalowanie(VertexNormalsCoords, sx, sy, sz);
+            VertexCoords = Math3D.Rotacja(VertexCoords, phi, c);
+            VertexNormalsCoords = Math3D.Rotacja(VertexNormalsCoords, phi, c);
+        }
+
+        public void Skaluj(Vector3D s)
+        {
+            VertexCoords = Math3D.Skalowanie(VertexCoords, s);
+            VertexNormalsCoords = Math3D.Skalowanie(VertexNormalsCoords, s);
         }
     }
 }

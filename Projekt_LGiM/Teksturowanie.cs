@@ -9,10 +9,10 @@ namespace Projekt_LGiM
 {
     class Teksturowanie
     {
-        private string sciezka;
-        private Rysownik rysownik;
-        private Drawing.Size rozmiarTekstury;
-        private Color[,] teksturaKolory;
+        string sciezka;
+        Rysownik rysownik;
+        Drawing.Size rozmiarTekstury;
+        Color[,] teksturaKolory;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
@@ -38,7 +38,7 @@ namespace Projekt_LGiM
             }
         }
 
-        public void Teksturuj(List<Vector3D> wektor, List<double> wektorNormalny, List<Vector2D> wektorTekstura, double[,] bufferZ)
+        public void Teksturuj(List<Vector3D> wektor, List<double> wektorNormalny, List<Vector2D> wektorTekstura, double[,] buforZ)
         {
             for(int i = 0; i < wektorTekstura.Count; ++i)
             {
@@ -49,14 +49,14 @@ namespace Projekt_LGiM
             Vector3D y0 = tmp.First();
             Vector3D y1 = tmp.Last();
 
-            List<Vector3D> punktyWypelnienie;
-            List<double> lvn;
+            List<Vector3D> graniczneX;
+            List<double> gradiendt;
 
             // Przechodź po obszarze figury od góry
             for (int y = (int)y0.Y; y <= y1.Y; ++y)
             {
-                punktyWypelnienie = new List<Vector3D>();
-                lvn = new List<double>(); 
+                graniczneX = new List<Vector3D>();
+                gradiendt = new List<double>(); 
 
                 // Przechodź po wszystkich krawędziach trójkąta
                 for (int i = 0; i < wektor.Count; ++i)
@@ -76,30 +76,30 @@ namespace Projekt_LGiM
                         double m = (wektor[i].Y - y) / (wektor[i].Y - wektor[j].Y);
                         double z = wektor[i].Z + (wektor[j].Z - wektor[i].Z) * m;
                         double cos = wektorNormalny[i] + (wektorNormalny[j] - wektorNormalny[i]) * m;
-                        punktyWypelnienie.Add(new Vector3D(x, y, z));
-                        lvn.Add(cos);
+                        graniczneX.Add(new Vector3D(x, y, z));
+                        gradiendt.Add(cos);
                     }
                 }
 
-                if (punktyWypelnienie.Count > 1)
+                if (graniczneX.Count > 1)
                 {
-                    Vector3D x0 = punktyWypelnienie[0];
-                    Vector3D x1 = punktyWypelnienie[0];
-                    double vn0 = lvn[0];
-                    double vn1 = lvn[0];
+                    Vector3D x0 = graniczneX[0];
+                    Vector3D x1 = graniczneX[0];
+                    double vn0 = gradiendt[0];
+                    double vn1 = gradiendt[0];
                     
-                    for (int i = 1; i < punktyWypelnienie.Count; ++i)
+                    for (int i = 1; i < graniczneX.Count; ++i)
                     {
-                        if (x0.X > punktyWypelnienie[i].X)
+                        if (x0.X > graniczneX[i].X)
                         {
-                            x0 = punktyWypelnienie[i];
-                            vn0 = lvn[i];
+                            x0 = graniczneX[i];
+                            vn0 = gradiendt[i];
                         }
 
-                        if (x1.X < punktyWypelnienie[i].X)
+                        if (x1.X < graniczneX[i].X)
                         {
-                            x1 = punktyWypelnienie[i];
-                            vn1 = lvn[i];
+                            x1 = graniczneX[i];
+                            vn1 = gradiendt[i];
                         }
                     }
 
@@ -108,9 +108,9 @@ namespace Projekt_LGiM
                     {
                         double m = (x1.X - x) / (x1.X - x0.X);
                         double z = x1.Z + (x0.Z - x1.Z) * m;
-                        double cos = vn1 + (vn0 - vn1) * m;
+                        double jasnosc = vn1 + (vn0 - vn1) * m;
 
-                        if (x >= 0 && x < bufferZ.GetLength(0) && y >=0 && y < bufferZ.GetLength(1) && bufferZ[x, y] > z)
+                        if (x >= 0 && x < buforZ.GetLength(0) && y >=0 && y < buforZ.GetLength(1) && buforZ[x, y] > z)
                         {
                             double d10x = wektor[1].X - wektor[0].X;
                             double d20y = wektor[2].Y - wektor[0].Y;
@@ -148,14 +148,14 @@ namespace Projekt_LGiM
                                     
                                     var c = new Color()
                                     {
-                                        R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * cos),
-                                        G = (byte)((db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)) * cos),
-                                        B = (byte)((db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)) * cos),
+                                        R = (byte)((db * (da * kolorP1.R + a * kolorP3.R) + b * (da * kolorP2.R + a * kolorP4.R)) * jasnosc),
+                                        G = (byte)((db * (da * kolorP1.G + a * kolorP3.G) + b * (da * kolorP2.G + a * kolorP4.G)) * jasnosc),
+                                        B = (byte)((db * (da * kolorP1.B + a * kolorP3.B) + b * (da * kolorP2.B + a * kolorP4.B)) * jasnosc),
                                         A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                                     };
 
                                     rysownik.RysujPiksel(x, y, c);
-                                    bufferZ[x, y] = z;
+                                    buforZ[x, y] = z;
                                 }
                             }
                         }

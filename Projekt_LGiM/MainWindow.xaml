@@ -1,131 +1,80 @@
-﻿<Window x:Class="Projekt_LGiM.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Projekt_LGiM"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="661.703" Width="904">
-    <Grid x:Name="GridMain">
+﻿<Window 
+    x:Class="Projekt_LGiM.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:Projekt_LGiM"
+    mc:Ignorable="d"
+    Title="MainWindow"
+    Height="620" 
+    Width="1075"
+    KeyDown="Window_KeyDown">
+    <Grid 
+        x:Name="GridMain">
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition
+                Height="0"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition Width="230"/>
+            <ColumnDefinition 
+                Width="230"/>
         </Grid.ColumnDefinitions>
-        <Border x:Name="RamkaEkran" BorderBrush="#FFA8A8A8" BorderThickness="1" Margin="10,10,0,10" Grid.Row="1">
-            <Image x:Name="Ekran" d:IsHidden="True" MouseWheel="Ekran_MouseWheel" MouseDown="Ekran_MouseDown" 
-                   MouseMove="Ekran_MouseMove"/>
+        <Border
+            x:Name="RamkaEkran"
+            BorderBrush="#FFA8A8A8" 
+            BorderThickness="1" 
+            Margin="10,10,0,10" 
+            Grid.Row="1">
+            <Image 
+                x:Name="Ekran" 
+                d:IsHidden="True" 
+                MouseWheel="Ekran_MouseWheel" 
+                MouseDown="Ekran_MouseDown" 
+                MouseMove="Ekran_MouseMove"/>
         </Border>
-        <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="0,10,0,0" Grid.Row="1" Height="592">
-            <StackPanel x:Name="FooPanel" Margin="10,0,0,0">
-                <Expander x:Name="GroupBoxTranslacja" Header="Translacja" Margin="0">
-                    <Grid x:Name="GridTranslacja" Margin="0,10,0,-2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="10*"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="SliderTranslacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="0,5" 
-                            Minimum="-100" Maximum="100" ValueChanged="SliderTranslacja_ValueChanged" 
-                            Thumb.DragCompleted="Slider_DragCompleted" VerticalContentAlignment="Center"/>
-                        <Slider x:Name="SliderTranslacjaY" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
-                            VerticalAlignment="Center" Margin="0,5" Maximum="100" Minimum="-100" 
-                            Thumb.DragCompleted="Slider_DragCompleted" ValueChanged="SliderTranslacja_ValueChanged" />
-                        <Slider x:Name="SliderTranslacjaZ" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="0,5" Maximum="100" Minimum="-100" ValueChanged="SliderTranslacja_ValueChanged"
-                            Thumb.DragCompleted="Slider_DragCompleted"/>
-                        <Label x:Name="EtykietaTranslacjaX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaTranslacjaY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaTranslacjaZ" Content="Z" Grid.Row="2" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                    </Grid>
-                </Expander>
-                <Expander x:Name="GroupBoxRotacja" Header="Rotacja" VerticalContentAlignment="Stretch">
-                    <Grid x:Name="GridRotacja" Margin="0,10,0,-2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="10*"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="SliderRotacjaX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="0,5"
-                            ValueChanged="SliderRotacja_ValueChanged" Thumb.DragCompleted="Slider_DragCompleted"/>
-                        <Slider x:Name="SliderRotacjaY" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center"
-                            VerticalAlignment="Center" Margin="0,5" ValueChanged="SliderRotacja_ValueChanged"
-                            Thumb.DragCompleted="Slider_DragCompleted"/>
-                        <Slider x:Name="SliderRotacjaZ" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="0,5" ValueChanged="SliderRotacja_ValueChanged" Thumb.DragCompleted="Slider_DragCompleted"/>
-                        <Label x:Name="EtykietaRotacjaX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaRotacjaY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaRotacjaZ" Content="Z" Grid.Row="2" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                    </Grid>
-                </Expander>
-                <Expander x:Name="GroupBoxSkalowanie" Header="Skalowanie">
-                    <Grid x:Name="GridSkalowanie" Margin="0,10,0,-2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="10*"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="SliderSkalowanieX" Grid.Column="1" VerticalAlignment="Center" Height="22" Margin="0,5" 
-                            Maximum="100" Minimum="-100" Thumb.DragCompleted="Slider_DragCompleted" 
-                            ValueChanged="SliderSkalowanie_ValueChanged"/>
-                        <Slider x:Name="SliderSkalowanieY" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" 
-                            VerticalAlignment="Center" Margin="0,5" Maximum="100" Minimum="-100" 
-                            Thumb.DragCompleted="Slider_DragCompleted" ValueChanged="SliderSkalowanie_ValueChanged"/>
-                        <Slider x:Name="SliderSkalowanieZ" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="22" 
-                            Margin="0,5" Maximum="100" Minimum="-100" Thumb.DragCompleted="Slider_DragCompleted"
-                            ValueChanged="SliderSkalowanie_ValueChanged"/>
-                        <Label x:Name="EtykietaSkalowanieX" Content="X" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaSkalowanieY" Content="Y" Grid.Row="1" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                        <Label x:Name="EtykietaSkalowanieZ" Content="Z" Grid.Row="2" VerticalContentAlignment="Center" 
-                           VerticalAlignment="Center"/>
-                    </Grid>
-                </Expander>
-                <Expander x:Name="GroupBoxOdleglosc" Header="Odległość" HorizontalAlignment="Left" Height="60"
-                      VerticalAlignment="Top" Width="210">
-                    <Grid HorizontalAlignment="Left" Height="50" Margin="0,0,-2,-12" VerticalAlignment="Top" Width="200">
-                        <Slider x:Name="SliderOdleglosc" Margin="0,5" VerticalAlignment="Center" Minimum="0" Maximum="1000" 
-                            ValueChanged="SliderOdleglosc_ValueChanged"/>
-                    </Grid>
-                </Expander>
-                <ComboBox x:Name="ComboBoxModele" Width="120"/>
-            </StackPanel>
-        </DockPanel>
-        <CheckBox x:Name="CheckSiatka" Content="Siatka" HorizontalAlignment="Left" Margin="10,0,0,36" Grid.Row="1" 
-                         VerticalAlignment="Bottom" Width="210" Click="CheckSiatka_Click" IsChecked="False" Height="16" Grid.Column="1"/>
-        <CheckBox x:Name="CheckTeksturuj" Content="Teksturowanie" HorizontalAlignment="Left" Margin="10,0,0,57" Grid.Row="1" 
-                         VerticalAlignment="Bottom" Width="210" Click="CheckTeksturuj_Click" IsChecked="True" Height="16" Grid.Column="1"/>
-        <CheckBox x:Name="CheckPrezentacja" Content="Prezentacja" VerticalContentAlignment="Center" VerticalAlignment="Bottom" 
-                  Margin="10,0,10,78" Grid.Row="1" Grid.Column="1"/>
-        <Label x:Name="LabelFps" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Bottom" Width="210" 
-                   Content="0 fps" HorizontalContentAlignment="Right" Height="26" Grid.Column="1" Margin="10,0,0,10"/>
-        <Menu x:Name="Menu" Grid.ColumnSpan="2">
-            <MenuItem Header="Plik">
-                <MenuItem Header="Otwórz">
-                    <MenuItem x:Name="MenuItemModel"  Header="Model (.obj)" Click="MenuItem_Click"/>
-                    <MenuItem x:Name="MenuItemTekstura" Header="Tekstura" Click="MenuItem_Click" IsEnabled="False"/>
-                </MenuItem>
-            </MenuItem>
-        </Menu>
-
+        <Label 
+            x:Name="SzybkoscLabel"
+            Content="Szybkość" 
+            Height="30" 
+            VerticalAlignment="Top" 
+            Margin="10,10,10,0" 
+            Grid.Column="1" 
+            Grid.Row="1"/>
+        <Slider 
+            x:Name="SliderSzybkosc" 
+            Margin="5,40,15,0" 
+            Grid.Row="1" 
+            Grid.Column="1" 
+            Maximum="20" 
+            Height="18" 
+            VerticalAlignment="Top" 
+            Value="1"/>
+        <CheckBox 
+            x:Name="CheckSiatka" 
+            Content="Siatka" 
+            HorizontalAlignment="Left" 
+            Margin="10,0,0,36" 
+            Grid.Row="1" 
+            VerticalAlignment="Bottom" 
+            Width="210" 
+            IsChecked="True" 
+            Height="16" 
+            Grid.Column="1" 
+            Focusable="False"
+            />
+        <ComboBox 
+            x:Name="ComboModele" 
+            Grid.Column="1" 
+            HorizontalAlignment="Left" 
+            Margin="10,100,0,0" 
+            Grid.RowSpan="2" 
+            VerticalAlignment="Top" 
+            Width="205" 
+            IsTextSearchEnabled="False" 
+            SelectionChanged="ComboModele_SelectionChanged"
+            />
     </Grid>
 </Window>
