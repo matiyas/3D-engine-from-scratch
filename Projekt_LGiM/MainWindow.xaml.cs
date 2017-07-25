@@ -295,7 +295,7 @@ namespace Projekt_LGiM
         void Window_KeyDown(object sender, KeyEventArgs e)
         {
             Console.WriteLine(kamera.Pozycja);
-            Console.WriteLine(-Math3D.Odleglosc(kamera.Pozycja, zrodloSwiatla, kamera.Przod));
+            Console.WriteLine(Math3D.RzutPerspektywiczny(zrodloSwiatla, odleglosc, new Vector2D(srodek.X, srodek.Y), kamera).Z);
 
             switch (e.Key)
             {

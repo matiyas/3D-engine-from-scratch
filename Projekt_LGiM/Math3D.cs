@@ -3,7 +3,6 @@ using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using MathNet.Spatial.Euclidean;
-using System;
 
 namespace Projekt_LGiM
 {
@@ -124,13 +123,12 @@ namespace Projekt_LGiM
         {
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
                                                            0,  1,  0,  0,
-                                                           0,  0,  0,  0,
+                                                           0,  0,  1,  0,
                                                            0,  0, 1/d, 1 });
             
             var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * kamera.LookAt * Proj;
 
-
-            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, -Odleglosc(kamera.Pozycja, punkt, kamera.Przod));
+            return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, p[2] / p[3]);
         }
 
         public static List<Vector3D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
@@ -152,26 +150,7 @@ namespace Projekt_LGiM
 
             return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
-
-        public static double Kat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
-        {
-            zrodlo -= srodek;
-            wierzcholek -= srodek;
-
-            return zrodlo.AngleTo(wierzcholek).Degrees;
-        }
-
-        public static double Odleglosc(Vector3D v1, Vector3D v2)
-        {
-            return Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2));
-        }
-
-        public static double Odleglosc(Vector3D v1, Vector3D v2, UnitVector3D kierunek)
-        {
-            return Sqrt(Pow(v1.X - v2.X, 2) + Pow(v1.Y - v2.Y, 2) + Pow(v1.Z - v2.Z, 2)) 
-                * Sign((v1.X - v2.X) * kierunek.X + (v1.Y - v2.Y) * kierunek.Y + (v1.Z - v2.Z) * kierunek.Z) - 1000;
-        }
-
+        
         public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
         {
             kat /= 100;
@@ -197,13 +176,6 @@ namespace Projekt_LGiM
             var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 });
 
             return new Vector3D((p * T0 * R * T1).Take(3).ToArray());
-        }
-
-        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat, Vector3D c)
-        {
-            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, c);
-
-            return new UnitVector3D(wynik.X, wynik.Y, wynik.Z);
         }
 
         public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat)
