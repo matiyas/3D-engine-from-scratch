@@ -145,10 +145,10 @@ namespace Projekt_LGiM
 
         public void RysujLinie(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
         {
-            int startX = (int)Math.Min(x0, x1);
-            int endX   = (int)Math.Max(x0, x1);
-            int startY = (int)Math.Min(y0, y1);
-            int endY   = (int)Math.Max(y0, y1);
+            int startX = Math.Min(x0, x1);
+            int endX   = Math.Max(x0, x1);
+            int startY = Math.Min(y0, y1);
+            int endY   = Math.Max(y0, y1);
             int dx = endX - startX;
             int dy = endY - startY;
 

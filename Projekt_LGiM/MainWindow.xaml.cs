@@ -7,6 +7,7 @@ using System.Threading;
 using MathNet.Spatial.Euclidean;
 using System.Windows.Controls;
 using System;
+using Microsoft.Win32;
 
 namespace Projekt_LGiM
 {
@@ -48,43 +49,43 @@ namespace Projekt_LGiM
             kamera   = new Kamera();
 
             rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
-            WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-            //swiat[0].Przesun(new Vector3D(0, 0, 600));
-            swiat[0].Skaluj(new Vector3D(100, 100, 100));
-
-            //WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
-            //swiat[1].Przesun(new Vector3D(600, 0, 600));
+            
+            // Wczytanie i ustawienie modeli
             {
-                //modele[1].Przesun(new Vector3D(300, 0, 0));
-                //modele[1].Skaluj(new Vector3D(-95, -95, -95));
+                WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
+                swiat[0].Skaluj(new Vector3D(100, 100, 100));
+
+                //WczytajModel(sciezkaModel, @"tekstury\mercury.jpg");
+                //swiat[1].Przesun(new Vector3D(300, 0, 0));
+                //swiat[1].Skaluj(new Vector3D(-95, -95, -95));
 
                 //WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
-                //modele[2].Przesun(new Vector3D(400, 0, 0));
-                //modele[2].Skaluj(new Vector3D(-88, -88, -88));
+                //swiat[2].Przesun(new Vector3D(400, 0, 0));
+                //swiat[2].Skaluj(new Vector3D(-88, -88, -88));
 
                 //WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
-                //modele[3].Przesun(new Vector3D(600, 0, 0));
-                //modele[3].Skaluj(new Vector3D(-87, -87, -87));
+                //swiat[3].Przesun(new Vector3D(600, 0, 0));
+                //swiat[3].Skaluj(new Vector3D(-87, -87, -87));
 
                 //WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
-                //modele[4].Przesun(new Vector3D(900, 0, 0));
-                //modele[4].Skaluj(new Vector3D(-93, -93, -93));
+                //swiat[4].Przesun(new Vector3D(900, 0, 0));
+                //swiat[4].Skaluj(new Vector3D(-93, -93, -93));
 
                 //WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
-                //modele[5].Przesun(new Vector3D(1300, 0, 0));
-                //modele[5].Skaluj(new Vector3D(42, 42, 42));
+                //swiat[5].Przesun(new Vector3D(1300, 0, 0));
+                //swiat[5].Skaluj(new Vector3D(42, 42, 42));
 
                 //WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
-                //modele[6].Przesun(new Vector3D(1800, 0, 0));
-                //modele[6].Skaluj(new Vector3D(20, 20, 20));
+                //swiat[6].Przesun(new Vector3D(1800, 0, 0));
+                //swiat[6].Skaluj(new Vector3D(20, 20, 20));
 
                 //WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
-                //modele[7].Przesun(new Vector3D(2400, 0, 0));
-                //modele[7].Skaluj(new Vector3D(-49, -49, -49));
+                //swiat[7].Przesun(new Vector3D(2400, 0, 0));
+                //swiat[7].Skaluj(new Vector3D(-49, -49, -49));
 
                 //WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
-                //modele[8].Przesun(new Vector3D(3100, 0, 0));
-                //modele[8].Skaluj(new Vector3D(-51, -51, -51));
+                //swiat[8].Przesun(new Vector3D(3100, 0, 0));
+                //swiat[8].Skaluj(new Vector3D(-51, -51, -51));
             }
 
             ComboModele.SelectedIndex = 0;
@@ -106,35 +107,36 @@ namespace Projekt_LGiM
                     {
                         Dispatcher.Invoke(() =>
                         {
+                            // Obrót modeli dookoła światła i własnej osi.
                             {
-                                //modele[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
 
-                                //modele[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                //swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
-                                //modele[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
+                                //swiat[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
-                                //modele[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
+                                //swiat[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
-                                //modele[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
+                                //swiat[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
-                                //modele[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
+                                //swiat[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                //modele[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                //swiat[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
-                                //modele[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
+                                //swiat[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
-                                //modele[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
+                                //swiat[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //modele[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
-                                //modele[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                //swiat[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                //swiat[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
                             }
 
                             RysujNaEkranie(swiat);
@@ -330,6 +332,50 @@ namespace Projekt_LGiM
         void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //kamera.Cel = Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
+        }
+
+        private void MenuNowyModel_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog() { Filter = "Waveform (*.obj)|*.obj" };
+
+            if(openFileDialog.ShowDialog() == true)
+            {
+                var model = new WavefrontObj(openFileDialog.FileName);
+                model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
+
+                swiat.Add(model);
+                ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
+                ComboModele.SelectedIndex = swiat.Count - 1;
+            }
+        }
+
+        private void MenuZastapModel_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog() { Filter = "Waveform (*.obj)|*.obj" };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var model = new WavefrontObj(openFileDialog.FileName);
+                model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
+                model.Teksturowanie = swiat[ComboModele.SelectedIndex].Teksturowanie;
+
+                int tmp = ComboModele.SelectedIndex;
+                swiat[ComboModele.SelectedIndex] = model;
+                ComboModele.Items[ComboModele.SelectedIndex] = new ComboBoxItem() { Content = "Foo" };
+                ComboModele.SelectedIndex = tmp;
+            }
+        }
+
+        private void MenuWczytajTeskture_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog() { Filter = "JPEG (*.jpg; *.jpeg; *.jpe)|*.jpg; *.jpeg; *.jpe|"
+                                                               + "PNG (*.png)|*.png|"
+                                                               + "BMP (*.bmp)|*.bmp"};
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                swiat[ComboModele.SelectedIndex].Teksturowanie = new Teksturowanie(openFileDialog.FileName, rysownik);
+            }
         }
 
         void Ekran_MouseDown(object sender,  MouseButtonEventArgs e)
