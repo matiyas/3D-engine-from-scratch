@@ -1,0 +1,38 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Projekt_LGiM"
+        xmlns:Data="clr-namespace:System.Data;assembly=System.Data" x:Name="WindowSterowanie" x:Class="Projekt_LGiM.Sterowaniexaml"
+        mc:Ignorable="d"
+        Title="Sterowanie" Height="314.248" Width="469.393">
+    <Window.Resources>
+        <XmlDataProvider x:Key="MockList" XPath="/MockObjects/*">
+            <x:XData>
+                <MockObjects 
+                    xmlns="">
+                    <MockObject Akcja="Przesunięcie kamery do przodu" Sterowanie="W"/>
+                    <MockObject Akcja="Przesunięcie kamery do tyłu"   Sterowanie="S"/>
+                    <MockObject Akcja="Przesunięcie kamery w lewo"    Sterowanie="A"/>
+                    <MockObject Akcja="Przesunięcie kamery w prawo"   Sterowanie="D"/>
+                    <MockObject Akcja="Przesunięcie kamery w górę"    Sterowanie="Spacja"/>
+                    <MockObject Akcja="Przesunięcie kamery w dół"     Sterowanie="Lewy Control"/>
+                    <MockObject Akcja="Obrót kamery w osi X"          Sterowanie="LPM + Ruch w pionie"/>
+                    <MockObject Akcja="Obrót kamery w osi Y"          Sterowanie="LPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Obrót kamery w osi Z"          Sterowanie="Lewy Shift + LPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Zoom"                          Sterowanie="Obrót kółkiem myszy"/>
+                </MockObjects>
+            </x:XData>
+        </XmlDataProvider>
+    </Window.Resources>
+    <Grid DataContext="{Binding Source={StaticResource MockList}}">
+        <DataGrid x:Name="GridSterowanie" ItemsSource="{Binding XPath=/MockObjects/MockObject}" AutoGenerateColumns="False" ColumnWidth="*" 
+            IsReadOnly="True" IsHitTestVisible="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Akcja"      Binding="{Binding XPath=@Akcja}"/>
+                <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
