@@ -186,6 +186,11 @@ namespace Projekt_LGiM
             }
         }
 
+        public void RysujLinie(int x0, int y0, int x1, int y1, Color c)
+        {
+            RysujLinie(x0, y0, x1, y1, c.R, c.G, c.B);
+        }
+
         public void RysujKolo(int x0, int y0, int x1, int y1)
         {
             int r = (int)Math.Abs(Math.Sqrt(Math.Pow(x1 - x0, 2) + Math.Pow(y1 - y0, 2)));

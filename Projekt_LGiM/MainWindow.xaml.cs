@@ -49,11 +49,11 @@ namespace Projekt_LGiM
 
             rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
             WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-            swiat[0].Przesun(new Vector3D(0, 0, 600));
+            //swiat[0].Przesun(new Vector3D(0, 0, 600));
             swiat[0].Skaluj(new Vector3D(100, 100, 100));
 
-            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
-            swiat[1].Przesun(new Vector3D(600, 0, 600));
+            //WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            //swiat[1].Przesun(new Vector3D(600, 0, 600));
             {
                 //modele[1].Przesun(new Vector3D(300, 0, 0));
                 //modele[1].Skaluj(new Vector3D(-95, -95, -95));
@@ -168,26 +168,31 @@ namespace Projekt_LGiM
         {
             rysownik.CzyscEkran();
 
-            for (int z = -1000; z <= 1000; z += 100)
+            for (int z = -1000; z < 1000; z += 100)
             {
-                for (int x = -1000; x <= 1000; x += 100)
+                for (int x = -1000; x < 1000; x += 100)
                 {
-                    var p0 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
-                    var p1 = Math3D.RzutPerspektywiczny(new Vector3D(-x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
-                    var p2 = Math3D.RzutPerspektywiczny(new Vector3D(x, 0, -z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera);
+                    var punkty = new List<Vector3D>()
+                    {
+                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + 100, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + 100, 0, z + 100), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + 100), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera)
+                    };
 
-                    if (x == 0/* && p0.Z > 100 && p2.Z > 100*/)
+                    for(int i = 0; i < punkty.Count; ++i)
                     {
-                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 0, 0, 255);
-                    }
-                    else if (z == 0 /*&& p0.Z > 100 && p1.Z > 100*/)
-                    {
-                        rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 255, 0, 0);
-                    }
-                    else /*if(p0.X > 100)*/
-                    {
-                        /*if (p1.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y, 127, 127, 127); }
-                        /*if (p2.Z > 100)*/ { rysownik.RysujLinie((int)p0.X, (int)p0.Y, (int)p2.X, (int)p2.Y, 127, 127, 127); }
+                        if(punkty[i].Z > 10 && punkty[(i + 1) % punkty.Count].Z > 10)
+                        {
+                            Color kolor;
+
+                            if      (x == 0 && i == 3)   { kolor = new Color() { R = 255, G =   0, B =   0 }; }
+                            else if (z == 0 && i == 0)   { kolor = new Color() { R =   0, G =   0, B = 255 }; }
+                            else                         { kolor = new Color() { R = 127, G = 127, B = 127 }; }
+
+                            rysownik.RysujLinie((int)punkty[i].X, (int)punkty[i].Y, (int)punkty[(i + 1) % punkty.Count].X,
+                            (int)punkty[(i + 1) % punkty.Count].Y, kolor);
+                        }
                     }
                 }
             }
@@ -201,7 +206,7 @@ namespace Projekt_LGiM
                 {
                     for (int i = 0; i < sciana.Vertex.Count; ++i)
                     {
-                        //if(modelRzut[sciana.Vertex[i]].Z > 100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z > 100)
+                        if(modelRzut[sciana.Vertex[i]].Z > 100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z > 100)
                         {
                             rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
                                 (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
@@ -237,8 +242,8 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        //if (modelRzut[sciana.Vertex[0]].Z < -150 && modelRzut[sciana.Vertex[1]].Z < -150
-                        //    && modelRzut[sciana.Vertex[2]].Z < -150)
+                        if (modelRzut[sciana.Vertex[0]].Z > 300 || modelRzut[sciana.Vertex[1]].Z > 300 
+                            || modelRzut[sciana.Vertex[2]].Z > 300)
                         {
                             List<double> gradient = new List<double>(3);
 
@@ -294,9 +299,6 @@ namespace Projekt_LGiM
 
         void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            Console.WriteLine(kamera.Pozycja);
-            Console.WriteLine(Math3D.RzutPerspektywiczny(zrodloSwiatla, odleglosc, new Vector2D(srodek.X, srodek.Y), kamera).Z);
-
             switch (e.Key)
             {
                 case Key.W:
