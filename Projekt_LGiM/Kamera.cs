@@ -19,9 +19,7 @@ namespace Projekt_LGiM
             set
             {
                 pozycja = value;
-                przod = (pozycja - cel).Normalize();
-                prawo = gora.CrossProduct(przod);
-                gora = przod.CrossProduct(prawo);
+                Rekalkulacja();
             }
         }
         public Vector3D Cel
@@ -30,9 +28,7 @@ namespace Projekt_LGiM
             set
             {
                 cel   = value;
-                przod = (pozycja - cel).Normalize();
-                prawo = gora.CrossProduct(przod);
-                gora = przod.CrossProduct(prawo);
+                Rekalkulacja();
             }
         }
         public UnitVector3D Przod => przod;
@@ -53,6 +49,13 @@ namespace Projekt_LGiM
                                                                      0,          0,          0,      1, });
                 return nvu * p;
             }
+        }
+
+        void Rekalkulacja()
+        {
+            przod = (pozycja - cel).Normalize();
+            prawo = gora.CrossProduct(przod);
+            gora = przod.CrossProduct(prawo);
         }
 
         public void DoPrzodu(double ile)

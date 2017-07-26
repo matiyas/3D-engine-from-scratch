@@ -16,7 +16,7 @@ namespace Projekt_LGiM
 
         public static List<Vector3D> Translacja(List<Vector3D> wierzcholki, Vector3D t)
         {
-            var wierzcholkiTrans = new List<Vector3D>();
+            var wierzcholkiMod = new List<Vector3D>();
             var T = new DenseMatrix(4, 4, new double[]{ 1,  0,  0, t.X,
                                                         0,  1,  0, t.Y,
                                                         0,  0,  1, t.Z,
@@ -24,17 +24,17 @@ namespace Projekt_LGiM
             foreach(Vector3D wierzcholek in wierzcholki)
             {
                 var wierzcholekTrans = new DenseVector(new double[]{ wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T;
-                wierzcholkiTrans.Add(new Vector3D(wierzcholekTrans.Take(3).ToArray()));
+                    wierzcholkiMod.Add(new Vector3D(wierzcholekTrans.Take(3).ToArray()));
             }
 
-            return wierzcholkiTrans;
+            return wierzcholkiMod;
         }
 
 		public static List<Vector3D> Rotacja(List<Vector3D> wierzcholki, Vector3D kat, Vector3D srodek)
         {
             kat = new Vector3D(kat.X / 100, kat.Y / 100, kat.Z / 100);
 
-			var wierzcholkiRot = new List<Vector3D>();
+			var wierzcholkiMod = new List<Vector3D>();
 
             var T0 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,      -srodek.X,
 																0,			 1,			0,      -srodek.Y,
@@ -63,35 +63,35 @@ namespace Projekt_LGiM
 
             foreach(Vector3D wierzcholek in wierzcholki)
             {
-                var wierzcholekRot = new DenseVector(new double[] { wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0;
+                var wierzcholekMod = new DenseVector(new double[] { wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0;
 
-                if (kat.X.CompareTo(0) != 0) wierzcholekRot *= Rx;
-                if (kat.Y.CompareTo(0) != 0) wierzcholekRot *= Ry;
-                if (kat.Z.CompareTo(0) != 0) wierzcholekRot *= Rz;
+                if (kat.X.CompareTo(0) != 0) wierzcholekMod *= Rx;
+                if (kat.Y.CompareTo(0) != 0) wierzcholekMod *= Ry;
+                if (kat.Z.CompareTo(0) != 0) wierzcholekMod *= Rz;
 
-                wierzcholkiRot.Add(new Vector3D((wierzcholekRot * T1).Take(3).ToArray()));
+                wierzcholkiMod.Add(new Vector3D((wierzcholekMod * T1).Take(3).ToArray()));
             }
             
-            return wierzcholkiRot;
+            return wierzcholkiMod;
         }
 
-        public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D s)
+        public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D kat)
         {
-            double tmpX = s.X, tmpY = s.Y, tmpZ = s.Z, x, y, z;
+            double tmpX = kat.X, tmpY = kat.Y, tmpZ = kat.Z, x, y, z;
 			var wierzcholkiMod = new List<Vector3D>();
 
-            s = new Vector3D(s.X / 100.0, s.Y / 100.0, s.Z / 100);
+            kat = new Vector3D(kat.X / 100.0, kat.Y / 100.0, kat.Z / 100);
 
-            if(tmpX >= 0 || s.X < 1.0)  x = s.X + 1;
-            else                        x = 1.0 / s.X;
+            if(tmpX >= 0 || kat.X < 1.0)  x = kat.X + 1;
+            else                          x = 1.0 / kat.X;
 
-            if(tmpY >= 0 || s.Y < 1.0)  y = s.Y + 1;
-            else                        y = 1.0 / s.Y;
+            if(tmpY >= 0 || kat.Y < 1.0)  y = kat.Y + 1;
+            else                          y = 1.0 / kat.Y;
 
-            if(tmpZ >= 0 || s.Z < 1.0)  z = s.Z + 1;
-            else                        z = 1.0 / s.Z;
+            if(tmpZ >= 0 || kat.Z < 1.0)  z = kat.Z + 1;
+            else                          z = 1.0 / kat.Z;
 
-            s = new Vector3D(x, y, z);
+            kat = new Vector3D(x, y, z);
 			
 			Vector3D c = ZnajdzSrodek(wierzcholki);
 			
@@ -105,15 +105,15 @@ namespace Projekt_LGiM
 														 0,	0, 1,  c.Z,
 														 0,	0, 0,	 1, });
 
-			var S = new DenseMatrix(4, 4, new double[]{ s.X,  0,  0, 0, 
-														 0, s.Y,  0, 0, 
-														 0,  0, s.Z, 0, 
+			var S = new DenseMatrix(4, 4, new double[]{ kat.X,  0,  0, 0, 
+														 0, kat.Y,  0, 0, 
+														 0,  0, kat.Z, 0, 
 														 0,  0,  0,  1, });
 
 			foreach(Vector3D wierzcholek in wierzcholki)
             {
 				var p = new DenseVector(new double[]{ wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0 * S * T1;
-                wierzcholkiMod.Add(new Vector3D(p.Take(3).ToArray()));
+                    wierzcholkiMod.Add(new Vector3D(p.Take(3).ToArray()));
             }
 
             return wierzcholkiMod;
@@ -151,18 +151,18 @@ namespace Projekt_LGiM
             return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
         
-        public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
+        public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D srodek)
         {
             kat /= 100;
 
-            var T0 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,      -c.X,
-                                                                0,           1,         0,      -c.Y,
-                                                                0,           0,         1,      -c.Z,
+            var T0 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,      -srodek.X,
+                                                                0,           1,         0,      -srodek.Y,
+                                                                0,           0,         1,      -srodek.Z,
                                                                 0,           0,         0,         1, });
 
-            var T1 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,       c.X,
-                                                                0,           1,         0,       c.Y,
-                                                                0,           0,         1,       c.Z,
+            var T1 = new DenseMatrix(4, 4, new double[]{        1,           0,         0,       srodek.X,
+                                                                0,           1,         0,       srodek.Y,
+                                                                0,           0,         1,       srodek.Z,
                                                                 0,           0,         0,         1, });
 
             var R = new DenseMatrix(4, 4, new double[]
@@ -173,9 +173,7 @@ namespace Projekt_LGiM
                                                              0,                                                  0,                                                  0, 1,
             });
             
-            var p = new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 });
-
-            return new Vector3D((p * T0 * R * T1).Take(3).ToArray());
+            return new Vector3D((new DenseVector(new double[] { punkt.X, punkt.Y, punkt.Z, 1 }) * T0 * R * T1).Take(3).ToArray());
         }
 
         public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat)
