@@ -11,7 +11,7 @@ using Microsoft.Win32;
 
 namespace Projekt_LGiM
 {
-    public enum Tryb { Poruszanie, Skalowanie, Obracanie };
+    public enum Tryb { Przesuwanie, Skalowanie, Obracanie };
 
     public partial class MainWindow : Window
     {
@@ -35,6 +35,8 @@ namespace Projekt_LGiM
             dpi = 96;
             czuloscMyszy = 0.3;
             odleglosc = 1000;
+
+            LabelTryb.Content = tryb;
 
             string sciezkaTlo   = @"tekstury\stars.jpg";
             string sciezkaModel = @"modele\shaded.obj";
@@ -330,15 +332,18 @@ namespace Projekt_LGiM
                     break;
 
                 case Key.D1:
-                    tryb = Tryb.Poruszanie;
+                    tryb = Tryb.Przesuwanie;
+                    LabelTryb.Content = tryb;
                     break;
 
                 case Key.D2:
                     tryb = Tryb.Skalowanie;
+                    LabelTryb.Content = tryb;
                     break;
 
                 case Key.D3:
                     tryb = Tryb.Obracanie;
+                    LabelTryb.Content = tryb;
                     break;
             }
         }
@@ -427,7 +432,7 @@ namespace Projekt_LGiM
 
                 switch (tryb)
                 {
-                    case Tryb.Poruszanie:
+                    case Tryb.Przesuwanie:
                         if(Keyboard.IsKeyDown(Key.LeftShift))
                         {
                             swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(-ile.Y * kamera.Przod.X * 3, -ile.Y * kamera.Przod.Y * 3,

@@ -6,33 +6,99 @@
         xmlns:local="clr-namespace:Projekt_LGiM"
         xmlns:Data="clr-namespace:System.Data;assembly=System.Data" x:Name="WindowSterowanie" x:Class="Projekt_LGiM.Sterowaniexaml"
         mc:Ignorable="d"
-        Title="Sterowanie" Height="314.248" Width="469.393">
+        Title="Sterowanie" Height="431.248" Width="707.393">
     <Window.Resources>
-        <XmlDataProvider x:Key="MockList" XPath="/MockObjects/*">
+        <XmlDataProvider x:Key="Sterowanie" XPath="/MockObjects/*">
             <x:XData>
-                <MockObjects 
-                    xmlns="">
-                    <MockObject Akcja="Przesunięcie kamery do przodu" Sterowanie="W"/>
-                    <MockObject Akcja="Przesunięcie kamery do tyłu"   Sterowanie="S"/>
-                    <MockObject Akcja="Przesunięcie kamery w lewo"    Sterowanie="A"/>
-                    <MockObject Akcja="Przesunięcie kamery w prawo"   Sterowanie="D"/>
-                    <MockObject Akcja="Przesunięcie kamery w górę"    Sterowanie="Spacja"/>
-                    <MockObject Akcja="Przesunięcie kamery w dół"     Sterowanie="Lewy Control"/>
-                    <MockObject Akcja="Obrót kamery w osi X"          Sterowanie="LPM + Ruch w pionie"/>
-                    <MockObject Akcja="Obrót kamery w osi Y"          Sterowanie="LPM + Ruch w poziomie"/>
-                    <MockObject Akcja="Obrót kamery w osi Z"          Sterowanie="Lewy Shift + LPM + Ruch w poziomie"/>
-                    <MockObject Akcja="Zoom"                          Sterowanie="Obrót kółkiem myszy"/>
+                <MockObjects xmlns="">
+                    <MockObject Akcja="Przesunięcie kamery do przodu"       Sterowanie="W"/>
+                    <MockObject Akcja="Przesunięcie kamery do tyłu"         Sterowanie="S"/>
+                    <MockObject Akcja="Przesunięcie kamery w lewo"          Sterowanie="A"/>
+                    <MockObject Akcja="Przesunięcie kamery w prawo"         Sterowanie="D"/>
+                    <MockObject Akcja="Przesunięcie kamery w górę"          Sterowanie="Spacja"/>
+                    <MockObject Akcja="Przesunięcie kamery w dół"           Sterowanie="Lewy Control"/>
+                    <MockObject Akcja="Obrót kamery w osi X"                Sterowanie="LPM + Ruch w pionie"/>
+                    <MockObject Akcja="Obrót kamery w osi Y"                Sterowanie="LPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Obrót kamery w osi Z"                Sterowanie="Lewy Shift + LPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Zoom"                                Sterowanie="Obrót kółkiem myszy"/>
+                    <MockObject Akcja="Zmiana trybu edycji na Przesuwanie"  Sterowanie="1"/>
+                    <MockObject Akcja="Zmiana trybu edycji na Skalowanie"   Sterowanie="2"/>
+                    <MockObject Akcja="Zmiana trybu edycji na Obracanie"    Sterowanie="3"/>
+                </MockObjects>
+            </x:XData>
+        </XmlDataProvider>
+        <XmlDataProvider x:Key="Przesuwanie" XPath="/MockObjects/*">
+            <x:XData>
+                <MockObjects xmlns="">
+                    <MockObject Akcja="Przesunięcie obiektu w pionie"       Sterowanie="PPM + Ruch w pionie"/>
+                    <MockObject Akcja="Przesunięcie obiektu w poziomie"     Sterowanie="PPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Przybliżenie / oddalenie obiektu"    Sterowanie="Lewy Shift + PPM + Ruch w pionie"/>
+                </MockObjects>
+            </x:XData>
+        </XmlDataProvider>
+        <XmlDataProvider x:Key="Skalowanie" XPath="/MockObjects/*">
+            <x:XData>
+                <MockObjects xmlns="">
+                    <MockObject Akcja="Przeskalowanie obiektu w pionie"         Sterowanie="PPM + Ruch w pionie"/>
+                    <MockObject Akcja="Przeskalowanie obiektu w poziomie"       Sterowanie="PPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Proporcjonalne przeskalowanie obiektu"   Sterowanie="Lewy Shift + PPM + Ruch"/>
+                </MockObjects>
+            </x:XData>
+        </XmlDataProvider>
+        <XmlDataProvider x:Key="Obracanie" XPath="/MockObjects/*">
+            <x:XData>
+                <MockObjects xmlns="">
+                    <MockObject Akcja="Obrócenie obiektu w pionie"      Sterowanie="PPM + Ruch w pionie"/>
+                    <MockObject Akcja="Obrócenie obiektu w poziomie"    Sterowanie="PPM + Ruch w poziomie"/>
+                    <MockObject Akcja="Obrócenie obiektu w osi Z"       Sterowanie="Lewy Shift + PPM + Ruch w poziomie"/>
                 </MockObjects>
             </x:XData>
         </XmlDataProvider>
     </Window.Resources>
-    <Grid DataContext="{Binding Source={StaticResource MockList}}">
-        <DataGrid x:Name="GridSterowanie" ItemsSource="{Binding XPath=/MockObjects/MockObject}" AutoGenerateColumns="False" ColumnWidth="*" 
-            IsReadOnly="True" IsHitTestVisible="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Akcja"      Binding="{Binding XPath=@Akcja}"/>
-                <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+    <TabControl Margin="0">
+        <TabItem Header="Ogolne"  DataContext="{Binding Source={StaticResource Sterowanie}}">
+            <Grid Background="#FFE5E5E5">
+                <DataGrid AutoGenerateColumns="False" ColumnWidth="*" IsReadOnly="True" IsHitTestVisible="False" 
+                          ItemsSource="{Binding XPath=/MockObjects/MockObject}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Akcja" Binding="{Binding XPath=@Akcja}" />
+                        <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Przesuwanie"  DataContext="{Binding Source={StaticResource Przesuwanie}}">
+            <Grid Background="#FFE5E5E5">
+                <DataGrid AutoGenerateColumns="False" ColumnWidth="*" IsReadOnly="True" IsHitTestVisible="False" 
+                          ItemsSource="{Binding XPath=/MockObjects/MockObject}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Akcja" Binding="{Binding XPath=@Akcja}" />
+                        <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Skalowanie"  DataContext="{Binding Source={StaticResource Skalowanie}}">
+            <Grid Background="#FFE5E5E5">
+                <DataGrid AutoGenerateColumns="False" ColumnWidth="*" IsReadOnly="True" IsHitTestVisible="False" 
+                          ItemsSource="{Binding XPath=/MockObjects/MockObject}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Akcja" Binding="{Binding XPath=@Akcja}" />
+                        <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Obracanie"  DataContext="{Binding Source={StaticResource Obracanie}}">
+            <Grid Background="#FFE5E5E5">
+                <DataGrid AutoGenerateColumns="False" ColumnWidth="*" IsReadOnly="True" IsHitTestVisible="False" 
+                          ItemsSource="{Binding XPath=/MockObjects/MockObject}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Akcja" Binding="{Binding XPath=@Akcja}" />
+                        <DataGridTextColumn Header="Sterowanie" Binding="{Binding XPath=@Sterowanie}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
