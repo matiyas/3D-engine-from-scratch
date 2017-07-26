@@ -86,17 +86,20 @@
                     Header="Model">
                     <MenuItem 
                         x:Name="MenuNowyModel" 
-                        Header="Wczytaj nowy..." Click="MenuNowyModel_Click"/>
+                        Header="Wczytaj nowy..." 
+                        Click="MenuNowyModel_Click"/>
                     <MenuItem 
                         x:Name="MenuZastapModel" 
-                        Header="Zastąp..." Click="MenuZastapModel_Click"/>
+                        Header="Zastąp..."
+                        Click="MenuZastapModel_Click"/>
                 </MenuItem>
                 <MenuItem
                     x:Name="MenuTekstura"
                     Header="Tekstura">
                     <MenuItem 
                         x:Name="MenuWczytajTeskture" 
-                        Header="Wczytaj teksturę..." Click="MenuWczytajTeskture_Click"/>
+                        Header="Wczytaj teksturę..." 
+                        Click="MenuWczytajTeskture_Click"/>
                 </MenuItem>
             </MenuItem>
             <MenuItem 
@@ -104,7 +107,8 @@
                 Header="Pomoc">
                 <MenuItem
                     x:Name="MenuSterowanie"
-                    Header="Sterowanie" Click="MenuSterowanie_Click"/>
+                    Header="Sterowanie"
+                    Click="MenuSterowanie_Click"/>
             </MenuItem>
         </Menu>
     </Grid>

@@ -295,8 +295,6 @@ namespace Projekt_LGiM
         {
             if (e.Delta > 0) { odleglosc += 100; }
             else             { odleglosc -= 100; }
-
-            Console.WriteLine(odleglosc);
         }
 
         void Window_KeyDown(object sender, KeyEventArgs e)
@@ -406,6 +404,16 @@ namespace Projekt_LGiM
 
                 lpm0 = e.GetPosition(Ekran);
             }
+            
+            if(e.RightButton == MouseButtonState.Pressed)
+            {
+                Vector ile = -(ppm0 - e.GetPosition(Ekran));
+
+                swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.X * kamera.Prawo.X, ile.X * kamera.Prawo.Y, ile.X * kamera.Prawo.Z));
+                swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.Y * kamera.Gora.X, ile.Y * kamera.Gora.Y, ile.Y * kamera.Gora.Z));
+            }
+
+            ppm0 = e.GetPosition(Ekran);
         }
     }
 }
