@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Drawing = System.Drawing;
 using MathNet.Spatial.Euclidean;
 
@@ -8,190 +6,54 @@ namespace Projekt_LGiM
 {
     class Rysownik
     {
-        byte[] pixs;
-        byte[] orgPixs;
+        byte[] backBuffer;
+        byte[] tlo;
         int wysokosc, szerokosc;
         public Color KolorPedzla;
         public Color KolorTla;
 
-        public Rysownik(ref byte[] pixs, int szerokosc, int wysokosc)
+        public Rysownik(byte[] backBuffer, int szerokosc, int wysokosc)
         {
             KolorPedzla.R = KolorPedzla.G = KolorPedzla.B = 0;
             KolorPedzla.A = 255;
 
             KolorTla.R = KolorTla.G = KolorTla.B = KolorTla.A = 255;
 
-            this.pixs = pixs;
-            orgPixs = new byte[4 * szerokosc * wysokosc];
-            pixs.CopyTo(orgPixs, 0);
+            this.backBuffer = backBuffer;
+            tlo = new byte[4 * szerokosc * wysokosc];
+            backBuffer.CopyTo(tlo, 0);
             this.szerokosc = szerokosc;
             this.wysokosc = wysokosc;
         }
-
-        public void UstawTlo(byte r, byte g, byte b, byte a)
+        
+        public void RysujPiksel(Vector2D p, Color c)
         {
-            KolorTla.R = r;
-            KolorTla.G = g;
-            KolorTla.B = b;
-            KolorTla.A = a;
-        }
-
-        public void UstawPedzel(byte r, byte g, byte b, byte a)
-        {
-            KolorPedzla.R = r;
-            KolorPedzla.G = g;
-            KolorPedzla.B = b;
-            KolorPedzla.A = a;
-        }
-
-        public void RysujPiksel(int x, int y)
-        {
-            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
+            if (p.X >= 0 && p.X < szerokosc && p.Y >= 0 && p.Y < wysokosc)
             {
-                int pozycja = 4 * (y * szerokosc + x);
-                pixs[pozycja] = KolorPedzla.B;
-                pixs[pozycja + 1] = KolorPedzla.G;
-                pixs[pozycja + 2] = KolorPedzla.R;
-                pixs[pozycja + 3] = KolorPedzla.A;
-            }
-        }
-
-        public void RysujPiksel(int x, int y, byte r, byte g, byte b, byte a)
-        {
-            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
-            {
-                int pozycja = 4 * (y * szerokosc + x);
-                pixs[pozycja] = b;
-                pixs[pozycja + 1] = g;
-                pixs[pozycja + 2] = r;
-                pixs[pozycja + 3] = a;
-            }
-        }
-
-        public void RysujPiksel(int x, int y, Color c)
-        {
-            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
-            {
-                int pozycja = 4 * (y * szerokosc + x);
-                pixs[pozycja] = c.B;
-                pixs[pozycja + 1] = c.G;
-                pixs[pozycja + 2] = c.R;
-                pixs[pozycja + 3] = c.A;
+                int pozycja = 4 * ((int)p.Y * szerokosc + (int)p.X);
+                backBuffer[pozycja] = c.B;
+                backBuffer[pozycja + 1] = c.G;
+                backBuffer[pozycja + 2] = c.R;
+                backBuffer[pozycja + 3] = c.A;
             }
         }
 
         public void CzyscEkran()
         {
-            for (int i = 0; i < pixs.Length; i += 4)
+            for (int i = 0; i < backBuffer.Length; i += 4)
             {
-                pixs[i] = KolorTla.B;
-                pixs[i + 1] = KolorTla.G;
-                pixs[i + 2] = KolorTla.R;
-                pixs[i + 3] = KolorTla.A;
+                backBuffer[i] = KolorTla.B;
+                backBuffer[i + 1] = KolorTla.G;
+                backBuffer[i + 2] = KolorTla.R;
+                backBuffer[i + 3] = KolorTla.A;
             }
         }
 
         public void Reset()
         {
-            orgPixs.CopyTo(pixs, 0);
+            tlo.CopyTo(backBuffer, 0);
         }
-
-        public void RysujLinie(Point p0, Point p1)
-        {
-            int startX = (int)Math.Min(p0.X, p1.X);
-            int endX   = (int)Math.Max(p0.X, p1.X);
-            int startY = (int)Math.Min(p0.Y, p1.Y);
-            int endY   = (int)Math.Max(p0.Y, p1.Y);
-            int dx = endX - startX;
-            int dy = endY - startY;
-
-            if (dx > dy)
-            {
-                for (int x = startX; x <= endX; ++x)
-                {
-                    double y = (dy / (double)dx) * (x - p0.X) + p0.Y;
-
-                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
-                    {
-                        RysujPiksel(x, (int)Math.Floor(y));
-                    }
-                    else
-                    {
-                        RysujPiksel(x, (int)(2 * p0.Y - Math.Floor(y)));
-                    }
-                }
-            }
-            else
-            {
-                for (int y = startY; y <= endY; ++y)
-                {
-                    double x = (dx / (double)dy) * (y - p0.Y) + p0.X;
-
-                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
-                    {
-                        RysujPiksel((int)Math.Floor(x), y);
-                    }
-                    else
-                    {
-                        RysujPiksel((int)(2 * p0.X - Math.Floor(x)), y);
-                    }
-                }
-            }
-        }
-
-        public void RysujLinie(int x0, int y0, int x1, int y1)
-        {
-            RysujLinie(new Point(x0, y0), new Point(x1, y1));
-        }
-
-        public void RysujLinie(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
-        {
-            int startX = Math.Min(x0, x1);
-            int endX   = Math.Max(x0, x1);
-            int startY = Math.Min(y0, y1);
-            int endY   = Math.Max(y0, y1);
-            int dx = endX - startX;
-            int dy = endY - startY;
-
-            if (dx > dy)
-            {
-                for (int x = startX; x <= endX; ++x)
-                {
-                    double y = (dy / (double)dx) * (x - x0) + y0;
-
-                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
-                    {
-                        RysujPiksel(x, (int)Math.Floor(y), r, g, b, 255);
-                    }
-                    else
-                    {
-                        RysujPiksel(x, (int)(2 * y0 - Math.Floor(y)), r, g, b, 255);
-                    }
-                }
-            }
-            else
-            {
-                for (int y = startY; y <= endY; ++y)
-                {
-                    double x = (dx / (double)dy) * (y - y0) + x0;
-
-                    if ((x1 > x0 && y1 > y0) || (x1 < x0 && y1 < y0))
-                    {
-                        RysujPiksel((int)Math.Floor(x), y, r, g, b, 255);
-                    }
-                    else
-                    {
-                        RysujPiksel((int)(2 * x0 - Math.Floor(x)), y, r, g, b, 255);
-                    }
-                }
-            }
-        }
-
-        public void RysujLinie(int x0, int y0, int x1, int y1, Color c)
-        {
-            RysujLinie(x0, y0, x1, y1, c.R, c.G, c.B);
-        }
-
+      
         public void RysujLinie(Vector3D p0, Vector3D p1, Color c, double[,] bufferZ)
         {
             Vector3D startX = p0.X < p1.X ? p0 : p1;
@@ -215,13 +77,13 @@ namespace Projekt_LGiM
                     {
                         if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[x, (int)y] > z && z > 100)
                         {
-                            RysujPiksel(x, (int)y, c);
+                            RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
                     else if (x >= 0 && x < bufferZ.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < bufferZ.GetLength(1)
                        && bufferZ[x, (int)(2 * p0.Y - y)] > z && z > 100)
                     {
-                        RysujPiksel(x, (int)(2 * p0.Y - y), c);
+                        RysujPiksel(new Vector2D(x, 2 * p0.Y - y), c);
                     }
 
                     y += krok;
@@ -240,154 +102,17 @@ namespace Projekt_LGiM
                     {
                         if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[(int)x, y] > z && z > 100)
                         {
-                            RysujPiksel((int)x, y, c);
+                            RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
                     else if (2 * p0.X - x >= 0 && 2 * p0.X - x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1)
                        && bufferZ[(int)(2 * p0.X - x), y] > z && z > 100)
                     {
-                        RysujPiksel((int)(2 * p0.X - x), y, c);
+                        RysujPiksel(new Vector2D(2 * p0.X - x, y), c);
                     }
 
                     z += krok;
                 }
-            }
-        }
-
-        public void RysujKolo(int x0, int y0, int x1, int y1)
-        {
-            int r = (int)Math.Abs(Math.Sqrt(Math.Pow(x1 - x0, 2) + Math.Pow(y1 - y0, 2)));
-
-            for (int x = 0; x <= r; ++x)
-            {
-                int y = (int)Math.Floor(Math.Sqrt(r * r - x * x));
-
-                // Prawy góra
-                RysujPiksel(y + x0, -x + y0);
-                RysujPiksel(x + x0, -y + y0);
-
-                // Lewy góra
-                RysujPiksel(-y + x0, -x + y0);
-                RysujPiksel(-x + x0, -y + y0);
-
-                // Prawy dół
-                RysujPiksel(y + x0, x + y0);
-                RysujPiksel(x + x0, y + y0);
-
-                // Lewy dół
-                RysujPiksel(-y + x0, x + y0);
-                RysujPiksel(-x + x0, y + y0);
-            }
-        }
-
-        public void RysujElipse(int x0, int y0, int x1, int y1, double beta)
-        {
-            beta *= (2 * Math.PI / 360);
-
-            double x = 0;
-            double y = 0;
-
-            // Promienie elipsy
-            int r1 = x1 - x0;
-            int r2 = y1 - y0;
-
-            for (int i = 0; i <= 360; ++i)
-            {
-                // Kąt obrotu kolejnych punktów w radianach
-                double alfa = (i / 360.0) * (2 * Math.PI);
-
-                // Zapomiętanie położenia poprzednich punktów
-                double oldX = x;
-                double oldY = y;
-
-                // Obrót punktów
-                x = r1 * Math.Cos(alfa);
-                y = r2 * Math.Sin(alfa);
-
-                // Obrót elipsy
-                double tmp = x;
-                x = x * Math.Cos(beta) - y * Math.Sin(beta);
-                y = tmp * Math.Sin(beta) + y * Math.Cos(beta);
-
-                if (i > 0)
-                {
-                    RysujLinie((int)oldX + x0, (int)oldY + y0, (int)x + x0, (int)y + y0);
-                }
-            }
-        }
-
-        public void RysujKrzywa(Point p0, Point p1, Point p2, Point p3)
-        {
-            Point tmp = p0;
-            double step = 1.0 / 25.0;
-            double t = 0;
-
-            for (int i = 0; i <= 25; ++i)
-            {
-                double x = (-Math.Pow(t, 3) + 3 * Math.Pow(t, 2) - 3 * t + 1) / 6 * p0.X 
-                         + (3 * Math.Pow(t, 3) - 6 * Math.Pow(t, 2) + 4) / 6 * p1.X 
-                         + (-3 * Math.Pow(t, 3) + 3 * Math.Pow(t, 2) + 3 * t + 1) / 6 * p2.X 
-                         + Math.Pow(t, 3) / 6 * p3.X;
-
-                double y = (-Math.Pow(t, 3) + 3 * Math.Pow(t, 2) - 3 * t + 1) / 6 * p0.Y 
-                         + (3 * Math.Pow(t, 3) - 6 * Math.Pow(t, 2) + 4) / 6 * p1.Y
-                         + (-3 * Math.Pow(t, 3) + 3 * Math.Pow(t, 2) + 3 * t + 1) / 6 * p2.Y
-                         + Math.Pow(t, 3) / 6 * p3.Y;
-
-                if (i > 0) RysujLinie((int)x, (int)y, (int)tmp.X, (int)tmp.Y);
-                tmp = new Point(x, y);
-                t += step;
-            }
-        }
-
-        public void Gumka(int x, int y)
-        {
-            for(int i = y - 2; i < y + 2; ++i)
-            {
-                for(int j = x - 2; j < x + 2; ++j)
-                {
-                    RysujPiksel(j, i, 255, 255, 255, 255);
-                }
-            }
-        }
-
-        public static Color SprawdzKolor(int x, int y, byte[] pixsTab, int szerokosc, int wysokosc)
-        {
-            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
-            {
-                int pozycja = 4 * (y * szerokosc + x);
-                
-                return new Color()
-                {
-                    B = pixsTab[pozycja],
-                    G = pixsTab[pozycja + 1],
-                    R = pixsTab[pozycja + 2],
-                    A = pixsTab[pozycja + 3]
-                };
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
-            }
-        }
-
-        public Color SprawdzKolor(int x, int y)
-        {
-            if (x >= 0 && x < szerokosc && y >= 0 && y < wysokosc)
-            {
-                int pozycja = 4 * (y * szerokosc + x);
-
-                return new Color()
-                {
-                    B = pixs[pozycja],
-                    G = pixs[pozycja + 1],
-                    R = pixs[pozycja + 2],
-                    A = pixs[pozycja + 3]
-                };
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("Pozycja z poza zakresu tablicy");
             }
         }
 

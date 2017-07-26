@@ -53,7 +53,11 @@ namespace Projekt_LGiM
             swiat    = new List<WavefrontObj>();
             kamera   = new Kamera();
 
-            rysownik = new Rysownik(ref tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height);
+            rysownik = new Rysownik(tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height)
+            {
+                KolorPedzla = new Color() { R = 0, G = 255, B = 0, A = 255 },
+                KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
+            };
             
             // Wczytanie i ustawienie modeli
             {
@@ -94,10 +98,6 @@ namespace Projekt_LGiM
             }
 
             ComboModele.SelectedIndex = 0;
-
-            // Przygotowanie ekranu i rysownika
-            rysownik.UstawTlo(0, 0, 0, 255);
-            rysownik.UstawPedzel(0, 255, 0, 255);
 
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
@@ -174,6 +174,8 @@ namespace Projekt_LGiM
 
         void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, double[,] buforZ, Color kolorSiatki, Color kolorOsiX, Color kolorOsiZ)
         {
+            if(CheckSiatkaPodlogi.IsChecked == false) { return; }
+
             for (int z = -wysokosc / 2; z < wysokosc / 2; z += skok)
             {
                 for (int x = -szerokosc / 2; x < szerokosc / 2; x += skok)

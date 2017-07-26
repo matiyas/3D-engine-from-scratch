@@ -8,71 +8,71 @@ namespace Projekt_LGiM
 {
 	class Math3D
     {
-		public static Vector3D ZnajdzSrodek(List<Vector3D> punkty)
+		public static Vector3D ZnajdzSrodek(List<Vector3D> wierzcholki)
         {
-            return new Vector3D((punkty.Max(v => v.X) + punkty.Min(v => v.X)) / 2, (punkty.Max(v => v.Y) + punkty.Min(v => v.Y)) / 2,
-                (punkty.Max(v => v.Z) + punkty.Min(v => v.Z)) / 2);
+            return new Vector3D((wierzcholki.Max(v => v.X) + wierzcholki.Min(v => v.X)) / 2, 
+                (wierzcholki.Max(v => v.Y) + wierzcholki.Min(v => v.Y)) / 2, (wierzcholki.Max(v => v.Z) + wierzcholki.Min(v => v.Z)) / 2);
         }
 
-        public static List<Vector3D> Translacja(List<Vector3D> punkty, Vector3D t)
+        public static List<Vector3D> Translacja(List<Vector3D> wierzcholki, Vector3D t)
         {
-            var punktyMod = new List<Vector3D>();
+            var wierzcholkiTrans = new List<Vector3D>();
             var T = new DenseMatrix(4, 4, new double[]{ 1,  0,  0, t.X,
                                                         0,  1,  0, t.Y,
                                                         0,  0,  1, t.Z,
                                                         0,  0,  0,   1,});
-            foreach(var punkt in punkty)
+            foreach(Vector3D wierzcholek in wierzcholki)
             {
-                var p = new DenseVector(new double[]{ punkt.X, punkt.Y, punkt.Z, 1 }) * T;
-                punktyMod.Add(new Vector3D(p.Take(3).ToArray()));
+                var wierzcholekTrans = new DenseVector(new double[]{ wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T;
+                wierzcholkiTrans.Add(new Vector3D(wierzcholekTrans.Take(3).ToArray()));
             }
 
-            return punktyMod;
+            return wierzcholkiTrans;
         }
 
-		public static List<Vector3D> Rotacja(List<Vector3D> punkty, Vector3D phi, Vector3D c)
+		public static List<Vector3D> Rotacja(List<Vector3D> wierzcholki, Vector3D kat, Vector3D srodek)
         {
-            phi = new Vector3D(phi.X / 100, phi.Y / 100, phi.Z / 100);
+            kat = new Vector3D(kat.X / 100, kat.Y / 100, kat.Z / 100);
 
-			var punktyMod = new List<Vector3D>();
+			var wierzcholkiRot = new List<Vector3D>();
 
-            var T0 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,      -c.X,
-																0,			 1,			0,      -c.Y,
-																0,			 0,			1,      -c.Z,
+            var T0 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,      -srodek.X,
+																0,			 1,			0,      -srodek.Y,
+																0,			 0,			1,      -srodek.Z,
 																0,			 0,			0,	       1, });
 
-            var T1 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,	     c.X,
-																0,			 1,			0,	     c.Y,
-																0,			 0,			1,	     c.Z,
+            var T1 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,	     srodek.X,
+																0,			 1,			0,	     srodek.Y,
+																0,			 0,			1,	     srodek.Z,
 																0,			 0,			0,	       1, });
 
             var Rx = new DenseMatrix(4, 4, new double[]{		1,			 0,			  0,	   0, 
-								 								0,  Cos(phi.X), -Sin(phi.X),	   0,
-																0,  Sin(phi.X),	 Cos(phi.X), 	   0,
+								 								0,  Cos(kat.X), -Sin(kat.X),	   0,
+																0,  Sin(kat.X),	 Cos(kat.X), 	   0,
 																0,			 0,			  0,	   1, });
 			
-			var Ry = new DenseMatrix(4, 4, new double[]{Cos(phi.Y),			0,	 Sin(phi.Y),	   0,
+			var Ry = new DenseMatrix(4, 4, new double[]{Cos(kat.Y),			0,	 Sin(kat.Y),	   0,
 																 0,			1,			  0,	   0, 
-													   -Sin(phi.Y),			0,	 Cos(phi.Y),	   0,
+													   -Sin(kat.Y),			0,	 Cos(kat.Y),	   0,
 																 0,			0,			  0,	   1, });
 			
-			var Rz = new DenseMatrix(4, 4, new double[]{Cos(phi.Z), -Sin(phi.Z),		  0,	   0,
-														Sin(phi.Z),	 Cos(phi.Z),		  0,	   0,
+			var Rz = new DenseMatrix(4, 4, new double[]{Cos(kat.Z), -Sin(kat.Z),		  0,	   0,
+														Sin(kat.Z),	 Cos(kat.Z),		  0,	   0,
 																 0,			  0,		  1,	   0, 
 																 0,			  0,		  0,	   1, });
 
-			for(int i = 0; i < punkty.Count(); ++i)
+            foreach(Vector3D wierzcholek in wierzcholki)
             {
-				var p = new DenseVector(new double[]{punkty[i].X, punkty[i].Y, punkty[i].Z, 1});
+                var wierzcholekRot = new DenseVector(new double[] { wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0;
 
-                if (phi.X.CompareTo(0) != 0) p *= T0 * Rx * T1;
-                if (phi.Y.CompareTo(0) != 0) p *= T0 * Ry * T1;
-                if (phi.Z.CompareTo(0) != 0) p *= T0 * Rz * T1;
+                if (kat.X.CompareTo(0) != 0) wierzcholekRot *= Rx;
+                if (kat.Y.CompareTo(0) != 0) wierzcholekRot *= Ry;
+                if (kat.Z.CompareTo(0) != 0) wierzcholekRot *= Rz;
 
-                punktyMod.Add(new Vector3D(p.Take(3).ToArray()));
+                wierzcholkiRot.Add(new Vector3D((wierzcholekRot * T1).Take(3).ToArray()));
             }
-
-            return punktyMod;
+            
+            return wierzcholkiRot;
         }
 
         public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D s)
@@ -118,7 +118,7 @@ namespace Projekt_LGiM
 
             return wierzcholkiMod;
         }
-        
+
         public static Vector3D RzutPerspektywiczny(Vector3D punkt, double d, Vector2D c, Kamera kamera)
         {
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
@@ -142,12 +142,7 @@ namespace Projekt_LGiM
 
             return punktyRzut;
         }
-
-        public static bool CzyStoiPrzed(Vector3D v0, Vector3D v1, UnitVector3D kierunek)
-        {
-            return (v0.X - v1.X) * kierunek.X + (v0.Y - v1.Y) * kierunek.Y + (v0.Z - v1.Z) * kierunek.Z > 0;
-        }
-
+        
         public static double CosKat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
         {
             zrodlo -= srodek;
@@ -156,24 +151,6 @@ namespace Projekt_LGiM
             return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
         
-        public static double Kat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
-        {
-            zrodlo -= srodek;
-            wierzcholek -= srodek;
-
-            double wynik;
-            
-            try
-            {
-                wynik = zrodlo.AngleTo(wierzcholek).Degrees;
-            }
-            catch
-            {
-                wynik = 0;
-            }
-            return wynik;
-        }
-
         public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D c)
         {
             kat /= 100;

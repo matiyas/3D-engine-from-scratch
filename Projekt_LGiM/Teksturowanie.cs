@@ -151,7 +151,7 @@ namespace Projekt_LGiM
                         A = (byte)(db * (da * kolorP1.A + a * kolorP3.A) + b * (da * kolorP2.A + a * kolorP4.A)),
                     };
 
-                    rysownik.RysujPiksel(x, y, c);
+                    rysownik.RysujPiksel(new Vector2D(x, y), c);
                     buforZ[x, y] = z;
                 }
             }
