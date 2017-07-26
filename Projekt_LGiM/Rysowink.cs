@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using Drawing = System.Drawing;
+using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
@@ -189,6 +190,68 @@ namespace Projekt_LGiM
         public void RysujLinie(int x0, int y0, int x1, int y1, Color c)
         {
             RysujLinie(x0, y0, x1, y1, c.R, c.G, c.B);
+        }
+
+        public void RysujLinie(Vector3D p0, Vector3D p1, Color c, double[,] bufferZ)
+        {
+            Vector3D startX = p0.X < p1.X ? p0 : p1;
+            Vector3D endX   = p0.X > p1.X ? p0 : p1;
+            Vector3D startY = p0.Y < p1.Y ? p0 : p1;
+            Vector3D endY   = p0.Y > p1.Y ? p0 : p1;
+
+            int dx = (int)(endX.X - startX.X);
+            int dy = (int)(endY.Y - startY.Y);
+
+            if (dx > dy)
+            {
+                double krok = (startX.Z - endX.Z) / dx;
+                double z = startX.Z;
+
+                for (int x = (int)startX.X; x <= endX.X; ++x)
+                {
+                    double y = (dy / (double)dx) * (x - p0.X) + p0.Y;
+
+                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
+                    {
+                        if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[x, (int)y] > z && z > 100)
+                        {
+                            RysujPiksel(x, (int)y, c);
+                        }
+                    }
+                    else if (x >= 0 && x < bufferZ.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < bufferZ.GetLength(1)
+                       && bufferZ[x, (int)(2 * p0.Y - y)] > z && z > 100)
+                    {
+                        RysujPiksel(x, (int)(2 * p0.Y - y), c);
+                    }
+
+                    y += krok;
+                }
+            }
+            else
+            {
+                double krok = (startY.Z - endY.Z) / dy;
+                double z = startY.Z;
+
+                for (int y = (int)startY.Y; y <= endY.Y; ++y)
+                {
+                    double x = (dx / (double)dy) * (y - p0.Y) + p0.X;
+
+                    if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
+                    {
+                        if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[(int)x, y] > z && z > 100)
+                        {
+                            RysujPiksel((int)x, y, c);
+                        }
+                    }
+                    else if (2 * p0.X - x >= 0 && 2 * p0.X - x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1)
+                       && bufferZ[(int)(2 * p0.X - x), y] > z && z > 100)
+                    {
+                        RysujPiksel((int)(2 * p0.X - x), y, c);
+                    }
+
+                    z += krok;
+                }
+            }
         }
 
         public void RysujKolo(int x0, int y0, int x1, int y1)

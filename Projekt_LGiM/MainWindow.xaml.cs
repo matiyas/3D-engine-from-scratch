@@ -60,37 +60,37 @@ namespace Projekt_LGiM
                 WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
                 swiat[0].Skaluj(new Vector3D(100, 100, 100));
 
-                //WczytajModel(sciezkaModel, @"tekstury\mercury.jpg");
-                //swiat[1].Przesun(new Vector3D(300, 0, 0));
-                //swiat[1].Skaluj(new Vector3D(-95, -95, -95));
+                WczytajModel(sciezkaModel, @"tekstury\mercury.jpg");
+                swiat[1].Przesun(new Vector3D(300, 0, 0));
+                swiat[1].Skaluj(new Vector3D(-95, -95, -95));
 
-                //WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
-                //swiat[2].Przesun(new Vector3D(400, 0, 0));
-                //swiat[2].Skaluj(new Vector3D(-88, -88, -88));
+                WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
+                swiat[2].Przesun(new Vector3D(400, 0, 0));
+                swiat[2].Skaluj(new Vector3D(-88, -88, -88));
 
-                //WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
-                //swiat[3].Przesun(new Vector3D(600, 0, 0));
-                //swiat[3].Skaluj(new Vector3D(-87, -87, -87));
+                WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
+                swiat[3].Przesun(new Vector3D(600, 0, 0));
+                swiat[3].Skaluj(new Vector3D(-87, -87, -87));
 
-                //WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
-                //swiat[4].Przesun(new Vector3D(900, 0, 0));
-                //swiat[4].Skaluj(new Vector3D(-93, -93, -93));
+                WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
+                swiat[4].Przesun(new Vector3D(900, 0, 0));
+                swiat[4].Skaluj(new Vector3D(-93, -93, -93));
 
-                //WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
-                //swiat[5].Przesun(new Vector3D(1300, 0, 0));
-                //swiat[5].Skaluj(new Vector3D(42, 42, 42));
+                WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
+                swiat[5].Przesun(new Vector3D(1300, 0, 0));
+                swiat[5].Skaluj(new Vector3D(42, 42, 42));
 
-                //WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
-                //swiat[6].Przesun(new Vector3D(1800, 0, 0));
-                //swiat[6].Skaluj(new Vector3D(20, 20, 20));
+                WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
+                swiat[6].Przesun(new Vector3D(1800, 0, 0));
+                swiat[6].Skaluj(new Vector3D(20, 20, 20));
 
-                //WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
-                //swiat[7].Przesun(new Vector3D(2400, 0, 0));
-                //swiat[7].Skaluj(new Vector3D(-49, -49, -49));
+                WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
+                swiat[7].Przesun(new Vector3D(2400, 0, 0));
+                swiat[7].Skaluj(new Vector3D(-49, -49, -49));
 
-                //WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
-                //swiat[8].Przesun(new Vector3D(3100, 0, 0));
-                //swiat[8].Skaluj(new Vector3D(-51, -51, -51));
+                WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
+                swiat[8].Przesun(new Vector3D(3100, 0, 0));
+                swiat[8].Skaluj(new Vector3D(-51, -51, -51));
             }
 
             ComboModele.SelectedIndex = 0;
@@ -115,34 +115,34 @@ namespace Projekt_LGiM
                         {
                             // Obrót modeli dookoła światła i własnej osi.
                             {
-                                //swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
 
-                                //swiat[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                //swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
-                                //swiat[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
+                                swiat[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
-                                //swiat[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
+                                swiat[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
-                                //swiat[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
+                                swiat[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
-                                //swiat[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
+                                swiat[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                //swiat[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
+                                swiat[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
-                                //swiat[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
+                                swiat[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
-                                //swiat[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
+                                swiat[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
 
-                                //swiat[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
-                                //swiat[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
+                                swiat[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                swiat[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
                             }
 
                             RysujNaEkranie(swiat);
@@ -172,38 +172,52 @@ namespace Projekt_LGiM
             swiat[ComboModele.SelectedIndex].Obroc(new Vector3D(Math.PI * 100, 0, 0));
         }
 
-        void RysujSiatke()
+        void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, double[,] buforZ, Color kolorSiatki, Color kolorOsiX, Color kolorOsiZ)
         {
-            rysownik.CzyscEkran();
-
-            for (int z = -1000; z < 1000; z += 100)
+            for (int z = -wysokosc / 2; z < wysokosc / 2; z += skok)
             {
-                for (int x = -1000; x < 1000; x += 100)
+                for (int x = -szerokosc / 2; x < szerokosc / 2; x += skok)
                 {
                     var punkty = new List<Vector3D>()
                     {
                         Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + 100, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + 100, 0, z + 100), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
-                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + 100), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera)
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z + skok), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + skok), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera)
                     };
 
-                    for(int i = 0; i < punkty.Count; ++i)
+                    for (int i = 0; i < punkty.Count; ++i)
                     {
-                        if(punkty[i].Z > 10 && punkty[(i + 1) % punkty.Count].Z > 10)
+                        if (punkty[i].Z > 10 && punkty[(i + 1) % punkty.Count].Z > 10)
                         {
                             Color kolor;
 
-                            if      (x == 0 && i == 3)   { kolor = new Color() { R = 255, G =   0, B =   0 }; }
-                            else if (z == 0 && i == 0)   { kolor = new Color() { R =   0, G =   0, B = 255 }; }
-                            else                         { kolor = new Color() { R = 127, G = 127, B = 127 }; }
+                            if (x == 0 && i == 3)       { kolor = kolorOsiZ; }
+                            else if (z == 0 && i == 0)  { kolor = kolorOsiX; }
+                            else                        { kolor = kolorSiatki; }
 
-                            rysownik.RysujLinie((int)punkty[i].X, (int)punkty[i].Y, (int)punkty[(i + 1) % punkty.Count].X,
-                            (int)punkty[(i + 1) % punkty.Count].Y, kolor);
+                            rysownik.RysujLinie(punkty[i], punkty[(i + 1) % punkty.Count], kolor, buforZ);
                         }
                     }
                 }
             }
+        }
+
+        void RysujSiatke()
+        {
+            rysownik.CzyscEkran();
+            var bufferZ = new double[(int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height];
+
+            for (int x = 0; x < bufferZ.GetLength(0); ++x)
+            {
+                for(int y = 0; y < bufferZ.GetLength(1); ++y)
+                {
+                    bufferZ[x, y] = double.PositiveInfinity;
+                }
+            }
+
+            RysujSiatkePodlogi(2000, 2000, 100, bufferZ, new Color() { R = 127, G = 127, B = 127, A = 255 }, 
+                new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
 
             foreach (WavefrontObj model in swiat)
             {
@@ -214,12 +228,8 @@ namespace Projekt_LGiM
                 {
                     for (int i = 0; i < sciana.Vertex.Count; ++i)
                     {
-                        if(modelRzut[sciana.Vertex[i]].Z > 100 && modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Z > 100)
-                        {
-                            rysownik.RysujLinie((int)modelRzut[sciana.Vertex[i]].X, (int)modelRzut[sciana.Vertex[i]].Y,
-                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].X,
-                                (int)modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]].Y, 0, 255, 0);
-                        }
+                        rysownik.RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]],
+                            new Color() { R = 0, G = 255, B = 0, A = 255 }, bufferZ);
                     }
                 }
             }
@@ -286,6 +296,9 @@ namespace Projekt_LGiM
                     }
                 }
             }
+
+            RysujSiatkePodlogi(2000, 2000, 100, buforZ, new Color() { R = 127, G = 127, B = 127, A = 255 },
+                new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
         }
 
         void RysujNaEkranie(List<WavefrontObj> modele)
@@ -450,14 +463,15 @@ namespace Projekt_LGiM
                     case Tryb.Skalowanie:
                         if(Keyboard.IsKeyDown(Key.LeftShift))
                         {
-                            swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X, ile.X, ile.X));
+                            double s = Math.Sqrt(Math.Pow(ile.X - ile.Y, 2)) * Math.Sign(ile.X - ile.Y) / 2;
+                            swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(s, s, s));
                         }
                         else
                         {
                             swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X * kamera.Prawo.X, ile.X * kamera.Prawo.Y,
                                 ile.X * kamera.Prawo.Z));
                             swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(-ile.Y * kamera.Gora.X, -ile.Y * kamera.Gora.Y,
-                                ile.Y * kamera.Gora.Z));
+                                -ile.Y * kamera.Gora.Z));
                         }
                         break;
 
