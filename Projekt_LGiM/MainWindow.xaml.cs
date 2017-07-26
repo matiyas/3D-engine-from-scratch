@@ -11,6 +11,8 @@ using Microsoft.Win32;
 
 namespace Projekt_LGiM
 {
+    public enum Tryb { Poruszanie, Skalowanie, Obracanie };
+
     public partial class MainWindow : Window
     {
         byte[] pixs, tmpPixs;
@@ -24,6 +26,7 @@ namespace Projekt_LGiM
         double dpi;
         double odleglosc;
         double czuloscMyszy;
+        Tryb tryb;
 
         public MainWindow()
         {
@@ -97,19 +100,20 @@ namespace Projekt_LGiM
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
 
-            zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[0].VertexCoords);
 
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
                 while (true)
                 {
+                    zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[0].VertexCoords);
+
                     //if (modele.Count >= 9)
                     {
                         Dispatcher.Invoke(() =>
                         {
                             // Obrót modeli dookoła światła i własnej osi.
                             {
-                                swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                                //swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
 
                                 //swiat[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
                                 //swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
@@ -324,6 +328,18 @@ namespace Projekt_LGiM
                 case Key.LeftCtrl:
                     kamera.WGore(-50);
                     break;
+
+                case Key.D1:
+                    tryb = Tryb.Poruszanie;
+                    break;
+
+                case Key.D2:
+                    tryb = Tryb.Skalowanie;
+                    break;
+
+                case Key.D3:
+                    tryb = Tryb.Obracanie;
+                    break;
             }
         }
 
@@ -409,8 +425,52 @@ namespace Projekt_LGiM
             {
                 Vector ile = -(ppm0 - e.GetPosition(Ekran));
 
-                swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.X * kamera.Prawo.X, ile.X * kamera.Prawo.Y, ile.X * kamera.Prawo.Z));
-                swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.Y * kamera.Gora.X, ile.Y * kamera.Gora.Y, ile.Y * kamera.Gora.Z));
+                switch (tryb)
+                {
+                    case Tryb.Poruszanie:
+                        if(Keyboard.IsKeyDown(Key.LeftShift))
+                        {
+                            swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(-ile.Y * kamera.Przod.X * 3, -ile.Y * kamera.Przod.Y * 3,
+                                -ile.Y * kamera.Przod.Z * 3));
+                        }
+                        else
+                        {
+                            swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.X * kamera.Prawo.X * 3, ile.X * kamera.Prawo.Y * 3,
+                                ile.X * kamera.Prawo.Z * 3));
+                            swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.Y * kamera.Gora.X * 3, ile.Y * kamera.Gora.Y * 3,
+                                ile.Y * kamera.Gora.Z * 3));
+                        }
+                        break;
+
+                    case Tryb.Skalowanie:
+                        if(Keyboard.IsKeyDown(Key.LeftShift))
+                        {
+                            swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X, ile.X, ile.X));
+                        }
+                        else
+                        {
+                            swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X * kamera.Prawo.X, ile.X * kamera.Prawo.Y,
+                                ile.X * kamera.Prawo.Z));
+                            swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(-ile.Y * kamera.Gora.X, -ile.Y * kamera.Gora.Y,
+                                ile.Y * kamera.Gora.Z));
+                        }
+                        break;
+
+                    case Tryb.Obracanie:
+                        if(Keyboard.IsKeyDown(Key.LeftShift))
+                        {
+                            swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.X, kamera.Przod, 
+                                Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords));
+                        }
+                        else
+                        {
+                            swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.X, kamera.Gora,
+                                Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords));
+                            swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.Y, kamera.Prawo,
+                                Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords));
+                        }
+                        break;
+                }
             }
 
             ppm0 = e.GetPosition(Ekran);

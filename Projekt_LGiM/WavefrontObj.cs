@@ -148,6 +148,12 @@ namespace Projekt_LGiM
             VertexNormalsCoords = Math3D.Rotacja(VertexNormalsCoords, phi, c);
         }
 
+        public void ObrocWokolOsi(double phi, UnitVector3D os, Vector3D c)
+        {
+            VertexCoords = Math3D.ObrocWokolOsi(VertexCoords, os, phi, c);
+            VertexNormalsCoords = Math3D.ObrocWokolOsi(VertexNormalsCoords, os, phi, c);
+        }
+
         public void Skaluj(Vector3D s)
         {
             VertexCoords = Math3D.Skalowanie(VertexCoords, s);

@@ -214,5 +214,17 @@ namespace Projekt_LGiM
 
             return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }
+
+        public static List<Vector3D> ObrocWokolOsi(List<Vector3D> punkty, UnitVector3D os, double kat, Vector3D c)
+        {
+            var punktyObrot = new List<Vector3D>(punkty.Count);
+
+            foreach(Vector3D punkt in punkty)
+            {
+                punktyObrot.Add(ObrocWokolOsi(punkt, os, kat, c));
+            }
+
+            return punktyObrot;
+        }
     }
 }
