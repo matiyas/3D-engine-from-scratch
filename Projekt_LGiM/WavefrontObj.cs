@@ -48,7 +48,14 @@ namespace Projekt_LGiM
 
                             foreach (string wartosc in wartosci.Skip(1))
                             {
-                                wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
+                                try
+                                {
+                                    wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
+                                }
+                                catch
+                                {
+                                    continue;
+                                }
                             }
                             if (wartosci[0] == "v")
                             {
@@ -77,26 +84,65 @@ namespace Projekt_LGiM
 
                             foreach (string wartosc in wartosci)
                             {
-                                sciana.Vertex.Add(int.Parse(wartosc.Split('/')[0]) - 1);
+                                try
+                                {
+                                    sciana.Vertex.Add(int.Parse(wartosc.Split('/')[0]));
+                                }
+                                catch
+                                {
+                                    continue;
+                                }
+
 
                                 if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)
                                 {
-                                    sciana.VertexTexture.Add(-1);
+                                    continue;
                                 }
                                 else
                                 {
-                                    sciana.VertexTexture.Add(vt - 1);
+                                    sciana.VertexTexture.Add(vt);
                                 }
 
                                 if (wartosc.Split('/').ToArray().Length == 3)
                                 {
-                                    sciana.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]) - 1);
+                                    sciana.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]));
                                 }
                             }
                             Sciany.Add(sciana);
                             break;
                     }
                 }
+            }
+
+            for(int i = 0; i < Sciany.Count; ++i)
+            {
+                var wierzcholki = new List<int>(Sciany[i].Vertex.Count);
+                for(int j = 0; j < Sciany[i].Vertex.Count; ++j)
+                {
+                    int wartosc = Sciany[i].Vertex[j];
+                    wierzcholki.Add(wartosc > 0 ? wartosc - 1 : VertexCoords.Count + wartosc);
+                }
+
+                var wierzcholkiNorm = new List<int>(Sciany[i].VertexNormal.Count);
+                for (int j = 0; j < Sciany[i].VertexNormal.Count; ++j)
+                {
+                    int wartosc = Sciany[i].VertexNormal[j];
+                    wierzcholkiNorm.Add(wartosc > 0 ? wartosc - 1 : VertexNormalsCoords.Count + wartosc);
+                }
+
+                var wierzcholkiText = new List<int>(Sciany[i].VertexTexture.Count);
+                for (int j = 0; j < Sciany[i].VertexTexture.Count; ++j)
+                {
+                    int wartosc = Sciany[i].VertexTexture[j];
+                    wierzcholkiText.Add(wartosc > 0 ? wartosc - 1 : VertexTextureCoords.Count + wartosc);
+                }
+
+                Sciany[i] = new Sciana()
+                {
+                    Vertex = wierzcholki,
+                    VertexNormal = wierzcholkiNorm,
+                    VertexTexture = wierzcholkiText
+                };
             }
 
             ScianyTrojkatne = new List<Sciana>();

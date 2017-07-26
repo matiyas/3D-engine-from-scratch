@@ -15,13 +15,14 @@ namespace Projekt_LGiM
 
     public partial class MainWindow : Window
     {
-        byte[] pixs, tmpPixs;
+        byte[] backBuffer;
         Rysownik rysownik;
         Size rozmiarPlotna;
         Point srodek;
         Point lpm0, ppm0;
         List<WavefrontObj> swiat;
         Vector3D zrodloSwiatla;
+        int zrodloSwiatlaIndeks;
         Kamera kamera;
         double dpi;
         double odleglosc;
@@ -40,9 +41,8 @@ namespace Projekt_LGiM
 
             string sciezkaTlo   = @"tekstury\stars.jpg";
             string sciezkaModel = @"modele\shaded.obj";
-
-            pixs    = Rysownik.ToByteArray(sciezkaTlo);
-            tmpPixs = Rysownik.ToByteArray(sciezkaTlo);
+            
+            backBuffer = Rysownik.ToByteArray(sciezkaTlo);
 
             rozmiarPlotna.Width  = System.Drawing.Image.FromFile(sciezkaTlo).Width;
             rozmiarPlotna.Height = System.Drawing.Image.FromFile(sciezkaTlo).Height;
@@ -53,101 +53,33 @@ namespace Projekt_LGiM
             swiat    = new List<WavefrontObj>();
             kamera   = new Kamera();
 
-            rysownik = new Rysownik(tmpPixs, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height)
+            rysownik = new Rysownik(backBuffer, (int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height)
             {
                 KolorPedzla = new Color() { R = 0, G = 255, B = 0, A = 255 },
                 KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
             };
             
-            // Wczytanie i ustawienie modeli
-            {
-                WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
-                swiat[0].Skaluj(new Vector3D(100, 100, 100));
-
-                WczytajModel(sciezkaModel, @"tekstury\mercury.jpg");
-                swiat[1].Przesun(new Vector3D(300, 0, 0));
-                swiat[1].Skaluj(new Vector3D(-95, -95, -95));
-
-                WczytajModel(sciezkaModel, @"tekstury\venus.jpg");
-                swiat[2].Przesun(new Vector3D(400, 0, 0));
-                swiat[2].Skaluj(new Vector3D(-88, -88, -88));
-
-                WczytajModel(sciezkaModel, @"tekstury\earth.jpg");
-                swiat[3].Przesun(new Vector3D(600, 0, 0));
-                swiat[3].Skaluj(new Vector3D(-87, -87, -87));
-
-                WczytajModel(sciezkaModel, @"tekstury\mars.jpg");
-                swiat[4].Przesun(new Vector3D(900, 0, 0));
-                swiat[4].Skaluj(new Vector3D(-93, -93, -93));
-
-                WczytajModel(sciezkaModel, @"tekstury\jupiter.jpg");
-                swiat[5].Przesun(new Vector3D(1300, 0, 0));
-                swiat[5].Skaluj(new Vector3D(42, 42, 42));
-
-                WczytajModel(sciezkaModel, @"tekstury\saturn.jpg");
-                swiat[6].Przesun(new Vector3D(1800, 0, 0));
-                swiat[6].Skaluj(new Vector3D(20, 20, 20));
-
-                WczytajModel(sciezkaModel, @"tekstury\uran.jpg");
-                swiat[7].Przesun(new Vector3D(2400, 0, 0));
-                swiat[7].Skaluj(new Vector3D(-49, -49, -49));
-
-                WczytajModel(sciezkaModel, @"tekstury\neptun.jpg");
-                swiat[8].Przesun(new Vector3D(3100, 0, 0));
-                swiat[8].Skaluj(new Vector3D(-51, -51, -51));
-            }
+            WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
+            zrodloSwiatlaIndeks = 0;
 
             ComboModele.SelectedIndex = 0;
 
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
-                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
+                PixelFormats.Bgra32, null, backBuffer, 4 * (int)rozmiarPlotna.Width);
 
 
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
                 while (true)
                 {
-                    zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[0].VertexCoords);
+                    zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[zrodloSwiatlaIndeks].VertexCoords);
 
-                    //if (modele.Count >= 9)
+                    Dispatcher.Invoke(() =>
                     {
-                        Dispatcher.Invoke(() =>
-                        {
-                            // Obrót modeli dookoła światła i własnej osi.
-                            {
-                                swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                        //swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
+                        RysujNaEkranie();
 
-                                swiat[1].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[1].Obroc(new Vector3D(0, -16 * SliderSzybkosc.Value, 0));
-                                swiat[1].Obroc(new Vector3D(0, -61 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[2].Obroc(new Vector3D(0, -14 * SliderSzybkosc.Value, 0));
-                                swiat[2].Obroc(new Vector3D(0, -24 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[3].Obroc(new Vector3D(0, -12 * SliderSzybkosc.Value, 0));
-                                swiat[3].Obroc(new Vector3D(0, -18 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[4].Obroc(new Vector3D(0, -10 * SliderSzybkosc.Value, 0));
-                                swiat[4].Obroc(new Vector3D(0, -9 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[5].Obroc(new Vector3D(0, -8 * SliderSzybkosc.Value, 0));
-                                swiat[5].Obroc(new Vector3D(0, -1.5 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[6].Obroc(new Vector3D(0, -6 * SliderSzybkosc.Value, 0));
-                                swiat[6].Obroc(new Vector3D(0, -0.6 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[7].Obroc(new Vector3D(0, -4 * SliderSzybkosc.Value, 0));
-                                swiat[7].Obroc(new Vector3D(0, -0.2 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-
-                                swiat[8].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
-                                swiat[8].Obroc(new Vector3D(0, -0.1 * SliderSzybkosc.Value, 0), zrodloSwiatla);
-                            }
-
-                            RysujNaEkranie(swiat);
-                        }, System.Windows.Threading.DispatcherPriority.Render);
-                    }
+                    }, System.Windows.Threading.DispatcherPriority.Render);
 
                     Thread.Sleep(20);
                 }
@@ -267,7 +199,7 @@ namespace Projekt_LGiM
                         {
                             List<double> gradient = new List<double>(3);
 
-                            gradient = model != swiat[0] ? new List<double>()
+                            gradient = model != swiat[zrodloSwiatlaIndeks] ? new List<double>()
                                 {
                                     Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
                                     Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
@@ -303,13 +235,13 @@ namespace Projekt_LGiM
                 new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
         }
 
-        void RysujNaEkranie(List<WavefrontObj> modele)
+        void RysujNaEkranie()
         {
             if (CheckSiatka.IsChecked == false)      { RysujTeksture(); }
             else                                     { RysujSiatke();   }
             
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
-                PixelFormats.Bgra32, null, tmpPixs, 4 * (int)rozmiarPlotna.Width);
+                PixelFormats.Bgra32, null, backBuffer, 4 * (int)rozmiarPlotna.Width);
         }
         
         void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -395,7 +327,7 @@ namespace Projekt_LGiM
 
                 int tmp = ComboModele.SelectedIndex;
                 swiat[ComboModele.SelectedIndex] = model;
-                ComboModele.Items[ComboModele.SelectedIndex] = new ComboBoxItem() { Content = "Foo" };
+                ComboModele.Items[ComboModele.SelectedIndex] = new ComboBoxItem() { Content = model.Nazwa };
                 ComboModele.SelectedIndex = tmp;
             }
         }
@@ -422,6 +354,11 @@ namespace Projekt_LGiM
         {
             if (e.LeftButton  == MouseButtonState.Pressed) { lpm0 = e.GetPosition(Ekran); }
             if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
+        }
+
+        private void BtnUstawZrodloSwiatla_Click(object sender, RoutedEventArgs e)
+        {
+            zrodloSwiatlaIndeks = ComboModele.SelectedIndex;
         }
 
         void Ekran_MouseMove(object sender,  MouseEventArgs e)
@@ -485,7 +422,7 @@ namespace Projekt_LGiM
                         }
                         else
                         {
-                            swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.X, kamera.Gora,
+                            swiat[ComboModele.SelectedIndex].ObrocWokolOsi(-ile.X, kamera.Gora,
                                 Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords));
                             swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.Y, kamera.Prawo,
                                 Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords));
