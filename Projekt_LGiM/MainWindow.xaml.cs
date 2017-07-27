@@ -8,6 +8,7 @@ using MathNet.Spatial.Euclidean;
 using System.Windows.Controls;
 using System;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace Projekt_LGiM
 {
@@ -70,18 +71,30 @@ namespace Projekt_LGiM
 
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
+                var stopWatch = new Stopwatch();
+                double avgRefreshTime = 0;
+                int i = 1;
+
                 while (true)
                 {
+                    Thread.Sleep(30);
+                    stopWatch.Restart();
                     zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[zrodloSwiatlaIndeks].VertexCoords);
 
                     Dispatcher.Invoke(() =>
                     {
-                        //swiat[0].Obroc(new Vector3D(0, -2 * SliderSzybkosc.Value, 0));
                         RysujNaEkranie();
+                        stopWatch.Stop();
+                        avgRefreshTime += stopWatch.ElapsedMilliseconds;
 
+                        if(i == 20)
+                        {
+                            LabelRefreshTime.Content = avgRefreshTime / i + " ms";
+                            i = 0;
+                            avgRefreshTime = 0;
+                        }
+                        ++i;
                     }, System.Windows.Threading.DispatcherPriority.Render);
-
-                    Thread.Sleep(20);
                 }
             }));
 
@@ -307,6 +320,7 @@ namespace Projekt_LGiM
             if(openFileDialog.ShowDialog() == true)
             {
                 var model = new WavefrontObj(openFileDialog.FileName);
+                model.Teksturowanie = new Teksturowanie(rysownik);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
                 swiat.Add(model);
@@ -336,7 +350,8 @@ namespace Projekt_LGiM
         {
             var openFileDialog = new OpenFileDialog() { Filter = "JPEG (*.jpg; *.jpeg; *.jpe)|*.jpg; *.jpeg; *.jpe|"
                                                                + "PNG (*.png)|*.png|"
-                                                               + "BMP (*.bmp)|*.bmp"};
+                                                               + "BMP (*.bmp)|*.bmp|"
+                                                               + "TIF (*.tif)|*.tif"};
 
             if (openFileDialog.ShowDialog() == true)
             {

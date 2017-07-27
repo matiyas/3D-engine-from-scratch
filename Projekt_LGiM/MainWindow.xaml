@@ -144,5 +144,6 @@
             Width="210"
             Focusable="False"/>
         <Button x:Name="BtnUstawZrodloSwiatla" Content="Ustaw jako zrodlo swiatla" Grid.Column="1" HorizontalAlignment="Left" Margin="5,170,0,0" Grid.Row="1" VerticalAlignment="Top" Width="215" Click="BtnUstawZrodloSwiatla_Click"/>
+        <Label x:Name="LabelRefreshTime" Content="0 ms" Grid.Column="1" HorizontalAlignment="Left" Margin="173,0,0,0" VerticalAlignment="Top" Height="21" FontSize="10" Grid.RowSpan="2"/>
     </Grid>
 </Window>

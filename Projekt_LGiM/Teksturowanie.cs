@@ -9,14 +9,12 @@ namespace Projekt_LGiM
 {
     class Teksturowanie
     {
-        string sciezka;
         Rysownik rysownik;
         Drawing.Size rozmiarTekstury;
         Color[,] teksturaKolory;
 
         public Teksturowanie(string sciezka, Rysownik rysownik)
         {
-            this.sciezka = sciezka;
             this.rysownik = rysownik;
 
             var bmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
@@ -36,6 +34,13 @@ namespace Projekt_LGiM
                     };
                 }
             }
+        }
+
+        public Teksturowanie(Rysownik rysownik)
+        {
+            this.rysownik = rysownik;
+
+            teksturaKolory = null;
         }
 
         public void Teksturuj(List<Vector3D> wektor, List<double> wektorNormalny, List<Vector2D> wektorTekstura, double[,] buforZ)
@@ -132,6 +137,20 @@ namespace Projekt_LGiM
                                 
                     int txx = (int)(tx + 1 < rozmiarTekstury.Width  ? tx + 1 : tx);
                     int tyy = (int)(ty + 1 < rozmiarTekstury.Height ? ty + 1 : ty);
+
+                    if(teksturaKolory == null)
+                    {
+                        rysownik.RysujPiksel(new Vector2D(x, y), new Color()
+                        {
+                            R = (byte)(127 * jasnosc),
+                            G = (byte)(127 * jasnosc),
+                            B = (byte)(127 * jasnosc),
+                            A = 255,
+                        });
+
+                        buforZ[x, y] = z;
+                        continue;
+                    }
 
                     if (tx >= rozmiarTekstury.Width || ty >= rozmiarTekstury.Height) { continue; }
 
