@@ -2,18 +2,17 @@
 using Drawing = System.Drawing;
 using System.Linq;
 using System.Windows.Media;
-using System.Collections.Generic;
 using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
-    class Teksturowanie
+    class Renderowanie
     {
         Rysownik rysownik;
         Drawing.Size rozmiarTekstury;
         Color[,] teksturaKolory;
 
-        public Teksturowanie(string sciezka, Rysownik rysownik)
+        public Renderowanie(string sciezka, Rysownik rysownik)
         {
             this.rysownik = rysownik;
 
@@ -36,16 +35,16 @@ namespace Projekt_LGiM
             }
         }
 
-        public Teksturowanie(Rysownik rysownik)
+        public Renderowanie(Rysownik rysownik)
         {
             this.rysownik = rysownik;
 
             teksturaKolory = null;
         }
 
-        public void Teksturuj(List<Vector3D> wektor, List<double> wektorNormalny, List<Vector2D> wektorTekstura, double[,] buforZ)
+        public void Renderuj(Vector3D[] wektor, double[] wektorNormalny, Vector2D[] wektorTekstura, double[,] buforZ)
         {
-            for(int i = 0; i < wektorTekstura.Count; ++i)
+            for(int i = 0; i < wektorTekstura.Length; ++i)
             {
                 wektorTekstura[i] = new Vector2D(wektorTekstura[i].X * rozmiarTekstury.Width, wektorTekstura[i].Y * rozmiarTekstury.Height);
             }
@@ -54,19 +53,20 @@ namespace Projekt_LGiM
             Vector3D y0 = tmp.First();
             Vector3D y1 = tmp.Last();
 
-            List<Vector3D> graniczneX;
-            List<double> gradiendt;
+            Vector3D[] graniczneX;
+            double[] gradient;
 
             // Przechodź po obszarze figury od góry
             for (int y = (int)y0.Y; y <= y1.Y; ++y)
             {
-                graniczneX = new List<Vector3D>();
-                gradiendt = new List<double>(); 
+                graniczneX = new Vector3D[3];
+                gradient = new double[3];
 
                 // Przechodź po wszystkich krawędziach trójkąta
-                for (int i = 0; i < wektor.Count; ++i)
+                int k = 0;
+                for (int i = 0; i < wektor.Length; ++i)
                 {
-                    int j = (i + 1) % wektor.Count;
+                    int j = (i + 1) % wektor.Length;
                     double maxX = Math.Max(wektor[i].X, wektor[j].X);
                     double minX = Math.Min(wektor[i].X, wektor[j].X);
                     double maxY = Math.Max(wektor[i].Y, wektor[j].Y);
@@ -80,29 +80,30 @@ namespace Projekt_LGiM
                     double m = (wektor[i].Y - y) / (wektor[i].Y - wektor[j].Y);
                     double z = wektor[i].Z + (wektor[j].Z - wektor[i].Z) * m;
                     double cos = wektorNormalny[i] + (wektorNormalny[j] - wektorNormalny[i]) * m;
-                    graniczneX.Add(new Vector3D(x, y, z));
-                    gradiendt.Add(cos);
+                    graniczneX[k] = new Vector3D(x, y, z);
+                    gradient[k] = cos;
+                    ++k;
                 }
 
-                if (graniczneX.Count <= 1) { continue; }
+                if (k <= 1) { continue; }
 
                 Vector3D x0 = graniczneX[0];
                 Vector3D x1 = graniczneX[0];
-                double vn0 = gradiendt[0];
-                double vn1 = gradiendt[0];
+                double vn0 = gradient[0];
+                double vn1 = gradient[0];
                     
-                for (int i = 1; i < graniczneX.Count; ++i)
+                for (int i = 1; i < k; ++i)
                 {
                     if (x0.X > graniczneX[i].X)
                     {
                         x0 = graniczneX[i];
-                        vn0 = gradiendt[i];
+                        vn0 = gradient[i];
                     }
 
                     if (x1.X < graniczneX[i].X)
                     {
                         x1 = graniczneX[i];
-                        vn1 = gradiendt[i];
+                        vn1 = gradient[i];
                     }
                 }
 

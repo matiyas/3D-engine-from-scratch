@@ -40,8 +40,7 @@ namespace Projekt_LGiM
 
             LabelTryb.Content = tryb;
 
-            string sciezkaTlo   = @"tekstury\stars.jpg";
-            string sciezkaModel = @"modele\shaded.obj";
+            string sciezkaTlo   = @"background.jpg";
             
             backBuffer = Rysownik.ToByteArray(sciezkaTlo);
 
@@ -60,7 +59,7 @@ namespace Projekt_LGiM
                 KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
             };
             
-            WczytajModel(sciezkaModel, @"tekstury\sun.jpg");
+            WczytajModel(@"modele\shaded.obj", @"tekstury\sun.jpg");
             zrodloSwiatlaIndeks = 0;
 
             ComboModele.SelectedIndex = 0;
@@ -77,7 +76,7 @@ namespace Projekt_LGiM
 
                 while (true)
                 {
-                    Thread.Sleep(30);
+                    Thread.Sleep(15);
                     stopWatch.Restart();
                     zrodloSwiatla = Math3D.ZnajdzSrodek(swiat[zrodloSwiatlaIndeks].VertexCoords);
 
@@ -87,7 +86,7 @@ namespace Projekt_LGiM
                         stopWatch.Stop();
                         avgRefreshTime += stopWatch.ElapsedMilliseconds;
 
-                        if(i == 20)
+                        if(i == 100)
                         {
                             LabelRefreshTime.Content = avgRefreshTime / i + " ms";
                             i = 0;
@@ -105,7 +104,7 @@ namespace Projekt_LGiM
         void WczytajModel(string sciezkaModel, string sciezkaTekstura)
         {
             swiat.Add(new WavefrontObj(sciezkaModel));
-            swiat[swiat.Count - 1].Teksturowanie = new Teksturowanie(sciezkaTekstura, rysownik);
+            swiat[swiat.Count - 1].Teksturowanie = new Renderowanie(sciezkaTekstura, rysownik);
 
             var item = new ComboBoxItem()
             {
@@ -125,7 +124,7 @@ namespace Projekt_LGiM
             {
                 for (int x = -szerokosc / 2; x < szerokosc / 2; x += skok)
                 {
-                    var punkty = new List<Vector3D>()
+                    var wierzcholki = new Vector3D[]
                     {
                         Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
                         Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera),
@@ -133,9 +132,9 @@ namespace Projekt_LGiM
                         Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + skok), odleglosc, new Vector2D(srodek.X, srodek.Y), kamera)
                     };
 
-                    for (int i = 0; i < punkty.Count; ++i)
+                    for (int i = 0; i < wierzcholki.Length; ++i)
                     {
-                        if (punkty[i].Z > 10 && punkty[(i + 1) % punkty.Count].Z > 10)
+                        if (wierzcholki[i].Z > 10 && wierzcholki[(i + 1) % wierzcholki.Length].Z > 10)
                         {
                             Color kolor;
 
@@ -143,7 +142,7 @@ namespace Projekt_LGiM
                             else if (z == 0 && i == 0)  { kolor = kolorOsiX; }
                             else                        { kolor = kolorSiatki; }
 
-                            rysownik.RysujLinie(punkty[i], punkty[(i + 1) % punkty.Count], kolor, buforZ);
+                            rysownik.RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor, buforZ);
                         }
                     }
                 }
@@ -168,21 +167,21 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
                 foreach (WavefrontObj.Sciana sciana in model.Sciany)
                 {
-                    for (int i = 0; i < sciana.Vertex.Count; ++i)
+                    for (int i = 0; i < sciana.Vertex.Length; ++i)
                     {
-                        rysownik.RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Count]],
+                        rysownik.RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Length]],
                             new Color() { R = 0, G = 255, B = 0, A = 255 }, bufferZ);
                     }
                 }
             }
         }
 
-        void RysujTeksture()
+        void Renderuj()
         {
             rysownik.Reset();
 
@@ -198,7 +197,7 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in swiat)
             {
-                List<Vector3D> modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc, 
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
                     new Vector2D(srodek.X, srodek.Y), kamera);
 
                 var srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
@@ -207,30 +206,30 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        if (modelRzut[sciana.Vertex[0]].Z > 300 || modelRzut[sciana.Vertex[1]].Z > 300 
+                        if (modelRzut[sciana.Vertex[0]].Z > 300 || modelRzut[sciana.Vertex[1]].Z > 300
                             || modelRzut[sciana.Vertex[2]].Z > 300)
                         {
-                            List<double> gradient = new List<double>(3);
+                            double[] gradient = new double[3];
 
-                            gradient = model != swiat[zrodloSwiatlaIndeks] ? new List<double>()
+                            gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
                                     Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
                                     Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
                                     Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
-                                } : new List<double>() { 1, 1, 1 };
+                                } : new double[] { 1, 1, 1 };
 
-                            var obszar = new List<Vector3D>()
+                            var obszar = new Vector3D[]
                                 {
                                     modelRzut[sciana.Vertex[0]],
                                     modelRzut[sciana.Vertex[1]],
                                     modelRzut[sciana.Vertex[2]],
                                 };
 
-                            List<Vector2D> tekstura = new List<Vector2D> { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
+                            Vector2D[] tekstura = new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
 
                             if (sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0)
                             {
-                                tekstura = new List<Vector2D>
+                                tekstura = new Vector2D[]
                                     {
                                         model.VertexTextureCoords[sciana.VertexTexture[0]],
                                         model.VertexTextureCoords[sciana.VertexTexture[1]],
@@ -238,7 +237,7 @@ namespace Projekt_LGiM
                                     };
                             }
 
-                            model.Teksturowanie.Teksturuj(obszar, gradient, tekstura, buforZ);
+                            model.Teksturowanie.Renderuj(obszar, gradient, tekstura, buforZ);
                         }
                     }
                 }
@@ -250,7 +249,7 @@ namespace Projekt_LGiM
 
         void RysujNaEkranie()
         {
-            if (CheckSiatka.IsChecked == false)      { RysujTeksture(); }
+            if (CheckSiatka.IsChecked == false)      { Renderuj(); }
             else                                     { RysujSiatke();   }
             
             Ekran.Source = BitmapSource.Create((int)rozmiarPlotna.Width, (int)rozmiarPlotna.Height, dpi, dpi,
@@ -320,7 +319,7 @@ namespace Projekt_LGiM
             if(openFileDialog.ShowDialog() == true)
             {
                 var model = new WavefrontObj(openFileDialog.FileName);
-                model.Teksturowanie = new Teksturowanie(rysownik);
+                model.Teksturowanie = new Renderowanie(rysownik);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
                 swiat.Add(model);
@@ -355,7 +354,7 @@ namespace Projekt_LGiM
 
             if (openFileDialog.ShowDialog() == true)
             {
-                swiat[ComboModele.SelectedIndex].Teksturowanie = new Teksturowanie(openFileDialog.FileName, rysownik);
+                swiat[ComboModele.SelectedIndex].Teksturowanie = new Renderowanie(openFileDialog.FileName, rysownik);
             }
         }
 
