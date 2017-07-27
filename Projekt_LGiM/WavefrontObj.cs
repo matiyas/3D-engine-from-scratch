@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using System.Globalization;
 using MathNet.Spatial.Euclidean;
+using System;
 
 namespace Projekt_LGiM
 {
@@ -10,9 +11,9 @@ namespace Projekt_LGiM
     {
         public struct Sciana
         {
-            public List<int> Vertex { get; set; }
-            public List<int> VertexTexture { get; set; }
-            public List<int> VertexNormal { get; set; }
+            public int[] Vertex { get; set; }
+            public int[] VertexTexture { get; set; }
+            public int[] VertexNormal { get; set; }
         }
 
         private string sciezka;
@@ -24,9 +25,9 @@ namespace Projekt_LGiM
             Pozycja = new Vector3D();
             Obrot = new Vector3D();
             Skalowanie = new Vector3D(new double[] { 1, 1, 1 });
-            VertexCoords = new List<Vector3D>();
-            VertexNormalsCoords = new List<Vector3D>();
-            VertexTextureCoords = new List<Vector2D>();
+            VertexCoords = new Vector3D[0];
+            VertexNormalsCoords = new Vector3D[0];
+            VertexTextureCoords = new Vector2D[0];
             Sciany = new List<Sciana>();
 
             string linia;
@@ -48,28 +49,32 @@ namespace Projekt_LGiM
 
                             foreach (string wartosc in wartosci.Skip(1))
                             {
-                                try
-                                {
-                                    wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100);
-                                }
-                                catch
-                                {
-                                    continue;
-                                }
+                                try     { wierzcholek.Add(double.Parse(wartosc, CultureInfo.InvariantCulture) * 100); }
+                                catch   { continue; }
                             }
+
                             if (wartosci[0] == "v")
                             {
-                                VertexCoords.Add(new Vector3D(wierzcholek.ToArray()));
+                                var tmpV = VertexCoords;
+                                Array.Resize(ref tmpV, tmpV.Length + 1);
+                                tmpV[tmpV.Length - 1] = new Vector3D(wierzcholek.ToArray());
+                                VertexCoords = tmpV;
                             }
                             else if(wartosci[0] == "vn")
                             {
-                                VertexNormalsCoords.Add(new Vector3D(wierzcholek.ToArray()));
+                                var tmpVN = VertexNormalsCoords;
+                                Array.Resize(ref tmpVN, tmpVN.Length + 1);
+                                tmpVN[tmpVN.Length - 1] = new Vector3D(wierzcholek.ToArray());
+                                VertexNormalsCoords = tmpVN;
                             }
                             break;
 
                         case "vt":
-                            VertexTextureCoords.Add(new Vector2D(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
-                                double.Parse(wartosci[2], CultureInfo.InvariantCulture) }));
+                            var tmpVT = VertexTextureCoords;
+                            Array.Resize(ref tmpVT, tmpVT.Length + 1);
+                            tmpVT[tmpVT.Length - 1] = new Vector2D(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
+                                double.Parse(wartosci[2], CultureInfo.InvariantCulture) });
+                            VertexTextureCoords = tmpVT;
                             break;
 
                         case "f":
@@ -77,35 +82,39 @@ namespace Projekt_LGiM
 
                             var sciana = new Sciana()
                             {
-                                Vertex = new List<int>(),
-                                VertexTexture = new List<int>(),
-                                VertexNormal = new List<int>()
+                                Vertex = new int[0],
+                                VertexTexture = new int[0],
+                                VertexNormal = new int[0]
                             };
 
                             foreach (string wartosc in wartosci)
                             {
                                 try
                                 {
-                                    sciana.Vertex.Add(int.Parse(wartosc.Split('/')[0]));
+                                    int wartoscInt = int.Parse(wartosc.Split('/')[0]);
+                                    var tmp = sciana.Vertex;
+                                    Array.Resize(ref tmp, tmp.Length + 1);
+                                    tmp[tmp.Length - 1] = wartoscInt;
+                                    sciana.Vertex = tmp;
                                 }
-                                catch
-                                {
-                                    continue;
-                                }
+                                catch { continue; }
 
-
-                                if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)
-                                {
-                                    continue;
-                                }
+                                if (int.TryParse(wartosc.Split('/')[1], out int vt) == false)   { continue; }
                                 else
                                 {
-                                    sciana.VertexTexture.Add(vt);
+                                    var tmp = sciana.VertexTexture;
+                                    Array.Resize(ref tmp, tmp.Length + 1);
+                                    tmp[tmp.Length - 1] = vt;
+                                    sciana.VertexTexture = tmp;
                                 }
 
                                 if (wartosc.Split('/').ToArray().Length == 3)
                                 {
-                                    sciana.VertexNormal.Add(int.Parse(wartosc.Split('/')[2]));
+                                    int wartoscInt = int.Parse(wartosc.Split('/')[2]);
+                                    var tmp = sciana.VertexNormal;
+                                    Array.Resize(ref tmp, tmp.Length + 1);
+                                    tmp[tmp.Length - 1] = wartoscInt;
+                                    sciana.VertexNormal = tmp;
                                 }
                             }
                             Sciany.Add(sciana);
@@ -116,25 +125,25 @@ namespace Projekt_LGiM
 
             for(int i = 0; i < Sciany.Count; ++i)
             {
-                var wierzcholki = new List<int>(Sciany[i].Vertex.Count);
-                for(int j = 0; j < Sciany[i].Vertex.Count; ++j)
+                var wierzcholki = new int[Sciany[i].Vertex.Length];
+                for(int j = 0; j < Sciany[i].Vertex.Length; ++j)
                 {
                     int wartosc = Sciany[i].Vertex[j];
-                    wierzcholki.Add(wartosc > 0 ? wartosc - 1 : VertexCoords.Count + wartosc);
+                    wierzcholki[j] = wartosc > 0 ? wartosc - 1 : VertexCoords.Length + wartosc;
                 }
 
-                var wierzcholkiNorm = new List<int>(Sciany[i].VertexNormal.Count);
-                for (int j = 0; j < Sciany[i].VertexNormal.Count; ++j)
+                var wierzcholkiNorm = new int[Sciany[i].VertexNormal.Length];
+                for (int j = 0; j < Sciany[i].VertexNormal.Length; ++j)
                 {
                     int wartosc = Sciany[i].VertexNormal[j];
-                    wierzcholkiNorm.Add(wartosc > 0 ? wartosc - 1 : VertexNormalsCoords.Count + wartosc);
+                    wierzcholkiNorm[j] = wartosc > 0 ? wartosc - 1 : VertexNormalsCoords.Length + wartosc;
                 }
 
-                var wierzcholkiText = new List<int>(Sciany[i].VertexTexture.Count);
-                for (int j = 0; j < Sciany[i].VertexTexture.Count; ++j)
+                var wierzcholkiText = new int[Sciany[i].VertexTexture.Length];
+                for (int j = 0; j < Sciany[i].VertexTexture.Length; ++j)
                 {
                     int wartosc = Sciany[i].VertexTexture[j];
-                    wierzcholkiText.Add(wartosc > 0 ? wartosc - 1 : VertexTextureCoords.Count + wartosc);
+                    wierzcholkiText[j] = wartosc > 0 ? wartosc - 1 : VertexTextureCoords.Length + wartosc;
                 }
 
                 Sciany[i] = new Sciana()
@@ -148,18 +157,19 @@ namespace Projekt_LGiM
             ScianyTrojkatne = new List<Sciana>();
             foreach (Sciana sciana in Sciany)
             {
-                for (int i = 0; i < sciana.Vertex.Count; i += 2)
+                for (int i = 0; i < sciana.Vertex.Length; i += 2)
                 {
                     ScianyTrojkatne.Add(new Sciana()
                     {
-                        Vertex = new List<int>(new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Count],
-                            sciana.Vertex[(i + 2) % sciana.Vertex.Count] }),
+                        Vertex = new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Length],
+                            sciana.Vertex[(i + 2) % sciana.Vertex.Length] },
 
-                        VertexTexture = new List<int>(new int[] { sciana.VertexTexture[i],
-                            sciana.VertexTexture[(i + 1) % sciana.Vertex.Count], sciana.VertexTexture[(i + 2) % sciana.Vertex.Count] }),
+                        VertexTexture = new int[] { sciana.VertexTexture[i],
+                            sciana.VertexTexture[(i + 1) % sciana.Vertex.Length],
+                            sciana.VertexTexture[(i + 2) % sciana.Vertex.Length] },
 
-                        VertexNormal = new List<int>(new int[] { sciana.VertexNormal[i],
-                            sciana.VertexNormal[(i + 1) % sciana.Vertex.Count], sciana.VertexNormal[(i + 2) % sciana.Vertex.Count] })
+                        VertexNormal = new int[] { sciana.VertexNormal[i],
+                            sciana.VertexNormal[(i + 1) % sciana.Vertex.Length], sciana.VertexNormal[(i + 2) % sciana.Vertex.Length] }
                     });
                 }
             }
@@ -168,12 +178,12 @@ namespace Projekt_LGiM
         public Vector3D Pozycja { get; set; }
         public Vector3D Obrot { get; set; }
         public Vector3D Skalowanie { get; set; }
-        public List<Vector3D> VertexCoords { get; private set; }
-        public List<Vector2D> VertexTextureCoords { get; }
-        public List<Vector3D> VertexNormalsCoords { get; private set; }
+        public Vector3D[] VertexCoords { get; private set; }
+        public Vector2D[] VertexTextureCoords { get; }
+        public Vector3D[] VertexNormalsCoords { get; private set; }
         public List<Sciana> Sciany { get; }
         public List<Sciana> ScianyTrojkatne { get; }
-        public Teksturowanie Teksturowanie { get; set; }
+        public Renderowanie Teksturowanie { get; set; }
         public string Nazwa { get; private set; }
 
         public void Przesun(Vector3D t)

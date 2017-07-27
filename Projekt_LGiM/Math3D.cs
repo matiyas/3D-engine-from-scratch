@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
 using static System.Math;
 using MathNet.Spatial.Euclidean;
@@ -8,33 +7,34 @@ namespace Projekt_LGiM
 {
 	class Math3D
     {
-		public static Vector3D ZnajdzSrodek(List<Vector3D> wierzcholki)
+		public static Vector3D ZnajdzSrodek(Vector3D[] wierzcholki)
         {
             return new Vector3D((wierzcholki.Max(v => v.X) + wierzcholki.Min(v => v.X)) / 2, 
                 (wierzcholki.Max(v => v.Y) + wierzcholki.Min(v => v.Y)) / 2, (wierzcholki.Max(v => v.Z) + wierzcholki.Min(v => v.Z)) / 2);
         }
 
-        public static List<Vector3D> Translacja(List<Vector3D> wierzcholki, Vector3D t)
+        public static Vector3D[] Translacja(Vector3D[] wierzcholki, Vector3D t)
         {
-            var wierzcholkiMod = new List<Vector3D>();
+            var wierzcholkiMod = new Vector3D[wierzcholki.Length];
+
             var T = new DenseMatrix(4, 4, new double[]{ 1,  0,  0, t.X,
                                                         0,  1,  0, t.Y,
                                                         0,  0,  1, t.Z,
                                                         0,  0,  0,   1,});
-            foreach(Vector3D wierzcholek in wierzcholki)
+            for(int i = 0; i < wierzcholki.Length; ++i)
             {
-                var wierzcholekTrans = new DenseVector(new double[]{ wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T;
-                    wierzcholkiMod.Add(new Vector3D(wierzcholekTrans.Take(3).ToArray()));
+                var wierzcholekMod = new DenseVector(new double[] { wierzcholki[i].X, wierzcholki[i].Y, wierzcholki[i].Z, 1 }) * T;
+                wierzcholkiMod[i] = new Vector3D(wierzcholekMod.Take(3).ToArray());
             }
 
             return wierzcholkiMod;
         }
 
-		public static List<Vector3D> Rotacja(List<Vector3D> wierzcholki, Vector3D kat, Vector3D srodek)
+		public static Vector3D[] Rotacja(Vector3D[] wierzcholki, Vector3D kat, Vector3D srodek)
         {
             kat = new Vector3D(kat.X / 100, kat.Y / 100, kat.Z / 100);
 
-			var wierzcholkiMod = new List<Vector3D>();
+			var wierzcholkiMod = new Vector3D[wierzcholki.Length];
 
             var T0 = new DenseMatrix(4, 4, new double[]{		1,			 0,			0,      -srodek.X,
 																0,			 1,			0,      -srodek.Y,
@@ -61,24 +61,24 @@ namespace Projekt_LGiM
 																 0,			  0,		  1,	   0, 
 																 0,			  0,		  0,	   1, });
 
-            foreach(Vector3D wierzcholek in wierzcholki)
+            for(int i = 0; i < wierzcholki.Length; ++i)
             {
-                var wierzcholekMod = new DenseVector(new double[] { wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0;
+                var wierzcholekMod = new DenseVector(new double[] { wierzcholki[i].X, wierzcholki[i].Y, wierzcholki[i].Z, 1 }) * T0;
 
                 if (kat.X.CompareTo(0) != 0) wierzcholekMod *= Rx;
                 if (kat.Y.CompareTo(0) != 0) wierzcholekMod *= Ry;
                 if (kat.Z.CompareTo(0) != 0) wierzcholekMod *= Rz;
 
-                wierzcholkiMod.Add(new Vector3D((wierzcholekMod * T1).Take(3).ToArray()));
+                wierzcholkiMod[i] = new Vector3D((wierzcholekMod * T1).Take(3).ToArray());
             }
             
             return wierzcholkiMod;
         }
 
-        public static List<Vector3D> Skalowanie(List<Vector3D> wierzcholki, Vector3D kat)
+        public static Vector3D[] Skalowanie(Vector3D[] wierzcholki, Vector3D kat)
         {
             double tmpX = kat.X, tmpY = kat.Y, tmpZ = kat.Z, x, y, z;
-			var wierzcholkiMod = new List<Vector3D>();
+			var wierzcholkiMod = new Vector3D[wierzcholki.Length];
 
             kat = new Vector3D(kat.X / 100.0, kat.Y / 100.0, kat.Z / 100);
 
@@ -110,10 +110,10 @@ namespace Projekt_LGiM
 														 0,  0, kat.Z, 0, 
 														 0,  0,  0,  1, });
 
-			foreach(Vector3D wierzcholek in wierzcholki)
+            for(int i = 0; i < wierzcholki.Length; ++i)
             {
-				var p = new DenseVector(new double[]{ wierzcholek.X, wierzcholek.Y, wierzcholek.Z, 1 }) * T0 * S * T1;
-                    wierzcholkiMod.Add(new Vector3D(p.Take(3).ToArray()));
+				var p = new DenseVector(new double[]{ wierzcholki[i].X, wierzcholki[i].Y, wierzcholki[i].Z, 1 }) * T0 * S * T1;
+                    wierzcholkiMod[i] = new Vector3D(p.Take(3).ToArray());
             }
 
             return wierzcholkiMod;
@@ -131,13 +131,13 @@ namespace Projekt_LGiM
             return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, p[2] + d/* kalibracja */);
         }
 
-        public static List<Vector3D> RzutPerspektywiczny(List<Vector3D> punkty, double d, Vector2D c, Kamera kamera)
+        public static Vector3D[] RzutPerspektywiczny(Vector3D[] wierzcholki, double d, Vector2D c, Kamera kamera)
         {
-            var punktyRzut = new List<Vector3D>(punkty.Count);
+            var punktyRzut = new Vector3D[wierzcholki.Length];
 
-            foreach(var punkt in punkty)
+            for(int i = 0; i < wierzcholki.Length; ++i)
             {
-                punktyRzut.Add(RzutPerspektywiczny(punkt, d, c, kamera));
+                punktyRzut[i] = RzutPerspektywiczny(wierzcholki[i], d, c, kamera);
             }
 
             return punktyRzut;
@@ -190,13 +190,13 @@ namespace Projekt_LGiM
             return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }
 
-        public static List<Vector3D> ObrocWokolOsi(List<Vector3D> punkty, UnitVector3D os, double kat, Vector3D c)
+        public static Vector3D[] ObrocWokolOsi(Vector3D[] wierzcholki, UnitVector3D os, double kat, Vector3D c)
         {
-            var punktyObrot = new List<Vector3D>(punkty.Count);
+            var punktyObrot = new Vector3D[wierzcholki.Length];
 
-            foreach(Vector3D punkt in punkty)
+            for(int i = 0; i < wierzcholki.Length; ++i)
             {
-                punktyObrot.Add(ObrocWokolOsi(punkt, os, kat, c));
+                punktyObrot[i] = ObrocWokolOsi(wierzcholki[i], os, kat, c);
             }
 
             return punktyObrot;
