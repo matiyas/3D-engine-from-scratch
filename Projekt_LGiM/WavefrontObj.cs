@@ -183,7 +183,7 @@ namespace Projekt_LGiM
         public Vector3D[] VertexNormalsCoords { get; private set; }
         public List<Sciana> Sciany { get; }
         public List<Sciana> ScianyTrojkatne { get; }
-        public Renderowanie Teksturowanie { get; set; }
+        public Renderowanie Renderowanie { get; set; }
         public string Nazwa { get; private set; }
 
         public void Przesun(Vector3D t)

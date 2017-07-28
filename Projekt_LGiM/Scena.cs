@@ -7,71 +7,55 @@ namespace Projekt_LGiM
 {
     class Scena
     {
-        public byte[] backBuffer;
-        byte[] tlo;
-        public Drawing.Size rozmiar;
-        public Color KolorPedzla;
-        public Color KolorTla;
+        public byte[] BackBuffer { get; private set; }
+        private byte[] tlo;
+        public Drawing.Size Rozmiar { get; private set; }
+        public Color KolorPedzla { get; set; }
+        public Color KolorTla { get; set; }
         public List<WavefrontObj> swiat;
         public Vector3D zrodloSwiatla;
         public int zrodloSwiatlaIndeks;
         public Kamera kamera;
-        public double odleglosc;
-        double[,] zBufor;
+        public double Odleglosc { get; set; }
+        private double[,] zBufor;
 
-        public Scena(byte[] backBuffer, Drawing.Size rozmiar)
+        public Scena(string sciezkaTlo, Drawing.Size rozmiar)
         {
-            KolorPedzla.R = KolorPedzla.G = KolorPedzla.B = 0;
-            KolorPedzla.A = 255;
+            KolorPedzla = new Color() { R = 0, G = 0, B = 0, A = 255 };
+            KolorTla    = new Color() { R = 0, G = 0, B = 0, A = 255 };
 
-            KolorTla.R = KolorTla.G = KolorTla.B = KolorTla.A = 255;
+            Rozmiar = rozmiar;
+            BackBuffer = new byte[4 * rozmiar.Width * rozmiar.Height];
 
-            this.backBuffer = backBuffer;
-            tlo = new byte[4 * rozmiar.Width * rozmiar.Height];
-            backBuffer.CopyTo(tlo, 0);
-            this.rozmiar = rozmiar;
+            tlo = ToByteArray(sciezkaTlo);
+            Reset();
+
             swiat = new List<WavefrontObj>();
-            zrodloSwiatlaIndeks = 0;
             kamera = new Kamera();
-            odleglosc = 1000;
+            zrodloSwiatlaIndeks = 0;
+            Odleglosc = 1000;
 
             zBufor = new double[rozmiar.Width, rozmiar.Height];
         }
         
         public void RysujPiksel(Vector2D p, Color c)
         {
-            if (p.X >= 0 && p.X < rozmiar.Width && p.Y >= 0 && p.Y < rozmiar.Height)
+            if (p.X >= 0 && p.X < Rozmiar.Width && p.Y >= 0 && p.Y < Rozmiar.Height)
             {
-                int pozycja = 4 * ((int)p.Y * rozmiar.Width + (int)p.X);
-                backBuffer[pozycja] = c.B;
-                backBuffer[pozycja + 1] = c.G;
-                backBuffer[pozycja + 2] = c.R;
-                backBuffer[pozycja + 3] = c.A;
+                int pozycja = 4 * ((int)p.Y * Rozmiar.Width + (int)p.X);
+                BackBuffer[pozycja] = c.B;
+                BackBuffer[pozycja + 1] = c.G;
+                BackBuffer[pozycja + 2] = c.R;
+                BackBuffer[pozycja + 3] = c.A;
             }
         }
 
-        public void CzyscEkran()
-        {
-            for (int i = 0; i < backBuffer.Length; i += 4)
-            {
-                backBuffer[i] = KolorTla.B;
-                backBuffer[i + 1] = KolorTla.G;
-                backBuffer[i + 2] = KolorTla.R;
-                backBuffer[i + 3] = KolorTla.A;
-            }
-        }
-
-        public void Reset()
-        {
-            tlo.CopyTo(backBuffer, 0);
-        }
-      
-        public void RysujLinie(Vector3D p0, Vector3D p1, Color c, double[,] bufferZ)
+        public void RysujLinie(Vector3D p0, Vector3D p1, Color c)
         {
             Vector3D startX = p0.X < p1.X ? p0 : p1;
-            Vector3D endX   = p0.X > p1.X ? p0 : p1;
+            Vector3D endX = p0.X > p1.X ? p0 : p1;
             Vector3D startY = p0.Y < p1.Y ? p0 : p1;
-            Vector3D endY   = p0.Y > p1.Y ? p0 : p1;
+            Vector3D endY = p0.Y > p1.Y ? p0 : p1;
 
             int dx = (int)(endX.X - startX.X);
             int dy = (int)(endY.Y - startY.Y);
@@ -87,13 +71,13 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[x, (int)y] > z && z > 100)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[x, (int)y] > z && z > 100)
                         {
                             RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
-                    else if (x >= 0 && x < bufferZ.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < bufferZ.GetLength(1)
-                       && bufferZ[x, (int)(2 * p0.Y - y)] > z && z > 100)
+                    else if (x >= 0 && x < zBufor.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < zBufor.GetLength(1)
+                       && zBufor[x, (int)(2 * p0.Y - y)] > z && z > 100)
                     {
                         RysujPiksel(new Vector2D(x, 2 * p0.Y - y), c);
                     }
@@ -112,13 +96,13 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if(x >= 0 && x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1) && bufferZ[(int)x, y] > z && z > 100)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[(int)x, y] > z && z > 100)
                         {
                             RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
-                    else if (2 * p0.X - x >= 0 && 2 * p0.X - x < bufferZ.GetLength(0) && y >= 0 && y < bufferZ.GetLength(1)
-                       && bufferZ[(int)(2 * p0.X - x), y] > z && z > 100)
+                    else if (2 * p0.X - x >= 0 && 2 * p0.X - x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1)
+                       && zBufor[(int)(2 * p0.X - x), y] > z && z > 100)
                     {
                         RysujPiksel(new Vector2D(2 * p0.X - x, y), c);
                     }
@@ -126,6 +110,22 @@ namespace Projekt_LGiM
                     z += krok;
                 }
             }
+        }
+
+        public void CzyscEkran()
+        {
+            for (int i = 0; i < BackBuffer.Length; i += 4)
+            {
+                BackBuffer[i] = KolorTla.B;
+                BackBuffer[i + 1] = KolorTla.G;
+                BackBuffer[i + 2] = KolorTla.R;
+                BackBuffer[i + 3] = KolorTla.A;
+            }
+        }
+
+        public void Reset()
+        {
+            tlo.CopyTo(BackBuffer, 0);
         }
 
         public static byte[] ToByteArray(string sciezka)
@@ -150,7 +150,7 @@ namespace Projekt_LGiM
             return pixs;
         }
 
-        public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, double[,] buforZ, Color kolorSiatki, Color kolorOsiX, 
+        public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, 
             Color kolorOsiZ)
         {
             for (int z = -wysokosc / 2; z < wysokosc / 2; z += skok)
@@ -159,17 +159,17 @@ namespace Projekt_LGiM
                 {
                     var wierzcholki = new Vector3D[]
                     {
-                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), odleglosc,
-                            new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), Odleglosc,
+                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
 
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z), odleglosc,
-                            new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z), Odleglosc,
+                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
 
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z + skok), odleglosc,
-                            new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera),
+                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z + skok), Odleglosc,
+                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
 
-                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + skok), odleglosc,
-                            new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera)
+                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + skok), Odleglosc,
+                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera)
                     };
 
                     for (int i = 0; i < wierzcholki.Length; ++i)
@@ -182,7 +182,7 @@ namespace Projekt_LGiM
                             else if (z == 0 && i == 0) { kolor = kolorOsiX; }
                             else { kolor = kolorSiatki; }
 
-                            RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor, buforZ);
+                            RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor);
                         }
                     }
                 }
@@ -200,21 +200,18 @@ namespace Projekt_LGiM
                     zBufor[x, y] = double.PositiveInfinity;
                 }
             }
-
-            RysujSiatkePodlogi(2000, 2000, 100, zBufor, new Color() { R = 127, G = 127, B = 127, A = 255 },
-                new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
-
+            
             foreach (WavefrontObj model in swiat)
             {
-                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
-                    new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera);
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
+                    new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
 
                 foreach (WavefrontObj.Sciana sciana in model.Sciany)
                 {
                     for (int i = 0; i < sciana.Vertex.Length; ++i)
                     {
                         RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Length]],
-                            new Color() { R = 0, G = 255, B = 0, A = 255 }, zBufor);
+                            new Color() { R = 0, G = 255, B = 0, A = 255 });
                     }
                 }
             }
@@ -234,12 +231,12 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in swiat)
             {
-                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, odleglosc,
-                    new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2), kamera);
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
+                    new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
 
                 var srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
 
-                if (model.Sciany != null && modelRzut != null && model.Teksturowanie != null)
+                if (model.Sciany != null && modelRzut != null && model.Renderowanie != null)
                 {
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
@@ -274,14 +271,11 @@ namespace Projekt_LGiM
                                     };
                             }
 
-                            model.Teksturowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
+                            model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
                         }
                     }
                 }
             }
-
-            RysujSiatkePodlogi(2000, 2000, 100, zBufor, new Color() { R = 127, G = 127, B = 127, A = 255 },
-                new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
         }
     }
 }

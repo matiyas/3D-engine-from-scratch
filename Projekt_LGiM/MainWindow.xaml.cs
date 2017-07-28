@@ -31,7 +31,7 @@ namespace Projekt_LGiM
             ComboModele.SelectedIndex = 0;
 
             string sciezkaTlo   = @"background.jpg";
-            scena = new Scena(Scena.ToByteArray(sciezkaTlo), System.Drawing.Image.FromFile(sciezkaTlo).Size)
+            scena = new Scena(sciezkaTlo, System.Drawing.Image.FromFile(sciezkaTlo).Size)
             {
                 KolorPedzla = new Color() { R = 0, G = 255, B = 0, A = 255 },
                 KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
@@ -75,7 +75,7 @@ namespace Projekt_LGiM
         void WczytajModel(string sciezkaModel, string sciezkaTekstura)
         {
             scena.swiat.Add(new WavefrontObj(sciezkaModel));
-            scena.swiat[scena.swiat.Count - 1].Teksturowanie = new Renderowanie(sciezkaTekstura, scena);
+            scena.swiat[scena.swiat.Count - 1].Renderowanie = new Renderowanie(sciezkaTekstura, scena);
 
             var item = new ComboBoxItem()
             {
@@ -90,16 +90,22 @@ namespace Projekt_LGiM
         void RysujNaEkranie()
         {
             if (CheckSiatka.IsChecked == false)      { scena.Renderuj(); }
-            else                                     { scena.RysujSiatke();   }
+            else                                     { scena.RysujSiatke(); }
+
+            if(CheckSiatkaPodlogi.IsChecked == true)
+            {
+                scena.RysujSiatkePodlogi(2000, 2000, 100, new Color() { R = 127, G = 127, B = 127, A = 255 },
+                    new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
+            }
             
-            Ekran.Source = BitmapSource.Create(scena.rozmiar.Width, scena.rozmiar.Height, dpi, dpi,
-                PixelFormats.Bgra32, null, scena.backBuffer, 4 * scena.rozmiar.Width);
+            Ekran.Source = BitmapSource.Create(scena.Rozmiar.Width, scena.Rozmiar.Height, dpi, dpi,
+                PixelFormats.Bgra32, null, scena.BackBuffer, 4 * scena.Rozmiar.Width);
         }
         
         void Ekran_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0) { scena.odleglosc += 100; }
-            else             { scena.odleglosc -= 100; }
+            if (e.Delta > 0) { scena.Odleglosc += 100; }
+            else             { scena.Odleglosc -= 100; }
         }
 
         void Window_KeyDown(object sender, KeyEventArgs e)
@@ -159,7 +165,7 @@ namespace Projekt_LGiM
             if(openFileDialog.ShowDialog() == true)
             {
                 var model = new WavefrontObj(openFileDialog.FileName);
-                model.Teksturowanie = new Renderowanie(scena);
+                model.Renderowanie = new Renderowanie(scena);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
                 scena.swiat.Add(model);
@@ -176,7 +182,7 @@ namespace Projekt_LGiM
             {
                 var model = new WavefrontObj(openFileDialog.FileName);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
-                model.Teksturowanie = scena.swiat[ComboModele.SelectedIndex].Teksturowanie;
+                model.Renderowanie = scena.swiat[ComboModele.SelectedIndex].Renderowanie;
 
                 int tmp = ComboModele.SelectedIndex;
                 scena.swiat[ComboModele.SelectedIndex] = model;
@@ -194,7 +200,7 @@ namespace Projekt_LGiM
 
             if (openFileDialog.ShowDialog() == true)
             {
-                scena.swiat[ComboModele.SelectedIndex].Teksturowanie = new Renderowanie(openFileDialog.FileName, scena);
+                scena.swiat[ComboModele.SelectedIndex].Renderowanie = new Renderowanie(openFileDialog.FileName, scena);
             }
         }
 
