@@ -5,7 +5,7 @@ using MathNet.Spatial.Euclidean;
 
 namespace Projekt_LGiM
 {
-	class Math3D
+	static class Math3D
     {
 		public static Vector3D ZnajdzSrodek(Vector3D[] wierzcholki)
         {
@@ -141,14 +141,6 @@ namespace Projekt_LGiM
             }
 
             return punktyRzut;
-        }
-        
-        public static double Jasnosc(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
-        {
-            zrodlo -= srodek;
-            wierzcholek -= srodek;
-
-            return Max(0, Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
         
         public static Vector3D ObrocWokolOsi(Vector3D punkt, UnitVector3D os, double kat, Vector3D srodek)

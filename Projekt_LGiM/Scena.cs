@@ -23,7 +23,7 @@ namespace Projekt_LGiM
             BackBuffer = new byte[4 * rozmiar.Width * rozmiar.Height];
 
             tlo = ToByteArray(sciezkaTlo);
-            Reset();
+            tlo.CopyTo(BackBuffer, 0);
 
             swiat = new List<WavefrontObj>();
             kamera = new Kamera();
@@ -31,6 +31,8 @@ namespace Projekt_LGiM
             Odleglosc = 1000;
 
             zBufor = new double[rozmiar.Width, rozmiar.Height];
+            CzyscZBuffor();
+
             MinOdleglosc = minOdleglosc;
         }
 
@@ -63,9 +65,9 @@ namespace Projekt_LGiM
         public void RysujLinie(Vector3D p0, Vector3D p1, Color c)
         {
             Vector3D startX = p0.X < p1.X ? p0 : p1;
-            Vector3D endX = p0.X > p1.X ? p0 : p1;
+            Vector3D endX   = p0.X > p1.X ? p0 : p1;
             Vector3D startY = p0.Y < p1.Y ? p0 : p1;
-            Vector3D endY = p0.Y > p1.Y ? p0 : p1;
+            Vector3D endY   = p0.Y > p1.Y ? p0 : p1;
 
             int dx = (int)(endX.X - startX.X);
             int dy = (int)(endY.Y - startY.Y);
@@ -81,7 +83,8 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[x, (int)y] > z && z > MinOdleglosc)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1)
+                            && zBufor[x, (int)y] > z && z > MinOdleglosc)
                         {
                             RysujPiksel(new Vector2D(x, y), c);
                         }
@@ -122,6 +125,17 @@ namespace Projekt_LGiM
             }
         }
 
+        public void CzyscZBuffor()
+        {
+            for (int i = 0; i < zBufor.GetLength(0); ++i)
+            {
+                for (int j = 0; j < zBufor.GetLength(1); ++j)
+                {
+                    zBufor[i, j] = double.PositiveInfinity;
+                }
+            }
+        }
+
         public void CzyscEkran()
         {
             for (int i = 0; i < BackBuffer.Length; i += 4)
@@ -131,11 +145,6 @@ namespace Projekt_LGiM
                 BackBuffer[i + 2] = KolorTla.R;
                 BackBuffer[i + 3] = KolorTla.A;
             }
-        }
-
-        public void Reset()
-        {
-            tlo.CopyTo(BackBuffer, 0);
         }
 
         public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, 
@@ -180,14 +189,7 @@ namespace Projekt_LGiM
         public void RysujSiatke()
         {
             CzyscEkran();
-
-            for (int x = 0; x < zBufor.GetLength(0); ++x)
-            {
-                for (int y = 0; y < zBufor.GetLength(1); ++y)
-                {
-                    zBufor[x, y] = double.PositiveInfinity;
-                }
-            }
+            CzyscZBuffor();
             
             foreach (WavefrontObj model in swiat)
             {
@@ -207,15 +209,8 @@ namespace Projekt_LGiM
 
         public void Renderuj()
         {
-            Reset();
-
-            for (int i = 0; i < zBufor.GetLength(0); ++i)
-            {
-                for (int j = 0; j < zBufor.GetLength(1); ++j)
-                {
-                    zBufor[i, j] = double.PositiveInfinity;
-                }
-            }
+            tlo.CopyTo(BackBuffer, 0);
+            CzyscZBuffor();
 
             foreach (WavefrontObj model in swiat)
             {
@@ -228,16 +223,15 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc || modelRzut[sciana.Vertex[1]].Z > MinOdleglosc
-                            || modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
+                        if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc ||
+                            modelRzut[sciana.Vertex[1]].Z > MinOdleglosc || 
+                            modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
                         {
-                            double[] gradient = new double[3];
-
-                            gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
+                            var gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
                                 } : new double[] { 1, 1, 1 };
 
                             var obszar = new Vector3D[]
@@ -247,17 +241,13 @@ namespace Projekt_LGiM
                                     modelRzut[sciana.Vertex[2]],
                                 };
 
-                            Vector2D[] tekstura = new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
-
-                            if (sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0)
-                            {
-                                tekstura = new Vector2D[]
-                                    {
-                                        model.VertexTextureCoords[sciana.VertexTexture[0]],
-                                        model.VertexTextureCoords[sciana.VertexTexture[1]],
-                                        model.VertexTextureCoords[sciana.VertexTexture[2]],
-                                    };
-                            }
+                            var tekstura = sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0 ? 
+                                new Vector2D[] 
+                                {
+                                    model.VertexTextureCoords[sciana.VertexTexture[0]],
+                                    model.VertexTextureCoords[sciana.VertexTexture[1]],
+                                    model.VertexTextureCoords[sciana.VertexTexture[2]],
+                                } : new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
 
                             model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
                         }
