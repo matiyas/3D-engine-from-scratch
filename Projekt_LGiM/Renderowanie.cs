@@ -8,11 +8,11 @@ namespace Projekt_LGiM
 {
     class Renderowanie
     {
-        Rysownik rysownik;
+        Scena rysownik;
         Drawing.Size rozmiarTekstury;
         Color[,] teksturaKolory;
 
-        public Renderowanie(string sciezka, Rysownik rysownik)
+        public Renderowanie(string sciezka, Scena rysownik)
         {
             this.rysownik = rysownik;
 
@@ -35,14 +35,14 @@ namespace Projekt_LGiM
             }
         }
 
-        public Renderowanie(Rysownik rysownik)
+        public Renderowanie(Scena rysownik)
         {
             this.rysownik = rysownik;
 
             teksturaKolory = null;
         }
 
-        public void Renderuj(Vector3D[] wektor, double[] wektorNormalny, Vector2D[] wektorTekstura, double[,] buforZ)
+        public void RenderujTrojkat(Vector3D[] wektor, double[] wektorNormalny, Vector2D[] wektorTekstura, double[,] buforZ)
         {
             for(int i = 0; i < wektorTekstura.Length; ++i)
             {

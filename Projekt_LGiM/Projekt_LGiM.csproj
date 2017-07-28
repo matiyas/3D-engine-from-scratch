@@ -66,7 +66,7 @@
     </ApplicationDefinition>
     <Compile Include="Kamera.cs" />
     <Compile Include="Math3D.cs" />
-    <Compile Include="Rysowink.cs" />
+    <Compile Include="Scena.cs" />
     <Compile Include="Sterowaniexaml.xaml.cs">
       <DependentUpon>Sterowaniexaml.xaml</DependentUpon>
     </Compile>
