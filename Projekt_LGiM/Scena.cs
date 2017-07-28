@@ -147,8 +147,7 @@ namespace Projekt_LGiM
             }
         }
 
-        public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, 
-            Color kolorOsiZ, bool zBuffering=false)
+        public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, Color kolorOsiZ)
         {
             for (int z = -wysokosc / 2; z < wysokosc / 2; z += skok)
             {
@@ -217,15 +216,21 @@ namespace Projekt_LGiM
                 Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
                     new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
 
-                var srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
+                Vector3D srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
 
                 if (model.Sciany != null && modelRzut != null && model.Renderowanie != null)
                 {
-                    foreach (var sciana in model.ScianyTrojkatne)
+                    foreach (Sciana sciana in model.ScianyTrojkatne)
                     {
-                        if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc ||
-                            modelRzut[sciana.Vertex[1]].Z > MinOdleglosc || 
-                            modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
+                        // Back-face culling
+                        //if (kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[0]]) > 0 &&
+                        //    kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[1]]) > 0 &&
+                        //    kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[2]]) > 0)
+                        //{ continue; }
+
+                            if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc ||
+                                modelRzut[sciana.Vertex[1]].Z > MinOdleglosc || 
+                                modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
                         {
                             var gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
@@ -249,6 +254,8 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 } : new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
 
+
+                            
                             model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
                         }
                     }
