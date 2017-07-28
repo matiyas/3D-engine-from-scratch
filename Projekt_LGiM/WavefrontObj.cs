@@ -22,9 +22,6 @@ namespace Projekt_LGiM
         {
             this.sciezka = sciezka;
 
-            Pozycja = new Vector3D();
-            Obrot = new Vector3D();
-            Skalowanie = new Vector3D(new double[] { 1, 1, 1 });
             VertexCoords = new Vector3D[0];
             VertexNormalsCoords = new Vector3D[0];
             VertexTextureCoords = new Vector2D[0];
@@ -183,10 +180,6 @@ namespace Projekt_LGiM
             tmp[tmp.Length - 1] = wartosc;
             return tmp;
         }
-
-        public Vector3D Pozycja { get; set; }
-
-        public Vector3D Obrot { get; set; }
 
         public Vector3D Skalowanie { get; set; }
 

@@ -23,7 +23,7 @@ namespace Projekt_LGiM
             BackBuffer = new byte[4 * rozmiar.Width * rozmiar.Height];
 
             tlo = ToByteArray(sciezkaTlo);
-            Reset();
+            tlo.CopyTo(BackBuffer, 0);
 
             swiat = new List<WavefrontObj>();
             kamera = new Kamera();
@@ -31,6 +31,8 @@ namespace Projekt_LGiM
             Odleglosc = 1000;
 
             zBufor = new double[rozmiar.Width, rozmiar.Height];
+            CzyscZBuffor();
+
             MinOdleglosc = minOdleglosc;
         }
 
@@ -122,6 +124,17 @@ namespace Projekt_LGiM
             }
         }
 
+        public void CzyscZBuffor()
+        {
+            for (int i = 0; i < zBufor.GetLength(0); ++i)
+            {
+                for (int j = 0; j < zBufor.GetLength(1); ++j)
+                {
+                    zBufor[i, j] = double.PositiveInfinity;
+                }
+            }
+        }
+
         public void CzyscEkran()
         {
             for (int i = 0; i < BackBuffer.Length; i += 4)
@@ -131,11 +144,6 @@ namespace Projekt_LGiM
                 BackBuffer[i + 2] = KolorTla.R;
                 BackBuffer[i + 3] = KolorTla.A;
             }
-        }
-
-        public void Reset()
-        {
-            tlo.CopyTo(BackBuffer, 0);
         }
 
         public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, 
@@ -180,14 +188,7 @@ namespace Projekt_LGiM
         public void RysujSiatke()
         {
             CzyscEkran();
-
-            for (int x = 0; x < zBufor.GetLength(0); ++x)
-            {
-                for (int y = 0; y < zBufor.GetLength(1); ++y)
-                {
-                    zBufor[x, y] = double.PositiveInfinity;
-                }
-            }
+            CzyscZBuffor();
             
             foreach (WavefrontObj model in swiat)
             {
@@ -207,15 +208,8 @@ namespace Projekt_LGiM
 
         public void Renderuj()
         {
-            Reset();
-
-            for (int i = 0; i < zBufor.GetLength(0); ++i)
-            {
-                for (int j = 0; j < zBufor.GetLength(1); ++j)
-                {
-                    zBufor[i, j] = double.PositiveInfinity;
-                }
-            }
+            tlo.CopyTo(BackBuffer, 0);
+            CzyscZBuffor();
 
             foreach (WavefrontObj model in swiat)
             {
@@ -235,9 +229,9 @@ namespace Projekt_LGiM
 
                             gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
                                 } : new double[] { 1, 1, 1 };
 
                             var obszar = new Vector3D[]

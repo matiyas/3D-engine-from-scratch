@@ -42,7 +42,7 @@ namespace Projekt_LGiM
             teksturaKolory = null;
         }
 
-        public void RenderujTrojkat(Vector3D[] wektor, double[] wektorNormalny, Vector2D[] wektorTekstura, double[,] buforZ)
+        public void RenderujTrojkat(Vector3D[] wektor, double[] wektorNormalny, Vector2D[] wektorTekstura, double[,] zBufor)
         {
             for(int i = 0; i < wektorTekstura.Length; ++i)
             {
@@ -114,7 +114,7 @@ namespace Projekt_LGiM
                     double z = x1.Z + (x0.Z - x1.Z) * m;
                     double jasnosc = vn1 + (vn0 - vn1) * m;
 
-                    if (x < 0 || x >= buforZ.GetLength(0) || y < 0 || y >= buforZ.GetLength(1) || buforZ[x, y] < z || z <= 300) { continue; }
+                    if (x < 0 || x >= zBufor.GetLength(0) || y < 0 || y >= zBufor.GetLength(1) || zBufor[x, y] < z || z <= 300) { continue; }
 
                     double d10x = wektor[1].X - wektor[0].X;
                     double d20y = wektor[2].Y - wektor[0].Y;
@@ -149,7 +149,7 @@ namespace Projekt_LGiM
                             A = 255,
                         });
 
-                        buforZ[x, y] = z;
+                        zBufor[x, y] = z;
                         continue;
                     }
 
@@ -172,9 +172,17 @@ namespace Projekt_LGiM
                     };
 
                     rysownik.RysujPiksel(new Vector2D(x, y), c);
-                    buforZ[x, y] = z;
+                    zBufor[x, y] = z;
                 }
             }
+        }
+
+        public static double Jasnosc(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
+        {
+            zrodlo -= srodek;
+            wierzcholek -= srodek;
+
+            return Math.Max(0, Math.Cos(zrodlo.AngleTo(wierzcholek).Radians));
         }
     }
 }
