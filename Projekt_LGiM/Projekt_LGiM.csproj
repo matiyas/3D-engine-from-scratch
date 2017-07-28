@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{97AF639D-1A60-4CD8-9332-73238690FF42}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Projekt_LGiM</RootNamespace>
     <AssemblyName>Projekt_LGiM</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>

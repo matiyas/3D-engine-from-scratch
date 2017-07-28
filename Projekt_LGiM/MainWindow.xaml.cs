@@ -31,14 +31,17 @@ namespace Projekt_LGiM
             ComboModele.SelectedIndex = 0;
 
             string sciezkaTlo   = @"background.jpg";
-            scena = new Scena(sciezkaTlo, System.Drawing.Image.FromFile(sciezkaTlo).Size, 100)
+            scena = new Scena(sciezkaTlo, System.Drawing.Image.FromFile(sciezkaTlo).Size, 1000, 100)
             {
-                KolorPedzla = new Color() { R = 0, G = 255, B = 0, A = 255 },
-                KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
+                KolorPedzla = Colors.Green,
+                KolorTla    = Colors.Black,
             };
             
             WczytajModel(@"modele\sphere.obj", @"tekstury\sun.jpg");
-            
+            scena.ZrodloSwiatlaIndeks = 0;
+
+            Console.WriteLine(scena.ZrodloSwiatlaIndeks);
+
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
                 var stopWatch = new Stopwatch();
@@ -49,7 +52,6 @@ namespace Projekt_LGiM
                 {
                     Thread.Sleep(15);
                     stopWatch.Restart();
-                    scena.ZrodloSwiatla = Math3D.ZnajdzSrodek(scena.swiat[scena.zrodloSwiatlaIndeks].VertexCoords);
 
                     Dispatcher.Invoke(() =>
                     {
@@ -74,18 +76,17 @@ namespace Projekt_LGiM
 
         void WczytajModel(string sciezkaModel, string sciezkaTekstura)
         {
-            scena.swiat.Add(new WavefrontObj(sciezkaModel));
-            scena.swiat[scena.swiat.Count - 1].Renderowanie = new Renderowanie(sciezkaTekstura, scena);
+            scena.Swiat.Add(new WavefrontObj(sciezkaModel));
+            scena.Swiat[scena.Swiat.Count - 1].Renderowanie = new Renderowanie(sciezkaTekstura, scena);
 
             var item = new ComboBoxItem()
             {
-                Content = scena.swiat[scena.swiat.Count - 1].Nazwa == null ? "Model" + (scena.swiat.Count - 1) 
-                    : scena.swiat[scena.swiat.Count - 1].Nazwa
+                Content = scena.Swiat[scena.Swiat.Count - 1].Nazwa ?? "Model" + (scena.Swiat.Count - 1)
             };
             ComboModele.Items.Add(item);
             ComboModele.SelectedIndex = ComboModele.Items.Count - 1;
 
-            scena.swiat[ComboModele.SelectedIndex].Obroc(new Vector3D(Math.PI * 100, 0, 0));
+            scena.Swiat[ComboModele.SelectedIndex].Obroc(new Vector3D(Math.PI * 100, 0, 0));
         }
 
         void RysujNaEkranie()
@@ -93,11 +94,7 @@ namespace Projekt_LGiM
             if (CheckSiatka.IsChecked == false)      { scena.Renderuj(); }
             else                                     { scena.RysujSiatke(); }
 
-            if(CheckSiatkaPodlogi.IsChecked == true)
-            {
-                scena.RysujSiatkePodlogi(2000, 2000, 100, new Color() { R = 127, G = 127, B = 127, A = 255 },
-                    new Color() { R = 0, G = 0, B = 255, A = 255 }, new Color() { R = 255, G = 0, B = 0, A = 255 });
-            }
+            if(CheckSiatkaPodlogi.IsChecked == true) { scena.RysujSiatkePodlogi(2000, 2000, 100, Colors.Gray, Colors.Blue, Colors.Red); }
             
             Ekran.Source = BitmapSource.Create(scena.Rozmiar.Width, scena.Rozmiar.Height, dpi, dpi,
                 PixelFormats.Bgra32, null, scena.BackBuffer, 4 * scena.Rozmiar.Width);
@@ -114,27 +111,27 @@ namespace Projekt_LGiM
             switch (e.Key)
             {
                 case Key.W:
-                    scena.kamera.DoPrzodu(50);
+                    scena.Kamera.DoPrzodu(50);
                     break;
 
                 case Key.S:
-                    scena.kamera.DoPrzodu(-50);
+                    scena.Kamera.DoPrzodu(-50);
                     break;
 
                 case Key.A:
-                    scena.kamera.WBok(50);
+                    scena.Kamera.WBok(50);
                     break;
 
                 case Key.D:
-                    scena.kamera.WBok(-50);
+                    scena.Kamera.WBok(-50);
                     break;
 
                 case Key.Space:
-                    scena.kamera.WGore(50);
+                    scena.Kamera.WGore(50);
                     break;
 
                 case Key.LeftCtrl:
-                    scena.kamera.WGore(-50);
+                    scena.Kamera.WGore(-50);
                     break;
 
                 case Key.D1:
@@ -164,9 +161,9 @@ namespace Projekt_LGiM
                 model.Renderowanie = new Renderowanie(scena);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
-                scena.swiat.Add(model);
+                scena.Swiat.Add(model);
                 ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
-                ComboModele.SelectedIndex = scena.swiat.Count - 1;
+                ComboModele.SelectedIndex = scena.Swiat.Count - 1;
             }
         }
 
@@ -178,10 +175,10 @@ namespace Projekt_LGiM
             {
                 var model = new WavefrontObj(openFileDialog.FileName);
                 model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
-                model.Renderowanie = scena.swiat[ComboModele.SelectedIndex].Renderowanie;
+                model.Renderowanie = scena.Swiat[ComboModele.SelectedIndex].Renderowanie;
 
                 int tmp = ComboModele.SelectedIndex;
-                scena.swiat[ComboModele.SelectedIndex] = model;
+                scena.Swiat[ComboModele.SelectedIndex] = model;
                 ComboModele.Items[ComboModele.SelectedIndex] = new ComboBoxItem() { Content = model.Nazwa };
                 ComboModele.SelectedIndex = tmp;
             }
@@ -196,7 +193,7 @@ namespace Projekt_LGiM
 
             if (openFileDialog.ShowDialog() == true)
             {
-                scena.swiat[ComboModele.SelectedIndex].Renderowanie = new Renderowanie(openFileDialog.FileName, scena);
+                scena.Swiat[ComboModele.SelectedIndex].Renderowanie = new Renderowanie(openFileDialog.FileName, scena);
             }
         }
 
@@ -214,7 +211,7 @@ namespace Projekt_LGiM
 
         void BtnUstawZrodloSwiatla_Click(object sender, RoutedEventArgs e)
         {
-            scena.zrodloSwiatlaIndeks = ComboModele.SelectedIndex;
+            scena.ZrodloSwiatlaIndeks = ComboModele.SelectedIndex;
         }
 
         void Ekran_MouseMove(object sender,  MouseEventArgs e)
@@ -223,11 +220,11 @@ namespace Projekt_LGiM
             {
                 if(Keyboard.IsKeyDown(Key.LeftShift))
                 {
-                    scena.kamera.Obroc(new Vector3D(0, 0, -(lpm0.X - e.GetPosition(Ekran).X) / 2));
+                    scena.Kamera.Obroc(new Vector3D(0, 0, -(lpm0.X - e.GetPosition(Ekran).X) / 2));
                 }
                 else
                 {
-                    scena.kamera.Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y) * czuloscMyszy, 
+                    scena.Kamera.Obroc(new Vector3D(-(lpm0.Y - e.GetPosition(Ekran).Y) * czuloscMyszy, 
                         (lpm0.X - e.GetPosition(Ekran).X) * czuloscMyszy, 0));
                 }
 
@@ -243,15 +240,15 @@ namespace Projekt_LGiM
                     case Tryb.Przesuwanie:
                         if(Keyboard.IsKeyDown(Key.LeftShift))
                         {
-                            scena.swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(-ile.Y * scena.kamera.Przod.X * 3, -ile.Y * scena.kamera.Przod.Y * 3,
-                                -ile.Y * scena.kamera.Przod.Z * 3));
+                            scena.Swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(-ile.Y * scena.Kamera.Przod.X * 3, 
+                                -ile.Y * scena.Kamera.Przod.Y * 3, -ile.Y * scena.Kamera.Przod.Z * 3));
                         }
                         else
                         {
-                            scena.swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.X * scena.kamera.Prawo.X * 3, ile.X * scena.kamera.Prawo.Y * 3,
-                                ile.X * scena.kamera.Prawo.Z * 3));
-                            scena.swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.Y * scena.kamera.Gora.X * 3, ile.Y * scena.kamera.Gora.Y * 3,
-                                ile.Y * scena.kamera.Gora.Z * 3));
+                            scena.Swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.X * scena.Kamera.Prawo.X * 3, 
+                                ile.X * scena.Kamera.Prawo.Y * 3, ile.X * scena.Kamera.Prawo.Z * 3));
+                            scena.Swiat[ComboModele.SelectedIndex].Przesun(new Vector3D(ile.Y * scena.Kamera.Gora.X * 3,
+                                ile.Y * scena.Kamera.Gora.Y * 3, ile.Y * scena.Kamera.Gora.Z * 3));
                         }
                         break;
 
@@ -259,29 +256,29 @@ namespace Projekt_LGiM
                         if(Keyboard.IsKeyDown(Key.LeftShift))
                         {
                             double s = Math.Sqrt(Math.Pow(ile.X - ile.Y, 2)) * Math.Sign(ile.X - ile.Y) / 2;
-                            scena.swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(s, s, s));
+                            scena.Swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(s, s, s));
                         }
                         else
                         {
-                            scena.swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X * scena.kamera.Prawo.X, ile.X * scena.kamera.Prawo.Y,
-                                ile.X * scena.kamera.Prawo.Z));
-                            scena.swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(-ile.Y * scena.kamera.Gora.X, -ile.Y * scena.kamera.Gora.Y,
-                                -ile.Y * scena.kamera.Gora.Z));
+                            scena.Swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(ile.X * scena.Kamera.Prawo.X, 
+                                ile.X * scena.Kamera.Prawo.Y, ile.X * scena.Kamera.Prawo.Z));
+                            scena.Swiat[ComboModele.SelectedIndex].Skaluj(new Vector3D(-ile.Y * scena.Kamera.Gora.X, 
+                                -ile.Y * scena.Kamera.Gora.Y, -ile.Y * scena.Kamera.Gora.Z));
                         }
                         break;
 
                     case Tryb.Obracanie:
                         if(Keyboard.IsKeyDown(Key.LeftShift))
                         {
-                            scena.swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.X, scena.kamera.Przod, 
-                                Math3D.ZnajdzSrodek(scena.swiat[ComboModele.SelectedIndex].VertexCoords));
+                            scena.Swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.X, scena.Kamera.Przod, 
+                                scena.Swiat[ComboModele.SelectedIndex].VertexCoords.ZnajdzSrodek());
                         }
                         else
                         {
-                            scena.swiat[ComboModele.SelectedIndex].ObrocWokolOsi(-ile.X, scena.kamera.Gora,
-                                Math3D.ZnajdzSrodek(scena.swiat[ComboModele.SelectedIndex].VertexCoords));
-                            scena.swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.Y, scena.kamera.Prawo,
-                                Math3D.ZnajdzSrodek(scena.swiat[ComboModele.SelectedIndex].VertexCoords));
+                            scena.Swiat[ComboModele.SelectedIndex].ObrocWokolOsi(-ile.X, scena.Kamera.Gora,
+                                scena.Swiat[ComboModele.SelectedIndex].VertexCoords.ZnajdzSrodek());
+                            scena.Swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.Y, scena.Kamera.Prawo,
+                                scena.Swiat[ComboModele.SelectedIndex].VertexCoords.ZnajdzSrodek());
                         }
                         break;
                 }

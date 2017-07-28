@@ -7,13 +7,13 @@ namespace Projekt_LGiM
 {
 	static class Math3D
     {
-		public static Vector3D ZnajdzSrodek(Vector3D[] wierzcholki)
+		public static Vector3D ZnajdzSrodek(this Vector3D[] wierzcholki)
         {
             return new Vector3D((wierzcholki.Max(v => v.X) + wierzcholki.Min(v => v.X)) / 2, 
                 (wierzcholki.Max(v => v.Y) + wierzcholki.Min(v => v.Y)) / 2, (wierzcholki.Max(v => v.Z) + wierzcholki.Min(v => v.Z)) / 2);
         }
 
-        public static Vector3D[] Translacja(Vector3D[] wierzcholki, Vector3D t)
+        public static Vector3D[] Translacja(this Vector3D[] wierzcholki, Vector3D t)
         {
             var wierzcholkiMod = new Vector3D[wierzcholki.Length];
 
@@ -30,7 +30,7 @@ namespace Projekt_LGiM
             return wierzcholkiMod;
         }
 
-		public static Vector3D[] Rotacja(Vector3D[] wierzcholki, Vector3D kat, Vector3D srodek)
+		public static Vector3D[] Rotacja(this Vector3D[] wierzcholki, Vector3D kat, Vector3D srodek)
         {
             kat = new Vector3D(kat.X / 100, kat.Y / 100, kat.Z / 100);
 
@@ -75,7 +75,7 @@ namespace Projekt_LGiM
             return wierzcholkiMod;
         }
 
-        public static Vector3D[] Skalowanie(Vector3D[] wierzcholki, Vector3D kat)
+        public static Vector3D[] Skalowanie(this Vector3D[] wierzcholki, Vector3D kat)
         {
             double tmpX = kat.X, tmpY = kat.Y, tmpZ = kat.Z, x, y, z;
 			var wierzcholkiMod = new Vector3D[wierzcholki.Length];
@@ -93,7 +93,7 @@ namespace Projekt_LGiM
 
             kat = new Vector3D(x, y, z);
 			
-			Vector3D c = ZnajdzSrodek(wierzcholki);
+			Vector3D c = wierzcholki.ZnajdzSrodek();
 			
 			var T0 = new DenseMatrix(4, 4, new double[]{ 1, 0, 0, -c.X,
                                                          0, 1, 0, -c.Y,
@@ -119,7 +119,7 @@ namespace Projekt_LGiM
             return wierzcholkiMod;
         }
 
-        public static Vector3D RzutPerspektywiczny(Vector3D punkt, double d, Vector2D c, Kamera kamera)
+        public static Vector3D RzutPerspektywiczny(this Vector3D punkt, double d, Vector2D c, Kamera kamera)
         {
             var Proj = new DenseMatrix(4, 4, new double[]{ 1,  0,  0,  0,
                                                            0,  1,  0,  0,
@@ -131,7 +131,7 @@ namespace Projekt_LGiM
             return new Vector3D(p[0] / p[3] + c.X, p[1] / p[3] + c.Y, p[2] + d/* kalibracja */);
         }
 
-        public static Vector3D[] RzutPerspektywiczny(Vector3D[] wierzcholki, double d, Vector2D c, Kamera kamera)
+        public static Vector3D[] RzutPerspektywiczny(this Vector3D[] wierzcholki, double d, Vector2D c, Kamera kamera)
         {
             var punktyRzut = new Vector3D[wierzcholki.Length];
 

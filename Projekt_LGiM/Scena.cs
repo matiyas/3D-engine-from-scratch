@@ -9,26 +9,21 @@ namespace Projekt_LGiM
     {
         byte[] tlo;
         double[,] zBufor;
+        int zrodloSwiatlaIndeks = -1;
+        Vector2D c;
 
-        public List<WavefrontObj> swiat;
-        public Kamera kamera;
-        public int zrodloSwiatlaIndeks;
-
-        public Scena(string sciezkaTlo, Drawing.Size rozmiar, double minOdleglosc)
+        public Scena(string sciezkaTlo, Drawing.Size rozmiar, double odlegosc, double minOdleglosc)
         {
-            KolorPedzla = new Color() { R = 0, G = 0, B = 0, A = 255 };
-            KolorTla    = new Color() { R = 0, G = 0, B = 0, A = 255 };
-
             Rozmiar = rozmiar;
+            c = new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2);
             BackBuffer = new byte[4 * rozmiar.Width * rozmiar.Height];
 
             tlo = ToByteArray(sciezkaTlo);
             tlo.CopyTo(BackBuffer, 0);
 
-            swiat = new List<WavefrontObj>();
-            kamera = new Kamera();
-            zrodloSwiatlaIndeks = 0;
-            Odleglosc = 1000;
+            Swiat = new List<WavefrontObj>();
+            Kamera = new Kamera();
+            Odleglosc = odlegosc;
 
             zBufor = new double[rozmiar.Width, rozmiar.Height];
             CzyscZBuffor();
@@ -36,33 +31,46 @@ namespace Projekt_LGiM
             MinOdleglosc = minOdleglosc;
         }
 
-        public Vector3D ZrodloSwiatla { get; set; }
+        public List<WavefrontObj> Swiat { get; set; }
+
+        public Kamera Kamera { get; set; }
+
+        public int ZrodloSwiatlaIndeks
+        {
+            get { return zrodloSwiatlaIndeks; }
+            set { zrodloSwiatlaIndeks = value < Swiat.Count ? value : zrodloSwiatlaIndeks; }
+        }
+
+        public Vector3D ZrodloSwiatla
+        {
+            get { return zrodloSwiatlaIndeks > 0 ? Swiat[zrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek() : Kamera.Pozycja; }
+        }
 
         public byte[] BackBuffer { get; private set; }
 
         public Drawing.Size Rozmiar { get; private set; }
 
-        public Color KolorPedzla { get; set; }
+        public Color KolorPedzla { get; set; } = Colors.Black;
 
-        public Color KolorTla { get; set; }
+        public Color KolorTla { get; set; } = Colors.White;
 
         public double Odleglosc { get; set; }
 
         public double MinOdleglosc { get; set; }
 
-        public void RysujPiksel(Vector2D p, Color c)
+        public void RysujPiksel(Vector2D p, Color kolor)
         {
             if (p.X >= 0 && p.X < Rozmiar.Width && p.Y >= 0 && p.Y < Rozmiar.Height)
             {
                 int pozycja = 4 * ((int)p.Y * Rozmiar.Width + (int)p.X);
-                BackBuffer[pozycja] = c.B;
-                BackBuffer[pozycja + 1] = c.G;
-                BackBuffer[pozycja + 2] = c.R;
-                BackBuffer[pozycja + 3] = c.A;
+                BackBuffer[pozycja] = kolor.B;
+                BackBuffer[pozycja + 1] = kolor.G;
+                BackBuffer[pozycja + 2] = kolor.R;
+                BackBuffer[pozycja + 3] = kolor.A;
             }
         }
         
-        public void RysujLinie(Vector3D p0, Vector3D p1, Color c)
+        public void RysujLinie(Vector3D p0, Vector3D p1, Color kolor)
         {
             Vector3D startX = p0.X < p1.X ? p0 : p1;
             Vector3D endX   = p0.X > p1.X ? p0 : p1;
@@ -86,13 +94,13 @@ namespace Projekt_LGiM
                         if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1)
                             && zBufor[x, (int)y] > z && z > MinOdleglosc)
                         {
-                            RysujPiksel(new Vector2D(x, y), c);
+                            RysujPiksel(new Vector2D(x, y), kolor);
                         }
                     }
                     else if (x >= 0 && x < zBufor.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < zBufor.GetLength(1)
                        && zBufor[x, (int)(2 * p0.Y - y)] > z && z > MinOdleglosc)
                     {
-                        RysujPiksel(new Vector2D(x, 2 * p0.Y - y), c);
+                        RysujPiksel(new Vector2D(x, 2 * p0.Y - y), kolor);
                     }
 
                     y += krok;
@@ -109,15 +117,16 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[(int)x, y] > z && z > MinOdleglosc)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[(int)x, y] > z 
+                            && z > MinOdleglosc)
                         {
-                            RysujPiksel(new Vector2D(x, y), c);
+                            RysujPiksel(new Vector2D(x, y), kolor);
                         }
                     }
                     else if (2 * p0.X - x >= 0 && 2 * p0.X - x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1)
                        && zBufor[(int)(2 * p0.X - x), y] > z && z > MinOdleglosc)
                     {
-                        RysujPiksel(new Vector2D(2 * p0.X - x, y), c);
+                        RysujPiksel(new Vector2D(2 * p0.X - x, y), kolor);
                     }
 
                     z += krok;
@@ -155,17 +164,10 @@ namespace Projekt_LGiM
                 {
                     var wierzcholki = new Vector3D[]
                     {
-                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z), Odleglosc,
-                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
-
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z), Odleglosc,
-                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
-
-                        Math3D.RzutPerspektywiczny(new Vector3D(x + skok, 0, z + skok), Odleglosc,
-                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera),
-
-                        Math3D.RzutPerspektywiczny(new Vector3D(x, 0, z + skok), Odleglosc,
-                            new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera)
+                        new Vector3D(x, 0, z).RzutPerspektywiczny(Odleglosc, c, Kamera),
+                        new Vector3D(x + skok, 0, z).RzutPerspektywiczny(Odleglosc, c, Kamera),
+                        new Vector3D(x + skok, 0, z + skok).RzutPerspektywiczny(Odleglosc, c, Kamera),
+                        new Vector3D(x, 0, z + skok).RzutPerspektywiczny(Odleglosc, c, Kamera)
                     };
 
                     for (int i = 0; i < wierzcholki.Length; ++i)
@@ -190,17 +192,15 @@ namespace Projekt_LGiM
             CzyscEkran();
             CzyscZBuffor();
             
-            foreach (WavefrontObj model in swiat)
+            foreach (WavefrontObj model in Swiat)
             {
-                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
-                    new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
+                Vector3D[] modelRzut = model.VertexCoords.RzutPerspektywiczny(Odleglosc, c, Kamera);
 
                 foreach (Sciana sciana in model.Sciany)
                 {
                     for (int i = 0; i < sciana.Vertex.Length; ++i)
                     {
-                        RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Length]],
-                            new Color() { R = 0, G = 255, B = 0, A = 255 });
+                        RysujLinie(modelRzut[sciana.Vertex[i]], modelRzut[sciana.Vertex[(i + 1) % sciana.Vertex.Length]], Colors.Green);
                     }
                 }
             }
@@ -211,12 +211,10 @@ namespace Projekt_LGiM
             tlo.CopyTo(BackBuffer, 0);
             CzyscZBuffor();
 
-            foreach (WavefrontObj model in swiat)
+            foreach (WavefrontObj model in Swiat)
             {
-                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
-                    new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
-
-                Vector3D srodekObiektu = Math3D.ZnajdzSrodek(model.VertexCoords);
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc, c, Kamera);
+                Vector3D srodekObiektu = model.VertexCoords.ZnajdzSrodek();
 
                 if (model.Sciany != null && modelRzut != null && model.Renderowanie != null)
                 {
@@ -232,11 +230,13 @@ namespace Projekt_LGiM
                                 modelRzut[sciana.Vertex[1]].Z > MinOdleglosc || 
                                 modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
                         {
-                            var gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
+                            Vector3D zrodloSwiatla = ZrodloSwiatla;
+
+                            var gradient = model != Swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
-                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
+                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
                                 } : new double[] { 1, 1, 1 };
 
                             var obszar = new Vector3D[]
@@ -253,8 +253,6 @@ namespace Projekt_LGiM
                                     model.VertexTextureCoords[sciana.VertexTexture[1]],
                                     model.VertexTextureCoords[sciana.VertexTexture[2]],
                                 } : new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
-
-
                             
                             model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
                         }

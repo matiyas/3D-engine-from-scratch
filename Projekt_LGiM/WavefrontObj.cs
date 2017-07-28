@@ -199,20 +199,20 @@ namespace Projekt_LGiM
 
         public void Przesun(Vector3D t)
         {
-            VertexCoords = Math3D.Translacja(VertexCoords, t);
-            VertexNormalsCoords = Math3D.Translacja(VertexNormalsCoords, t);
+            VertexCoords = VertexCoords.Translacja(t);
+            VertexNormalsCoords = VertexNormalsCoords.Translacja(t);
         }
 
         public void Obroc(Vector3D phi)
         {
-            VertexCoords = Math3D.Rotacja(VertexCoords, phi, Math3D.ZnajdzSrodek(VertexCoords));
-            VertexNormalsCoords = Math3D.Rotacja(VertexNormalsCoords, phi, Math3D.ZnajdzSrodek(VertexNormalsCoords));
+            VertexCoords = VertexCoords.Rotacja(phi, VertexCoords.ZnajdzSrodek());
+            VertexNormalsCoords = VertexNormalsCoords.Rotacja(phi, VertexNormalsCoords.ZnajdzSrodek());
         }
 
         public void Obroc(Vector3D phi, Vector3D c)
         {
-            VertexCoords = Math3D.Rotacja(VertexCoords, phi, c);
-            VertexNormalsCoords = Math3D.Rotacja(VertexNormalsCoords, phi, c);
+            VertexCoords = VertexCoords.Rotacja(phi, c);
+            VertexNormalsCoords = VertexNormalsCoords.Rotacja(phi, c);
         }
 
         public void ObrocWokolOsi(double phi, UnitVector3D os, Vector3D c)
@@ -223,8 +223,8 @@ namespace Projekt_LGiM
 
         public void Skaluj(Vector3D s)
         {
-            VertexCoords = Math3D.Skalowanie(VertexCoords, s);
-            VertexNormalsCoords = Math3D.Skalowanie(VertexNormalsCoords, s);
+            VertexCoords = VertexCoords.Skalowanie(s);
+            VertexNormalsCoords = VertexNormalsCoords.Skalowanie(s);
         }
     }
 }
