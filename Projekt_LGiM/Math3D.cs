@@ -143,7 +143,7 @@ namespace Projekt_LGiM
             return punktyRzut;
         }
         
-        public static double CosKat(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
+        public static double Jasnosc(Vector3D zrodlo, Vector3D wierzcholek, Vector3D srodek)
         {
             zrodlo -= srodek;
             wierzcholek -= srodek;

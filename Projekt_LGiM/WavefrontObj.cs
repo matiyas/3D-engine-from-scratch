@@ -7,15 +7,15 @@ using System;
 
 namespace Projekt_LGiM
 {
+    public struct Sciana
+    {
+        public int[] Vertex { get; set; }
+        public int[] VertexTexture { get; set; }
+        public int[] VertexNormal { get; set; }
+    }
+
     class WavefrontObj
     {
-        public struct Sciana
-        {
-            public int[] Vertex { get; set; }
-            public int[] VertexTexture { get; set; }
-            public int[] VertexNormal { get; set; }
-        }
-
         private string sciezka;
 
         public WavefrontObj(string sciezka)
@@ -55,26 +55,17 @@ namespace Projekt_LGiM
 
                             if (wartosci[0] == "v")
                             {
-                                var tmpV = VertexCoords;
-                                Array.Resize(ref tmpV, tmpV.Length + 1);
-                                tmpV[tmpV.Length - 1] = new Vector3D(wierzcholek.ToArray());
-                                VertexCoords = tmpV;
+                                VertexCoords = DodajNaKoniec(VertexCoords, new Vector3D(wierzcholek.ToArray()));
                             }
                             else if(wartosci[0] == "vn")
                             {
-                                var tmpVN = VertexNormalsCoords;
-                                Array.Resize(ref tmpVN, tmpVN.Length + 1);
-                                tmpVN[tmpVN.Length - 1] = new Vector3D(wierzcholek.ToArray());
-                                VertexNormalsCoords = tmpVN;
+                                VertexNormalsCoords = DodajNaKoniec(VertexNormalsCoords, new Vector3D(wierzcholek.ToArray()));
                             }
                             break;
 
                         case "vt":
-                            var tmpVT = VertexTextureCoords;
-                            Array.Resize(ref tmpVT, tmpVT.Length + 1);
-                            tmpVT[tmpVT.Length - 1] = new Vector2D(new double[] { double.Parse(wartosci[1], CultureInfo.InvariantCulture),
-                                double.Parse(wartosci[2], CultureInfo.InvariantCulture) });
-                            VertexTextureCoords = tmpVT;
+                            VertexTextureCoords = DodajNaKoniec(VertexTextureCoords, new Vector2D(double.Parse(wartosci[1], 
+                                CultureInfo.InvariantCulture), double.Parse(wartosci[2], CultureInfo.InvariantCulture)));
                             break;
 
                         case "f":
@@ -123,6 +114,7 @@ namespace Projekt_LGiM
                 }
             }
 
+            // Zamiana indeksów na właściwe
             for(int i = 0; i < Sciany.Count; ++i)
             {
                 var wierzcholki = new int[Sciany[i].Vertex.Length];
@@ -154,6 +146,7 @@ namespace Projekt_LGiM
                 };
             }
 
+            // Dzielenie ścian na trójkątne
             ScianyTrojkatne = new List<Sciana>();
             foreach (Sciana sciana in Sciany)
             {
@@ -175,15 +168,40 @@ namespace Projekt_LGiM
             }
         }
 
+        Vector3D[] DodajNaKoniec(Vector3D[] tablica, Vector3D wartosc)
+        {
+            Vector3D[] tmp = tablica;
+            Array.Resize(ref tmp, tmp.Length + 1);
+            tmp[tmp.Length - 1] = wartosc;
+            return tmp;
+        }
+
+        Vector2D[] DodajNaKoniec(Vector2D[] tablica, Vector2D wartosc)
+        {
+            Vector2D[] tmp = tablica;
+            Array.Resize(ref tmp, tmp.Length + 1);
+            tmp[tmp.Length - 1] = wartosc;
+            return tmp;
+        }
+
         public Vector3D Pozycja { get; set; }
+
         public Vector3D Obrot { get; set; }
+
         public Vector3D Skalowanie { get; set; }
+
         public Vector3D[] VertexCoords { get; private set; }
+
         public Vector2D[] VertexTextureCoords { get; }
+
         public Vector3D[] VertexNormalsCoords { get; private set; }
+
         public List<Sciana> Sciany { get; }
+
         public List<Sciana> ScianyTrojkatne { get; }
+
         public Renderowanie Renderowanie { get; set; }
+
         public string Nazwa { get; private set; }
 
         public void Przesun(Vector3D t)
@@ -217,3 +235,4 @@ namespace Projekt_LGiM
         }
     }
 }
+ 

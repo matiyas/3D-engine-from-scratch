@@ -73,7 +73,8 @@
             VerticalAlignment="Top" 
             Width="205" 
             IsTextSearchEnabled="False" 
-            SelectionChanged="ComboModele_SelectionChanged" Height="22" Grid.Row="1"
+            Height="22" 
+            Grid.Row="1"
             />
         <Menu
             x:Name="MainMenu" 

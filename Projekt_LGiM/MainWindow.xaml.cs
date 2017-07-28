@@ -31,7 +31,7 @@ namespace Projekt_LGiM
             ComboModele.SelectedIndex = 0;
 
             string sciezkaTlo   = @"background.jpg";
-            scena = new Scena(sciezkaTlo, System.Drawing.Image.FromFile(sciezkaTlo).Size)
+            scena = new Scena(sciezkaTlo, System.Drawing.Image.FromFile(sciezkaTlo).Size, 100)
             {
                 KolorPedzla = new Color() { R = 0, G = 255, B = 0, A = 255 },
                 KolorTla    = new Color() { R = 0, G =   0, B = 0, A = 255 },
@@ -49,7 +49,7 @@ namespace Projekt_LGiM
                 {
                     Thread.Sleep(15);
                     stopWatch.Restart();
-                    scena.zrodloSwiatla = Math3D.ZnajdzSrodek(scena.swiat[scena.zrodloSwiatlaIndeks].VertexCoords);
+                    scena.ZrodloSwiatla = Math3D.ZnajdzSrodek(scena.swiat[scena.zrodloSwiatlaIndeks].VertexCoords);
 
                     Dispatcher.Invoke(() =>
                     {
@@ -79,7 +79,8 @@ namespace Projekt_LGiM
 
             var item = new ComboBoxItem()
             {
-                Content = scena.swiat[scena.swiat.Count - 1].Nazwa == null ? "Model" : scena.swiat[scena.swiat.Count - 1].Nazwa
+                Content = scena.swiat[scena.swiat.Count - 1].Nazwa == null ? "Model" + (scena.swiat.Count - 1) 
+                    : scena.swiat[scena.swiat.Count - 1].Nazwa
             };
             ComboModele.Items.Add(item);
             ComboModele.SelectedIndex = ComboModele.Items.Count - 1;
@@ -153,12 +154,7 @@ namespace Projekt_LGiM
             }
         }
 
-        void ComboModele_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //kamera.Cel = Math3D.ZnajdzSrodek(swiat[ComboModele.SelectedIndex].VertexCoords);
-        }
-
-        private void MenuNowyModel_Click(object sender, RoutedEventArgs e)
+        void MenuNowyModel_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog() { Filter = "Waveform (*.obj)|*.obj" };
 
@@ -174,7 +170,7 @@ namespace Projekt_LGiM
             }
         }
 
-        private void MenuZastapModel_Click(object sender, RoutedEventArgs e)
+        void MenuZastapModel_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog() { Filter = "Waveform (*.obj)|*.obj" };
 
@@ -191,7 +187,7 @@ namespace Projekt_LGiM
             }
         }
 
-        private void MenuWczytajTeskture_Click(object sender, RoutedEventArgs e)
+        void MenuWczytajTeskture_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog() { Filter = "JPEG (*.jpg; *.jpeg; *.jpe)|*.jpg; *.jpeg; *.jpe|"
                                                                + "PNG (*.png)|*.png|"
@@ -204,7 +200,7 @@ namespace Projekt_LGiM
             }
         }
 
-        private void MenuSterowanie_Click(object sender, RoutedEventArgs e)
+        void MenuSterowanie_Click(object sender, RoutedEventArgs e)
         {
             var sterowanie = new Sterowaniexaml();
             sterowanie.Show();
@@ -216,7 +212,7 @@ namespace Projekt_LGiM
             if (e.RightButton == MouseButtonState.Pressed) { ppm0 = e.GetPosition(Ekran); }
         }
 
-        private void BtnUstawZrodloSwiatla_Click(object sender, RoutedEventArgs e)
+        void BtnUstawZrodloSwiatla_Click(object sender, RoutedEventArgs e)
         {
             scena.zrodloSwiatlaIndeks = ComboModele.SelectedIndex;
         }

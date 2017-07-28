@@ -5,14 +5,35 @@ namespace Projekt_LGiM
 {
     class Kamera
     {
-        Vector3D pozycja   = new Vector3D(0, 0, 10);
-        Vector3D cel       = new Vector3D(0, 0, 0);
-        UnitVector3D przod = new UnitVector3D(0, 0, 1);
-        UnitVector3D gora  = new UnitVector3D(0, 1, 0);
-        UnitVector3D prawo = new UnitVector3D(1, 0, 0);
+        Vector3D pozycja;
+        Vector3D cel;
+        UnitVector3D przod;
+        UnitVector3D gora;
+        UnitVector3D prawo;
 
-        public Vector3D RealPos { get; private set; }  = new Vector3D(0, 0, 10);
-        public Vector3D RealTarget { get; private set; } = new Vector3D(0, 0, 0);
+        public Kamera()
+        {
+            pozycja = new Vector3D(0, 0, 10);
+            cel     = new Vector3D(0, 0, 0);
+            przod   = new UnitVector3D(0, 0, 1);
+            gora    = new UnitVector3D(0, 1, 0);
+            prawo   = new UnitVector3D(1, 0, 0);
+        }
+
+        public Kamera(Vector3D pozycja, Vector3D cel)
+        {
+            this.pozycja = pozycja;
+            this.cel = cel;
+            Rekalkulacja();
+        }
+
+        void Rekalkulacja()
+        {
+            przod = (pozycja - cel).Normalize();
+            prawo = gora.CrossProduct(przod);
+            gora = przod.CrossProduct(prawo);
+        }
+
         public Vector3D Pozycja
         {
             get { return pozycja; }
@@ -22,18 +43,23 @@ namespace Projekt_LGiM
                 Rekalkulacja();
             }
         }
+
         public Vector3D Cel
         {
             get { return cel; }
             set
             {
-                cel   = value;
+                cel = value;
                 Rekalkulacja();
             }
         }
+
         public UnitVector3D Przod => przod;
+
         public UnitVector3D Prawo => prawo;
+
         public UnitVector3D Gora => gora;
+
         public DenseMatrix LookAt
         {
             get
@@ -49,13 +75,6 @@ namespace Projekt_LGiM
                                                                      0,          0,          0,      1, });
                 return nvu * p;
             }
-        }
-
-        void Rekalkulacja()
-        {
-            przod = (pozycja - cel).Normalize();
-            prawo = gora.CrossProduct(przod);
-            gora = przod.CrossProduct(prawo);
         }
 
         public void DoPrzodu(double ile)
@@ -79,15 +98,15 @@ namespace Projekt_LGiM
             cel     -= new Vector3D(gora.X * ile, gora.Y * ile, gora.Z * -ile);
         }
 
-        public void Obroc(Vector3D t)
+        public void Obroc(Vector3D kat)
         {
-            przod = Math3D.ObrocWokolOsi(przod, gora, -t.Y);
+            przod = Math3D.ObrocWokolOsi(przod, gora, -kat.Y);
             prawo = gora.CrossProduct(przod);
 
-            przod = Math3D.ObrocWokolOsi(przod, prawo, -t.X);
+            przod = Math3D.ObrocWokolOsi(przod, prawo, -kat.X);
             gora = przod.CrossProduct(prawo);
 
-            prawo = Math3D.ObrocWokolOsi(prawo, przod, -t.Z);
+            prawo = Math3D.ObrocWokolOsi(prawo, przod, -kat.Z);
             gora = przod.CrossProduct(prawo);
             
             cel = pozycja - przod;

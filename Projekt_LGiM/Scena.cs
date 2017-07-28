@@ -7,19 +7,14 @@ namespace Projekt_LGiM
 {
     class Scena
     {
-        public byte[] BackBuffer { get; private set; }
-        private byte[] tlo;
-        public Drawing.Size Rozmiar { get; private set; }
-        public Color KolorPedzla { get; set; }
-        public Color KolorTla { get; set; }
-        public List<WavefrontObj> swiat;
-        public Vector3D zrodloSwiatla;
-        public int zrodloSwiatlaIndeks;
-        public Kamera kamera;
-        public double Odleglosc { get; set; }
-        private double[,] zBufor;
+        byte[] tlo;
+        double[,] zBufor;
 
-        public Scena(string sciezkaTlo, Drawing.Size rozmiar)
+        public List<WavefrontObj> swiat;
+        public Kamera kamera;
+        public int zrodloSwiatlaIndeks;
+
+        public Scena(string sciezkaTlo, Drawing.Size rozmiar, double minOdleglosc)
         {
             KolorPedzla = new Color() { R = 0, G = 0, B = 0, A = 255 };
             KolorTla    = new Color() { R = 0, G = 0, B = 0, A = 255 };
@@ -36,8 +31,23 @@ namespace Projekt_LGiM
             Odleglosc = 1000;
 
             zBufor = new double[rozmiar.Width, rozmiar.Height];
+            MinOdleglosc = minOdleglosc;
         }
-        
+
+        public Vector3D ZrodloSwiatla { get; set; }
+
+        public byte[] BackBuffer { get; private set; }
+
+        public Drawing.Size Rozmiar { get; private set; }
+
+        public Color KolorPedzla { get; set; }
+
+        public Color KolorTla { get; set; }
+
+        public double Odleglosc { get; set; }
+
+        public double MinOdleglosc { get; set; }
+
         public void RysujPiksel(Vector2D p, Color c)
         {
             if (p.X >= 0 && p.X < Rozmiar.Width && p.Y >= 0 && p.Y < Rozmiar.Height)
@@ -49,7 +59,7 @@ namespace Projekt_LGiM
                 BackBuffer[pozycja + 3] = c.A;
             }
         }
-
+        
         public void RysujLinie(Vector3D p0, Vector3D p1, Color c)
         {
             Vector3D startX = p0.X < p1.X ? p0 : p1;
@@ -71,13 +81,13 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[x, (int)y] > z && z > 100)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[x, (int)y] > z && z > MinOdleglosc)
                         {
                             RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
                     else if (x >= 0 && x < zBufor.GetLength(0) && 2 * p0.Y - y >= 0 && 2 * p0.Y - y < zBufor.GetLength(1)
-                       && zBufor[x, (int)(2 * p0.Y - y)] > z && z > 100)
+                       && zBufor[x, (int)(2 * p0.Y - y)] > z && z > MinOdleglosc)
                     {
                         RysujPiksel(new Vector2D(x, 2 * p0.Y - y), c);
                     }
@@ -96,13 +106,13 @@ namespace Projekt_LGiM
 
                     if ((p1.X > p0.X && p1.Y > p0.Y) || (p1.X < p0.X && p1.Y < p0.Y))
                     {
-                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[(int)x, y] > z && z > 100)
+                        if (x >= 0 && x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1) && zBufor[(int)x, y] > z && z > MinOdleglosc)
                         {
                             RysujPiksel(new Vector2D(x, y), c);
                         }
                     }
                     else if (2 * p0.X - x >= 0 && 2 * p0.X - x < zBufor.GetLength(0) && y >= 0 && y < zBufor.GetLength(1)
-                       && zBufor[(int)(2 * p0.X - x), y] > z && z > 100)
+                       && zBufor[(int)(2 * p0.X - x), y] > z && z > MinOdleglosc)
                     {
                         RysujPiksel(new Vector2D(2 * p0.X - x, y), c);
                     }
@@ -128,30 +138,8 @@ namespace Projekt_LGiM
             tlo.CopyTo(BackBuffer, 0);
         }
 
-        public static byte[] ToByteArray(string sciezka)
-        {
-            var bmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
-            var pixs = new byte[bmp.Size.Width * bmp.Height * 4];
-
-            for (int x = 0; x < bmp.Width; ++x)
-            {
-                for (int y = 0; y < bmp.Height; ++y)
-                {
-                    int pos = 4 * (y * bmp.Width + x);
-                    var c = bmp.GetPixel(x, y);
-
-                    pixs[pos++] = c.B;
-                    pixs[pos++] = c.G;
-                    pixs[pos++] = c.R;
-                    pixs[pos] = c.A;
-                }
-            }
-
-            return pixs;
-        }
-
         public void RysujSiatkePodlogi(int szerokosc, int wysokosc, int skok, Color kolorSiatki, Color kolorOsiX, 
-            Color kolorOsiZ)
+            Color kolorOsiZ, bool zBuffering=false)
         {
             for (int z = -wysokosc / 2; z < wysokosc / 2; z += skok)
             {
@@ -174,13 +162,13 @@ namespace Projekt_LGiM
 
                     for (int i = 0; i < wierzcholki.Length; ++i)
                     {
-                        if (wierzcholki[i].Z > 10 && wierzcholki[(i + 1) % wierzcholki.Length].Z > 10)
+                        if (wierzcholki[i].Z > MinOdleglosc && wierzcholki[(i + 1) % wierzcholki.Length].Z > MinOdleglosc)
                         {
                             Color kolor;
 
-                            if (x == 0 && i == 3) { kolor = kolorOsiZ; }
-                            else if (z == 0 && i == 0) { kolor = kolorOsiX; }
-                            else { kolor = kolorSiatki; }
+                            if      (x == 0 && i == 3)  { kolor = kolorOsiZ; }
+                            else if (z == 0 && i == 0)  { kolor = kolorOsiX; }
+                            else                        { kolor = kolorSiatki; }
 
                             RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor);
                         }
@@ -206,7 +194,7 @@ namespace Projekt_LGiM
                 Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc,
                     new Vector2D(Rozmiar.Width / 2, Rozmiar.Height / 2), kamera);
 
-                foreach (WavefrontObj.Sciana sciana in model.Sciany)
+                foreach (Sciana sciana in model.Sciany)
                 {
                     for (int i = 0; i < sciana.Vertex.Length; ++i)
                     {
@@ -240,16 +228,16 @@ namespace Projekt_LGiM
                 {
                     foreach (var sciana in model.ScianyTrojkatne)
                     {
-                        if (modelRzut[sciana.Vertex[0]].Z > 300 || modelRzut[sciana.Vertex[1]].Z > 300
-                            || modelRzut[sciana.Vertex[2]].Z > 300)
+                        if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc || modelRzut[sciana.Vertex[1]].Z > MinOdleglosc
+                            || modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
                         {
                             double[] gradient = new double[3];
 
                             gradient = model != swiat[zrodloSwiatlaIndeks] ? new double[]
                                 {
-                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Math3D.CosKat(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
+                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                                    Math3D.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu)
                                 } : new double[] { 1, 1, 1 };
 
                             var obszar = new Vector3D[]
@@ -276,6 +264,28 @@ namespace Projekt_LGiM
                     }
                 }
             }
+        }
+
+        public static byte[] ToByteArray(string sciezka)
+        {
+            var bmp = new Drawing.Bitmap(Drawing.Image.FromFile(sciezka));
+            var pixs = new byte[bmp.Size.Width * bmp.Height * 4];
+
+            for (int x = 0; x < bmp.Width; ++x)
+            {
+                for (int y = 0; y < bmp.Height; ++y)
+                {
+                    int pos = 4 * (y * bmp.Width + x);
+                    var c = bmp.GetPixel(x, y);
+
+                    pixs[pos++] = c.B;
+                    pixs[pos++] = c.G;
+                    pixs[pos++] = c.R;
+                    pixs[pos] = c.A;
+                }
+            }
+
+            return pixs;
         }
     }
 }
