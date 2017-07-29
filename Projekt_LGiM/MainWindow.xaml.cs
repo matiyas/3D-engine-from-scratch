@@ -38,9 +38,10 @@ namespace Projekt_LGiM
             };
             
             WczytajModel(@"modele\sphere.obj", @"tekstury\sun.jpg");
+            WczytajModel(@"modele\smoothMonkey.obj", @"tekstury\mercury.jpg");
+            scena.Swiat[1].Przesun(new Vector3D(500, 0, 0));
+            scena.Swiat[1].Skaluj(new Vector3D(-50, -50, -50));
             scena.ZrodloSwiatlaIndeks = 0;
-
-            Console.WriteLine(scena.ZrodloSwiatlaIndeks);
 
             var t = new Thread(new ParameterizedThreadStart((e) =>
             {
@@ -55,6 +56,12 @@ namespace Projekt_LGiM
 
                     Dispatcher.Invoke(() =>
                     {
+                        scena.ZrodloSwiatla = scena.Swiat[scena.ZrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek();
+                        if (scena.Swiat.Count > 1)
+                        {
+                            scena.Swiat[1].Obroc(new Vector3D(0, 5, 0));
+                            scena.Swiat[1].ObrocWokolOsi(5, new UnitVector3D(0, 1, 0), scena.ZrodloSwiatla);
+                        }
                         RysujNaEkranie();
                         stopWatch.Stop();
                         avgRefreshTime += stopWatch.ElapsedMilliseconds;

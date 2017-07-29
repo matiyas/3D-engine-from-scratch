@@ -9,13 +9,12 @@ namespace Projekt_LGiM
     {
         byte[] tlo;
         double[,] zBufor;
-        int zrodloSwiatlaIndeks = -1;
-        Vector2D c;
+        Vector2D srodek;
 
         public Scena(string sciezkaTlo, Drawing.Size rozmiar, double odlegosc, double minOdleglosc)
         {
             Rozmiar = rozmiar;
-            c = new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2);
+            srodek = new Vector2D(rozmiar.Width / 2, rozmiar.Height / 2);
             BackBuffer = new byte[4 * rozmiar.Width * rozmiar.Height];
 
             tlo = ToByteArray(sciezkaTlo);
@@ -35,16 +34,9 @@ namespace Projekt_LGiM
 
         public Kamera Kamera { get; set; }
 
-        public int ZrodloSwiatlaIndeks
-        {
-            get { return zrodloSwiatlaIndeks; }
-            set { zrodloSwiatlaIndeks = value < Swiat.Count ? value : zrodloSwiatlaIndeks; }
-        }
+        public int ZrodloSwiatlaIndeks { get; set; } = -1;
 
-        public Vector3D ZrodloSwiatla
-        {
-            get { return zrodloSwiatlaIndeks > 0 ? Swiat[zrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek() : Kamera.Pozycja; }
-        }
+        public Vector3D ZrodloSwiatla { get; set; }
 
         public byte[] BackBuffer { get; private set; }
 
@@ -60,14 +52,13 @@ namespace Projekt_LGiM
 
         public void RysujPiksel(Vector2D p, Color kolor)
         {
-            if (p.X >= 0 && p.X < Rozmiar.Width && p.Y >= 0 && p.Y < Rozmiar.Height)
-            {
-                int pozycja = 4 * ((int)p.Y * Rozmiar.Width + (int)p.X);
-                BackBuffer[pozycja] = kolor.B;
-                BackBuffer[pozycja + 1] = kolor.G;
-                BackBuffer[pozycja + 2] = kolor.R;
-                BackBuffer[pozycja + 3] = kolor.A;
-            }
+            if (p.X < 0 || p.X >= Rozmiar.Width || p.Y < 0 || p.Y >= Rozmiar.Height) { return; }
+
+            int pozycja = 4 * ((int)p.Y * Rozmiar.Width + (int)p.X);
+            BackBuffer[pozycja] = kolor.B;
+            BackBuffer[pozycja + 1] = kolor.G;
+            BackBuffer[pozycja + 2] = kolor.R;
+            BackBuffer[pozycja + 3] = kolor.A;
         }
         
         public void RysujLinie(Vector3D p0, Vector3D p1, Color kolor)
@@ -164,24 +155,23 @@ namespace Projekt_LGiM
                 {
                     var wierzcholki = new Vector3D[]
                     {
-                        new Vector3D(x, 0, z).RzutPerspektywiczny(Odleglosc, c, Kamera),
-                        new Vector3D(x + skok, 0, z).RzutPerspektywiczny(Odleglosc, c, Kamera),
-                        new Vector3D(x + skok, 0, z + skok).RzutPerspektywiczny(Odleglosc, c, Kamera),
-                        new Vector3D(x, 0, z + skok).RzutPerspektywiczny(Odleglosc, c, Kamera)
+                        new Vector3D(x, 0, z).RzutPerspektywiczny(Odleglosc, srodek, Kamera),
+                        new Vector3D(x + skok, 0, z).RzutPerspektywiczny(Odleglosc, srodek, Kamera),
+                        new Vector3D(x + skok, 0, z + skok).RzutPerspektywiczny(Odleglosc, srodek, Kamera),
+                        new Vector3D(x, 0, z + skok).RzutPerspektywiczny(Odleglosc, srodek, Kamera)
                     };
 
                     for (int i = 0; i < wierzcholki.Length; ++i)
                     {
-                        if (wierzcholki[i].Z > MinOdleglosc && wierzcholki[(i + 1) % wierzcholki.Length].Z > MinOdleglosc)
-                        {
-                            Color kolor;
+                        if (wierzcholki[i].Z <= MinOdleglosc || wierzcholki[(i + 1) % wierzcholki.Length].Z <= MinOdleglosc) { continue; }
 
-                            if      (x == 0 && i == 3)  { kolor = kolorOsiZ; }
-                            else if (z == 0 && i == 0)  { kolor = kolorOsiX; }
-                            else                        { kolor = kolorSiatki; }
+                        Color kolor;
 
-                            RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor);
-                        }
+                        if      (x == 0 && i == 3)  { kolor = kolorOsiZ; }
+                        else if (z == 0 && i == 0)  { kolor = kolorOsiX; }
+                        else                        { kolor = kolorSiatki; }
+
+                        RysujLinie(wierzcholki[i], wierzcholki[(i + 1) % wierzcholki.Length], kolor);
                     }
                 }
             }
@@ -194,7 +184,7 @@ namespace Projekt_LGiM
             
             foreach (WavefrontObj model in Swiat)
             {
-                Vector3D[] modelRzut = model.VertexCoords.RzutPerspektywiczny(Odleglosc, c, Kamera);
+                Vector3D[] modelRzut = model.VertexCoords.RzutPerspektywiczny(Odleglosc, srodek, Kamera);
 
                 foreach (Sciana sciana in model.Sciany)
                 {
@@ -213,50 +203,39 @@ namespace Projekt_LGiM
 
             foreach (WavefrontObj model in Swiat)
             {
-                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc, c, Kamera);
+                Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc, srodek, Kamera);
                 Vector3D srodekObiektu = model.VertexCoords.ZnajdzSrodek();
 
-                if (model.Sciany != null && modelRzut != null && model.Renderowanie != null)
+                if (model.Sciany == null || modelRzut == null || model.Renderowanie == null) { continue; }
+
+                foreach (Sciana sciana in model.ScianyTrojkatne)
                 {
-                    foreach (Sciana sciana in model.ScianyTrojkatne)
+                    if (modelRzut[sciana.Vertex[0]].Z <= MinOdleglosc && modelRzut[sciana.Vertex[1]].Z <= MinOdleglosc 
+                        && modelRzut[sciana.Vertex[2]].Z <= MinOdleglosc) { continue; }
+
+                    var gradient = Swiat.IndexOf(model) != 0 ? new double[]
                     {
-                        // Back-face culling
-                        //if (kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[0]]) > 0 &&
-                        //    kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[1]]) > 0 &&
-                        //    kamera.Przod.DotProduct(model.VertexNormalsCoords[sciana.VertexNormal[2]]) > 0)
-                        //{ continue; }
+                        Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
+                        Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
+                        Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
+                    } : new double[] { 1, 1, 1 };
 
-                            if (modelRzut[sciana.Vertex[0]].Z > MinOdleglosc ||
-                                modelRzut[sciana.Vertex[1]].Z > MinOdleglosc || 
-                                modelRzut[sciana.Vertex[2]].Z > MinOdleglosc)
-                        {
-                            Vector3D zrodloSwiatla = ZrodloSwiatla;
+                    var obszar = new Vector3D[]
+                    {
+                        modelRzut[sciana.Vertex[0]],
+                        modelRzut[sciana.Vertex[1]],
+                        modelRzut[sciana.Vertex[2]],
+                    };
 
-                            var gradient = model != Swiat[zrodloSwiatlaIndeks] ? new double[]
-                                {
-                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
-                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
-                                    Renderowanie.Jasnosc(zrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
-                                } : new double[] { 1, 1, 1 };
-
-                            var obszar = new Vector3D[]
-                                {
-                                    modelRzut[sciana.Vertex[0]],
-                                    modelRzut[sciana.Vertex[1]],
-                                    modelRzut[sciana.Vertex[2]],
-                                };
-
-                            var tekstura = sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0 ? 
-                                new Vector2D[] 
-                                {
-                                    model.VertexTextureCoords[sciana.VertexTexture[0]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[1]],
-                                    model.VertexTextureCoords[sciana.VertexTexture[2]],
-                                } : new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
+                    var tekstura = sciana.VertexTexture[0] >= 0 && sciana.VertexTexture[1] >= 0 && sciana.VertexTexture[2] >= 0 ? 
+                    new Vector2D[] 
+                    {
+                        model.VertexTextureCoords[sciana.VertexTexture[0]],
+                        model.VertexTextureCoords[sciana.VertexTexture[1]],
+                        model.VertexTextureCoords[sciana.VertexTexture[2]],
+                    } : new Vector2D[] { new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0) };
                             
-                            model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
-                        }
-                    }
+                    model.Renderowanie.RenderujTrojkat(obszar, gradient, tekstura, zBufor);
                 }
             }
         }
