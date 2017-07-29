@@ -213,7 +213,7 @@ namespace Projekt_LGiM
                     if (modelRzut[sciana.Vertex[0]].Z <= MinOdleglosc && modelRzut[sciana.Vertex[1]].Z <= MinOdleglosc 
                         && modelRzut[sciana.Vertex[2]].Z <= MinOdleglosc) { continue; }
 
-                    var gradient = Swiat.IndexOf(model) != 0 ? new double[]
+                    var gradient = Swiat.IndexOf(model) != ZrodloSwiatlaIndeks ? new double[]
                     {
                         Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[0]], srodekObiektu),
                         Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
