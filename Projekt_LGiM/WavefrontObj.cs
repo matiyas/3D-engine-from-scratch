@@ -164,18 +164,10 @@ namespace Projekt_LGiM
                 }
             }
         }
-
-        Vector3D[] DodajNaKoniec(Vector3D[] tablica, Vector3D wartosc)
+        
+        T[] DodajNaKoniec<T>(T[] tablica, T wartosc)
         {
-            Vector3D[] tmp = tablica;
-            Array.Resize(ref tmp, tmp.Length + 1);
-            tmp[tmp.Length - 1] = wartosc;
-            return tmp;
-        }
-
-        Vector2D[] DodajNaKoniec(Vector2D[] tablica, Vector2D wartosc)
-        {
-            Vector2D[] tmp = tablica;
+            T[] tmp = tablica;
             Array.Resize(ref tmp, tmp.Length + 1);
             tmp[tmp.Length - 1] = wartosc;
             return tmp;
