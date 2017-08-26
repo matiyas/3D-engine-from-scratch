@@ -25,7 +25,7 @@ namespace Projekt_LGiM
             VertexCoords = new Vector3D[0];
             VertexNormalsCoords = new Vector3D[0];
             VertexTextureCoords = new Vector2D[0];
-            Sciany = new List<Sciana>();
+            Sciany = new Sciana[0];
 
             string linia;
             List<double> wierzcholek;
@@ -105,14 +105,15 @@ namespace Projekt_LGiM
                                     sciana.VertexNormal = tmp;
                                 }
                             }
-                            Sciany.Add(sciana);
+                            Sciany = DodajNaKoniec(Sciany, sciana);
+                            //Sciany.Add(sciana);
                             break;
                     }
                 }
             }
 
             // Zamiana indeksów na właściwe
-            for(int i = 0; i < Sciany.Count; ++i)
+            for(int i = 0; i < Sciany.Length; ++i)
             {
                 var wierzcholki = new int[Sciany[i].Vertex.Length];
                 for(int j = 0; j < Sciany[i].Vertex.Length; ++j)
@@ -144,12 +145,13 @@ namespace Projekt_LGiM
             }
 
             // Dzielenie ścian na trójkątne
-            ScianyTrojkatne = new List<Sciana>();
+            ScianyTrojkatne = new Sciana[0];
             foreach (Sciana sciana in Sciany)
             {
                 for (int i = 0; i < sciana.Vertex.Length; i += 2)
                 {
-                    ScianyTrojkatne.Add(new Sciana()
+                    //ScianyTrojkatne.Add(new Sciana()
+                    ScianyTrojkatne = DodajNaKoniec(ScianyTrojkatne, new Sciana()
                     {
                         Vertex = new int[] { sciana.Vertex[i], sciana.Vertex[(i + 1) % sciana.Vertex.Length],
                             sciana.Vertex[(i + 2) % sciana.Vertex.Length] },
@@ -175,15 +177,19 @@ namespace Projekt_LGiM
 
         public Vector3D Skalowanie { get; set; }
 
+        public Vector3D Translacja { get; set; }
+
+        public Vector3D Rotacja { get; set; }
+
         public Vector3D[] VertexCoords { get; private set; }
 
         public Vector2D[] VertexTextureCoords { get; }
 
         public Vector3D[] VertexNormalsCoords { get; private set; }
 
-        public List<Sciana> Sciany { get; }
+        public Sciana[] Sciany { get; }
 
-        public List<Sciana> ScianyTrojkatne { get; }
+        public Sciana[] ScianyTrojkatne { get; }
 
         public Renderowanie Renderowanie { get; set; }
 

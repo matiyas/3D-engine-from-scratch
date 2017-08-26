@@ -59,8 +59,8 @@ namespace Projekt_LGiM
                         scena.ZrodloSwiatla = scena.Swiat[scena.ZrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek();
                         if (scena.Swiat.Count > 1)
                         {
-                            scena.Swiat[1].Obroc(new Vector3D(0, 5, 0));
-                            scena.Swiat[1].ObrocWokolOsi(5, new UnitVector3D(0, 1, 0), scena.ZrodloSwiatla);
+                            //scena.Swiat[1].Obroc(new Vector3D(0, 5, 0));
+                            //scena.Swiat[1].ObrocWokolOsi(5, new UnitVector3D(0, 1, 0), scena.ZrodloSwiatla);
                         }
                         RysujNaEkranie();
                         stopWatch.Stop();
@@ -164,13 +164,20 @@ namespace Projekt_LGiM
 
             if(openFileDialog.ShowDialog() == true)
             {
-                var model = new WavefrontObj(openFileDialog.FileName);
-                model.Renderowanie = new Renderowanie(scena);
-                model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
+                try
+                {
+                    var model = new WavefrontObj(openFileDialog.FileName);
+                    model.Renderowanie = new Renderowanie(scena);
+                    model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
-                scena.Swiat.Add(model);
-                ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
-                ComboModele.SelectedIndex = scena.Swiat.Count - 1;
+                    scena.Swiat.Add(model);
+                    ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
+                    ComboModele.SelectedIndex = scena.Swiat.Count - 1;
+                }
+                catch
+                {
+                    MessageBox.Show("Wystąpił błąd podczas wczytywania modelu.");
+                }
             }
         }
 
@@ -284,6 +291,7 @@ namespace Projekt_LGiM
                         {
                             scena.Swiat[ComboModele.SelectedIndex].ObrocWokolOsi(-ile.X, scena.Kamera.Gora,
                                 scena.Swiat[ComboModele.SelectedIndex].VertexCoords.ZnajdzSrodek());
+
                             scena.Swiat[ComboModele.SelectedIndex].ObrocWokolOsi(ile.Y, scena.Kamera.Prawo,
                                 scena.Swiat[ComboModele.SelectedIndex].VertexCoords.ZnajdzSrodek());
                         }

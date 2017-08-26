@@ -175,20 +175,20 @@ namespace Projekt_LGiM
             return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }
 
-        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat, Vector3D c)
+        public static UnitVector3D ObrocWokolOsi(UnitVector3D punkt, UnitVector3D os, double kat, Vector3D srodek)
         {
-            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, c);
+            Vector3D wynik = ObrocWokolOsi(new Vector3D(punkt.X, punkt.Y, punkt.Z), os, kat, srodek);
 
             return new Vector3D(wynik.X, wynik.Y, wynik.Z).Normalize();
         }
 
-        public static Vector3D[] ObrocWokolOsi(Vector3D[] wierzcholki, UnitVector3D os, double kat, Vector3D c)
+        public static Vector3D[] ObrocWokolOsi(Vector3D[] wierzcholki, UnitVector3D os, double kat, Vector3D srodek)
         {
             var punktyObrot = new Vector3D[wierzcholki.Length];
 
             for(int i = 0; i < wierzcholki.Length; ++i)
             {
-                punktyObrot[i] = ObrocWokolOsi(wierzcholki[i], os, kat, c);
+                punktyObrot[i] = ObrocWokolOsi(wierzcholki[i], os, kat, srodek);
             }
 
             return punktyObrot;

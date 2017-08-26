@@ -204,7 +204,7 @@ namespace Projekt_LGiM
             foreach (WavefrontObj model in Swiat)
             {
                 Vector3D[] modelRzut = Math3D.RzutPerspektywiczny(model.VertexCoords, Odleglosc, srodek, Kamera);
-                Vector3D srodekObiektu = model.VertexCoords.ZnajdzSrodek();
+                Vector3D srodekObiektu = model.VertexNormalsCoords.ZnajdzSrodek();
 
                 if (model.Sciany == null || modelRzut == null || model.Renderowanie == null) { continue; }
 
@@ -219,7 +219,7 @@ namespace Projekt_LGiM
                         Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[1]], srodekObiektu),
                         Renderowanie.Jasnosc(ZrodloSwiatla, model.VertexNormalsCoords[sciana.VertexNormal[2]], srodekObiektu),
                     } : new double[] { 1, 1, 1 };
-
+                    
                     var obszar = new Vector3D[]
                     {
                         modelRzut[sciana.Vertex[0]],
