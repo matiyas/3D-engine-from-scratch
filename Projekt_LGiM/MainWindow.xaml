@@ -7,8 +7,8 @@
     xmlns:local="clr-namespace:Projekt_LGiM"
     mc:Ignorable="d"
     Title="MainWindow"
-    Height="620" 
-    Width="1075"
+    Height="802" 
+    Width="1349"
     KeyDown="Window_KeyDown">
     <Grid 
         x:Name="GridMain">
