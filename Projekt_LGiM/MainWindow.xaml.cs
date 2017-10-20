@@ -20,6 +20,7 @@ namespace Projekt_LGiM
         double dpi;
         double czuloscMyszy;
         Tryb tryb;
+        Thread t;
 
         public MainWindow()
         {
@@ -43,42 +44,49 @@ namespace Projekt_LGiM
             scena.Swiat[1].Skaluj(new Vector3D(-50, -50, -50));
             scena.ZrodloSwiatlaIndeks = 0;
 
-            var t = new Thread(new ParameterizedThreadStart((e) =>
-            {
-                var stopWatch = new Stopwatch();
-                double avgRefreshTime = 0;
-                int i = 1;
-
-                while (true)
-                {
-                    Thread.Sleep(15);
-                    stopWatch.Restart();
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        scena.ZrodloSwiatla = scena.Swiat[scena.ZrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek();
-                        if (scena.Swiat.Count > 1)
-                        {
-                            //scena.Swiat[1].Obroc(new Vector3D(0, 5, 0));
-                            //scena.Swiat[1].ObrocWokolOsi(5, new UnitVector3D(0, 1, 0), scena.ZrodloSwiatla);
-                        }
-                        RysujNaEkranie();
-                        stopWatch.Stop();
-                        avgRefreshTime += stopWatch.ElapsedMilliseconds;
-
-                        if(i == 100)
-                        {
-                            LabelRefreshTime.Content = avgRefreshTime / i + " ms";
-                            i = 0;
-                            avgRefreshTime = 0;
-                        }
-                        ++i;
-                    }, System.Windows.Threading.DispatcherPriority.Render);
-                }
-            }));
-
+            t = new Thread(OnUpdate);
             t.IsBackground = true;
             t.Start();
+        }
+
+        void OnUpdate()
+        {
+            var stopWatch = new Stopwatch();
+            double avgRefreshTime = 0;
+            int i = 1;
+
+            while (true)
+            {
+                Thread.Sleep(15);
+                stopWatch.Restart();
+
+                Dispatcher.Invoke(() =>
+                {
+                    scena.ZrodloSwiatla = scena.Swiat[scena.ZrodloSwiatlaIndeks].VertexCoords.ZnajdzSrodek();
+
+                    foreach (var model in scena.Swiat)
+                    {
+                        if (model != scena.Swiat[scena.ZrodloSwiatlaIndeks])
+                        {
+                            model.Obroc(new Vector3D(0, SliderSzybkosc.Value * 1, 0), scena.ZrodloSwiatla);
+                            model.Obroc(new Vector3D(0, SliderSzybkosc.Value * 2, 0));
+                        }
+                        else { model.Obroc(new Vector3D(0, SliderSzybkosc.Value * 0.5, 0)); }
+                    }
+
+                    RysujNaEkranie();
+                    stopWatch.Stop();
+                    avgRefreshTime += stopWatch.ElapsedMilliseconds;
+
+                    if (i == 100)
+                    {
+                        LabelRefreshTime.Content = avgRefreshTime / i + " ms";
+                        i = 0;
+                        avgRefreshTime = 0;
+                    }
+                    ++i;
+                }, System.Windows.Threading.DispatcherPriority.Render);
+            }
         }
 
         void WczytajModel(string sciezkaModel, string sciezkaTekstura)
@@ -160,25 +168,21 @@ namespace Projekt_LGiM
 
         void MenuNowyModel_Click(object sender, RoutedEventArgs e)
         {
+            t.Abort();
             var openFileDialog = new OpenFileDialog() { Filter = "Waveform (*.obj)|*.obj" };
 
             if(openFileDialog.ShowDialog() == true)
             {
-                try
-                {
-                    var model = new WavefrontObj(openFileDialog.FileName);
-                    model.Renderowanie = new Renderowanie(scena);
-                    model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
+                var model = new WavefrontObj(openFileDialog.FileName);
+                model.Renderowanie = new Renderowanie(scena);
+                model.Obroc(new Vector3D(Math.PI * 100, 0, 0));
 
-                    scena.Swiat.Add(model);
-                    ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
-                    ComboModele.SelectedIndex = scena.Swiat.Count - 1;
-                }
-                catch
-                {
-                    MessageBox.Show("Wystąpił błąd podczas wczytywania modelu.");
-                }
+                scena.Swiat.Add(model);
+                ComboModele.Items.Add(new ComboBoxItem() { Content = model.Nazwa });
+                ComboModele.SelectedIndex = scena.Swiat.Count - 1;
             }
+            t = new Thread(OnUpdate);
+            t.Start();
         }
 
         void MenuZastapModel_Click(object sender, RoutedEventArgs e)
