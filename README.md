@@ -16,9 +16,8 @@ The project is 3D engine containing basic functionalities such as loading 3D mod
 
 ## Technologies
 * [C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)
-* [Monodevelop](https://www.monodevelop.com/)
-* [Mono](https://www.mono-project.com/)
-* [GtkSharp](https://www.mono-project.com/docs/gui/gtksharp/)
+* [.NET Framework 4.6.1](https://www.microsoft.com/net)
+* [WPF](https://docs.microsoft.com/en-us/dotnet/framework/wpf/index)
 * [Math.Net](https://www.mathdotnet.com/)
 
 ## Setup
