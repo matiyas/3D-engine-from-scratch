@@ -9,6 +9,8 @@
   * [Moving mode](#moving-mode)
   * [Scaling mode](#scaling-mode)
   * [Rotating mode](#rotating-mode)
+ * [TODO](#todo)
+ * [Bugs](#bugs)
 
 ## General info
 The project is 3D engine containing basic functionalities such as loading 3D models in .obj format, loading textures for models, rotating, moving and scaling models. It's also possible to move and rotate the camera.
