@@ -22,10 +22,10 @@ The project is 3D engine containing basic functionalities such as loading 3D mod
 
 ## Setup
 To run this project:
-1. [Download](https://www.monodevelop.com/download/) and install Monodevelop.
-1. Open Monodevelop.
-2. Press Control + O and choose 3dEngine.sln.
-3. Press Control + F5 to run the program.
+1. Open VisualStudio
+1. Click File -> Open -> Project/Solution... (Control + Shift + O) 
+1. Select Projekt_LGiM.sln
+1. Click Debug -> Start Without Debugging (Control + F5)
 
 
 ## Controls
