@@ -67,3 +67,14 @@ To run this project:
 | PPM + Horizontal mouse move | Rotate the object horizontally  |
 | PPM + Vertical mouse move | Rotate the object vertically |
 | Left Shift + PPM + Veritcal mouse move | Rotate the object in the z-axis |
+
+
+## TODO
+* Models parser optimization
+* Repairing camera rotation
+* Multiple light sources
+* FPP like camera
+* Support for multipart models
+
+## Bugs
+* Some models don't load
