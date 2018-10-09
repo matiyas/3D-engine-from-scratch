@@ -74,7 +74,7 @@ To run this project:
 ## TODO
 * Models parser optimization
 * Repairing camera rotation
-* Multiple light sources
+* Adding the possibility of handling many light sources
 * FPP like camera
 * Support for multipart models
 
