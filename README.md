@@ -13,7 +13,7 @@
  * [Bugs](#bugs)
 
 ## General info
-The project is 3D engine from scratch. It containing basic functionalities such as loading 3D models in .obj format, loading textures for models, rotating, moving and scaling models. It's also possible to move and rotate the camera around the area.
+The project is a 3D engine from scratch. It containing basic functionalities such as loading 3D models in .obj format, loading textures for models, rotating, moving and scaling models. It's also possible to move and rotate the camera around the area.
 
 
 ## Technologies
