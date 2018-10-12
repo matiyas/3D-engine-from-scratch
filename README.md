@@ -1,4 +1,4 @@
-# Project LGiM
+# 3D Engine From Scratch
 
 ## Table of contents
 * [General info](#general-info)
