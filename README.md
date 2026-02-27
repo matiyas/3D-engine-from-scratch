@@ -1,5 +1,8 @@
 # 3D Engine From Scratch
 
+## Alternatives
+You may want to check my other repository instead: [LGiM_Mono](https://github.com/matiyas/LGiM_Mono). It’s the same project, optimized and rewritten for .NET 6.
+
 ## Table of contents
 * [General info](#general-info)
 * [Technologies](#technologies)
